@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import bcrypt
 from programs import *
 from sheets import *
 from users import *
@@ -22,13 +23,19 @@ if not st.session_state.logged_in:
     users_sheet = getUsers()
     users = getAllUsers(users_sheet)
 
+    def hashPassword(password: str) -> str:
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    def checkPassword(password: str, hashed: str) -> bool:
+        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+
     with tab1:
         st.subheader("Login")
         username = st.text_input("Username", key="login_user")
         password = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login"):
-            user = findUser(users, username, password)
-            if user:
+            user = next((u for u in users if u["username"] == username), None)
+            if user and checkPassword(password, user["password"]):
                 st.session_state.logged_in = True
                 st.session_state.user = user
                 st.rerun()
@@ -49,8 +56,8 @@ if not st.session_state.logged_in:
                 st.error("Username already taken.")
             else:
                 new_id = getNextUserId(users)
-                appendUser(users_sheet, [new_username, new_password, new_id])
-                st.success(f"Account created! You can now log in.")
+                appendUser(users_sheet, [new_id, new_username, hashPassword(new_password)])
+                st.success("Account created! You can now log in.")
 
 # Main App
 else:
