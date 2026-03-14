@@ -56,7 +56,7 @@ if not st.session_state.logged_in:
                 st.error("Username already taken.")
             else:
                 new_id = getNextUserId(users)
-                appendUser(users_sheet, [new_id, new_username, hashPassword(new_password)])
+                appendUser(users_sheet, [new_username, hashPassword(new_password),new_id,])
                 st.success("Account created! You can now log in.")
 
 # Main App
