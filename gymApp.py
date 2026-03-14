@@ -81,6 +81,7 @@ else:
 
     with tab1:
         st.subheader("Your Programs")
+        st.write("This panel displays all current programs you have created.")
 
         for prog in myPrograms:
             st.markdown(f"### {prog}")
@@ -97,6 +98,10 @@ else:
         exercises = [row for row in userProg if row["programName"] == selected]
         today = date.today().strftime("%m/%d/%Y")
         workoutDate = st.text_input("Date", value=today)
+        st.write("This panel enters your lifts into our dataset. First you must have an available program to run, "
+                 "after one has been made, select the program you with to run in the dropdown menu. After that, "
+                 "simply enter the weight and reps for every set, and then click log set.")
+        st.write('If you skip a set, simply do not click "Log Set" or if you wish, log 0 reps at 0 pounds.')
 
 
         def calculate_diff(data, program, exercise, set_num, current_1rm):
@@ -153,6 +158,10 @@ else:
 
     with tab3:
         st.subheader("Create Program")
+        st.write('This panel lets you create your own programs, and add to them. To do this, enter the name of your program,'
+                 'then all the specific details of the first exercise, once everything is filled in, '
+                 'then click "Add to Program". And repeat the process, not changing the name of your program, '
+                 'until all exercises are entered.')
 
         program = st.text_input("Program (e.g. Legs, Push, Pull)")
         exercise = st.text_input("Exercise Name")
@@ -161,7 +170,7 @@ else:
         minReps = st.number_input("Minimum Number of Reps (Optional)", min_value=0, step=1)
         maxReps = st.number_input("Maximum Number of Reps (Optional)", min_value=minReps, step=1)
 
-        if st.button("Create Program"):
+        if st.button("Add to Program"):
             if not program or not exercise:
                 st.warning("Please fill in program and exercise name.")
             else:
@@ -171,6 +180,7 @@ else:
 
     with tab4:
         st.subheader("Edit Programs")
+        st.write('This panel lets you modify your existing programs, delete them, and add to them.')
 
         if not myPrograms:
             st.write("No programs found.")
@@ -267,6 +277,8 @@ else:
 
     with tab5:
         st.subheader("Stats")
+        st.write('This panel lets you see the small details and statistics behind your lifts, select the program you'
+                 'wish to look at, then the specific exercise, and then the set.')
         selectedProg = st.selectbox("Select Program", myPrograms, key="stats_prog")
         exercises = [row for row in userProg if row["programName"] == selectedProg]
         exerciseNames = [row["exerciseName"] for row in exercises]
