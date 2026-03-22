@@ -58,6 +58,7 @@ if not st.session_state.logged_in:
                 new_id = getNextUserId(users)
                 appendUser(users_sheet, [new_username, hashPassword(new_password),new_id,])
                 st.success("Account created! You can now log in.")
+    st.markdown("---")
 
 # Main App
 else:
@@ -431,7 +432,6 @@ else:
         else:
             st.write("No Programs Yet!")
 
-st.markdown("---")
 st.caption("Developed by Erik Afdahl")
 st.caption('For customer service questions, error messages, and any and all feedback '
            'email "erik.afdahl.1@gmail.com"')
