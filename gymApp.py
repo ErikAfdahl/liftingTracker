@@ -264,14 +264,15 @@ else:
                     new_min = st.number_input("Min Reps", min_value=0, step=1, key="edit_new_min")
                     new_max = st.number_input("Max Reps", min_value=0, step=1, key="edit_new_max")
 
-                    nextOrder = 1
+                    nextOrder = 0
 
                     if len(editExercises) > 0:
                         for i in range(len(editExercises)):
                             if editExercises[i]['order'] > nextOrder:
                                 nextOrder = editExercises[i]['order']
 
-                    new_order = st.number_input("Order", min_value=1, step=1, key="edit_new_order")
+                    new_order = st.number_input("Order", min_value=1, max_value= maxExercises,
+                                                value=nextOrder + 1,step=1, key="edit_new_order")
                     if st.button("Add Exercise", key="edit_add_exercise"):
 
 
