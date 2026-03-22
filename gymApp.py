@@ -432,4 +432,6 @@ else:
             st.write("No Programs Yet!")
 
 st.markdown("---")
-st.caption("Your description or footer text here.")
+st.caption("Developed by Erik Afdahl")
+st.caption('For customer service questions, error messages, and any and all feedback '
+           'email "erik.afdahl.1@gmail.com"')
