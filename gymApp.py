@@ -150,7 +150,7 @@ else:
                                 min_value=0.0,
                                 value=float(last['weight']) if last else 0.0,
                                 step=float(ex['increment']),
-                                key=f"weight_{ex['exerciseName']}_{set_num}"
+                                key=f"reps_{selected}_{ex['exerciseName']}_{set_num}"
                             )
                         with col2:
                             weight = st.number_input(
@@ -158,7 +158,7 @@ else:
                                 min_value=0.0,
                                 value=float(last['weight']) if last else 0.0,
                                 step=float(ex['increment']),
-                                key=f"weight_{ex['exerciseName']}_{set_num}"
+                                key=f"weight_{selected}_{ex['exerciseName']}_{set_num}"
                             )
 
                         if st.button("Log Set", key=f"log_{ex['exerciseName']}_{set_num}"):
