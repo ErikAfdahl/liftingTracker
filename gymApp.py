@@ -431,3 +431,5 @@ else:
         else:
             st.write("No Programs Yet!")
 
+st.markdown("---")
+st.caption("Your description or footer text here.")
