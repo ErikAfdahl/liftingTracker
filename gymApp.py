@@ -135,9 +135,11 @@ else:
                         if last:
                             st.caption(f"Last time you hit {last['weight']} lbs, for {last['reps']} reps.")
                             if last['reps'] >= ex['maxReps']:
-                                st.caption(f"Recommended weight is {last['weight'] + ex['increment']} lbs, for {ex['minReps']} reps.")
+                                st.caption(f"Recommended weight is "
+                                           f"{last['weight'] + ex['increment']} lbs, for {ex['minReps']} reps.")
                             elif last['reps'] <= ex['minReps'] - 1:
-                                st.caption(f"Recommended weight is {last['weight'] - ex['increment']} lbs, for {ex['maxReps']} reps.")
+                                st.caption(f"Recommended weight is "
+                                           f"{last['weight'] - ex['increment']} lbs, for {ex['maxReps']} reps.")
                             else:
                                 st.caption(f"Recommended weight is {last['weight']} lbs, for {last['reps'] + 1} reps.")
                         else:
@@ -190,7 +192,7 @@ else:
         if len(exercises) > 0:
             for i in range(len(exercises)):
                 if exercises[i]['order'] > nextOrder:
-                    nextOrder = exercises[i]['order']
+                    nextOrder = exercises[i]['order'] + 1
 
         order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder, step=1)
 
