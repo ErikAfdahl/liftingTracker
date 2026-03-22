@@ -341,8 +341,8 @@ else:
                             for i in range(len(editExercises)):
                                 if editExercises[i]['order'] == upd_order:
                                     editExercises[i]['order'] = nextOrder
-                                    st.success(f"Swapped order values for exercise '{new_exercise}' and "
-                                               f"'{editExercises[i]["exerciseName"]}'.")
+                                    st.success(f"Swapped order values for exercise '{editExercises[i]['exerciseName']}' "
+                                               f"and '{editExercises[i]["exerciseName"]}'.")
 
                             if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
                                 all_rows = getAllProgram(programs)
