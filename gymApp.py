@@ -147,11 +147,12 @@ else:
 
                         col1, col2 = st.columns(2)
                         with col1:
-                            weight = st.number_input(
-                                "Weight",
-                                min_value=0.0,
-                                value=float(last['weight']) if last else 0.0,
-                                step=float(ex['increment']),
+                            reps = st.number_input(
+                                "Reps",
+                                min_value=0,
+                                max_value=100,
+                                value=int(last['reps']) if last else ex['minReps'],
+                                step=1,
                                 key=f"reps_{selected}_{ex['exerciseName']}_{set_num}"
                             )
                         with col2:
@@ -192,7 +193,7 @@ else:
         if len(exercises) > 0:
             for i in range(len(exercises)):
                 if exercises[i]['order'] > nextOrder:
-                    nextOrder = exercises[i]['order'] + 1
+                    nextOrder = exercises[i]['order'] + 1 # next order
 
         order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder, step=1)
 
