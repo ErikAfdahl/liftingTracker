@@ -145,10 +145,21 @@ else:
 
                         col1, col2 = st.columns(2)
                         with col1:
-                            reps = st.number_input("Reps", min_value=0, max_value=100, value=last['reps'] if last else ex['minReps'], step=1, key=f"reps_{ex['exerciseName']}_{set_num}")
+                            weight = st.number_input(
+                                "Weight",
+                                min_value=0.0,
+                                value=float(last['weight']) if last else 0.0,
+                                step=float(ex['increment']),
+                                key=f"weight_{ex['exerciseName']}_{set_num}"
+                            )
                         with col2:
-                            weight = st.number_input("Weight", min_value=0.0, value=last['weight'] if last else 0.0, step=ex['increment'],
-                                                     key=f"weight_{ex['exerciseName']}_{set_num}")
+                            weight = st.number_input(
+                                "Weight",
+                                min_value=0.0,
+                                value=float(last['weight']) if last else 0.0,
+                                step=float(ex['increment']),
+                                key=f"weight_{ex['exerciseName']}_{set_num}"
+                            )
 
                         if st.button("Log Set", key=f"log_{ex['exerciseName']}_{set_num}"):
                             one_rm = round(weight * (1 + float(reps) / 30), 3)
