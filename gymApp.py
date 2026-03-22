@@ -63,7 +63,8 @@ if not st.session_state.logged_in:
 else:
     user = st.session_state.user
     st.write(f"Welcome, {user['username']}!")
-    st.write("Recent Update(s): Added ordering to programs, making it easier to customize the ordering of your programs.")
+    st.write("Recent Update(s): Added ordering to programs, making it easier to customize the ordering of your "
+             "programs.")
 
     if st.button("Logout"):
         st.session_state.logged_in = False
@@ -132,18 +133,19 @@ else:
                         for j in range(ex['numSets']):
                             set_num = j + 1
                             st.markdown(f"**Set {set_num}**")
-
                             last = get_last_entry(user_data, selected, ex['exerciseName'], set_num)
                             if last:
                                 st.caption(f"Last time you hit {last['weight']} lbs, for {last['reps']} reps.")
                                 if last['reps'] >= ex['maxReps']:
-                                    st.caption(f"Recommended weight is "
-                                               f"{last['weight'] + ex['increment']} lbs, for {ex['minReps']} reps.")
+                                    recWeight = last['weight'] + ex['increment'] + (int((last['weight'] - ex['maxReps'])
+                                                                                        / 2) * ex['increment'])
+                                    st.caption(f"Recommended weight is {recWeight} lbs, for {ex['minReps']} reps.")
                                 elif last['reps'] <= ex['minReps'] - 1:
                                     st.caption(f"Recommended weight is "
                                                f"{last['weight'] - ex['increment']} lbs, for {ex['maxReps']} reps.")
                                 else:
-                                    st.caption(f"Recommended weight is {last['weight']} lbs, for {last['reps'] + 1} reps.")
+                                    st.caption(f"Recommended weight is {last['weight']} lbs, "
+                                               f"for {last['reps'] + 1} reps.")
                             else:
                                 st.caption("No previous entry found.")
 
@@ -169,7 +171,8 @@ else:
                             if st.button("Log Set", key=f"log_{ex['exerciseName']}_{set_num}"):
                                 one_rm = round(weight * (1 + float(reps) / 30), 3)
                                 diff = calculate_diff(user_data, selected, ex['exerciseName'], set_num, one_rm)
-                                row = [int(user["userId"]), selected, workoutDate, ex['exerciseName'], set_num, float(weight), int(reps),
+                                row = [int(user["userId"]), selected, workoutDate, ex['exerciseName'], set_num,
+                                       float(weight), int(reps),
                                        one_rm, diff]
                                 appendLogs(sheet, row)
                                 st.success(f"Logged! 1RM estimate: {one_rm} | Diff: {diff}")
@@ -180,8 +183,8 @@ else:
 
     with tab3:
         st.subheader("Create Program")
-        st.write('This panel lets you create your own programs, and add to them. To do this, enter the name of your program,'
-                 'then all the specific details of the first exercise, once everything is filled in, '
+        st.write('This panel lets you create your own programs, and add to them. To do this, enter the name of your '
+                 'program then all the specific details of the first exercise, once everything is filled in, '
                  'then click "Add to Program". And repeat the process, not changing the name of your program, '
                  'until all exercises are entered.')
 
@@ -217,7 +220,8 @@ else:
             else:
                 # cap program size at 25 exercises or so
 
-                row = [int(user["userId"]), program, exercise, int(set_num), float(inc), int(minReps), int(maxReps), int(order)]
+                row = [int(user["userId"]), program, exercise, int(set_num), float(inc), int(minReps), int(maxReps),
+                       int(order)]
                 appendProgram(programs, row)
 
                 for i in range(len(userProg)):
@@ -294,7 +298,8 @@ else:
 
                     with col1:
                         st.write(
-                            f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, {ex['increment']} lb increments")
+                            f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
+                            f"{ex['increment']} lb increments")
 
                     with col2:
                         if st.button("Edit", key=f"edit_{ex['exerciseName']}"):
@@ -323,6 +328,20 @@ else:
                                                       key=f"upd_min_{ex['exerciseName']}")
                             upd_max = st.number_input("Max Reps", value=int(ex['maxReps']), step=1,
                                                       key=f"upd_max_{ex['exerciseName']}")
+                            nextOrder = 0
+                            if len(editExercises) > 0:
+                                for i in range(len(editExercises)):
+                                    if editExercises[i]['order'] > nextOrder:
+                                        nextOrder = editExercises[i]['order']
+
+                            upd_order = st.number_input("Order", min_value=1, max_value=maxExercises,
+                                                        value=nextOrder, step=1, key=f"upd_order_{ex['exerciseName']}")
+
+                            for i in range(len(editExercises)):
+                                if editExercises[i]['order'] == upd_order:
+                                    editExercises[i]['order'] = nextOrder
+                                    st.success(f"Swapped order values for exercise '{new_exercise}' and "
+                                               f"'{editExercises[i]["exerciseName"]}'.")
 
                             if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
                                 all_rows = getAllProgram(programs)
@@ -331,7 +350,8 @@ else:
                                             row["programName"] == selected_edit and
                                             row["exerciseName"] == ex["exerciseName"]):
                                         programs.update(f"D{idx + 2}:G{idx + 2}",
-                                                        [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max)]])
+                                                        [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
+                                                          int(upd_order)]])
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
                                 st.success("Changes saved!")
                                 st.rerun()
@@ -349,8 +369,8 @@ else:
     with tab5:
         if len(myPrograms) > 0:
             st.subheader("Stats")
-            st.write('This panel lets you see the small details and statistics behind your lifts, select the program you'
-                     'wish to look at, then the specific exercise, and then the set.')
+            st.write('This panel lets you see the small details and statistics behind your lifts, select the program '
+                     'you wish to look at, then the specific exercise, and then the set.')
             selectedProg = st.selectbox("Select Program", myPrograms, key="stats_prog")
             exercises = [row for row in userProg if row["programName"] == selectedProg]
             exerciseNames = [row["exerciseName"] for row in exercises]
