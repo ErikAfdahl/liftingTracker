@@ -127,8 +127,8 @@ else:
             for ex in exercises:
                 if i == ex['order']:
                     st.markdown(f"### {ex['exerciseName']}")
-                    for i in range(ex['numSets']):
-                        set_num = i + 1
+                    for j in range(ex['numSets']):
+                        set_num = j + 1
                         st.markdown(f"**Set {set_num}**")
 
                         last = get_last_entry(user_data, selected, ex['exerciseName'], set_num)
@@ -145,9 +145,9 @@ else:
 
                         col1, col2 = st.columns(2)
                         with col1:
-                            reps = st.number_input("Reps", min_value=0, max_value=100, value = last['reps'], step=1, key=f"reps_{ex['exerciseName']}_{set_num}")
+                            reps = st.number_input("Reps", min_value=0, max_value=100, value=last['reps'] if last else ex['minReps'], step=1, key=f"reps_{ex['exerciseName']}_{set_num}")
                         with col2:
-                            weight = st.number_input("Weight", min_value=0.0, value = last['weight'], step=ex['increment'],
+                            weight = st.number_input("Weight", min_value=0.0, value=last['weight'] if last else 0.0, step=ex['increment'],
                                                      key=f"weight_{ex['exerciseName']}_{set_num}")
 
                         if st.button("Log Set", key=f"log_{ex['exerciseName']}_{set_num}"):
@@ -200,7 +200,7 @@ else:
                 # cap program size at 25 exercises or so
 
                 row = [int(user["userId"]), program, exercise, int(set_num), float(inc), int(minReps), int(maxReps), int(order)]
-                appendLogs(programs, row)
+                appendProgram(programs, row)
 
                 for i in range(len(userProg)):
                     if userProg[i]["programName"] == program:
@@ -284,11 +284,12 @@ else:
                 with col3:
                     if st.button("Delete", key=f"delete_{ex['exerciseName']}"):
                         all_rows = getAllProgram(programs)
-                        for idx, row in enumerate(all_rows):
-                            if (str(row["userId"]) == str(user["userId"]) and
-                                    row["programName"] == selected_edit and
-                                    row["exerciseName"] == ex["exerciseName"]):
-                                programs.delete_rows(idx + 2)
+                        indices_to_delete = [idx + 2 for idx, row in enumerate(all_rows)
+                                             if (str(row["userId"]) == str(user["userId"]) and
+                                                 row["programName"] == selected_edit and
+                                                 row["exerciseName"] == ex["exerciseName"])]
+                        for idx in reversed(indices_to_delete):
+                            programs.delete_rows(idx)
                         st.success(f"Deleted {ex['exerciseName']}!")
                         st.rerun()
 
