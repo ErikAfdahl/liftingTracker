@@ -188,14 +188,14 @@ else:
         minReps = st.number_input("Minimum Number of Reps (Optional)", min_value=0, step=1)
         maxReps = st.number_input("Maximum Number of Reps (Optional)", min_value=minReps, step=1)
         exercises = [row for row in userProg if row["programName"] == program]
-        nextOrder = 1
+        nextOrder = 0
 
         if len(exercises) > 0:
             for i in range(len(exercises)):
                 if exercises[i]['order'] > nextOrder:
-                    nextOrder = exercises[i]['order'] + 1 # next order
+                    nextOrder = exercises[i]['order'] # next order
 
-        order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder, step=1)
+        order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder + 1, step=1)
 
         def isOpen(exercises, order):
             for i in range(len(exercises)):
