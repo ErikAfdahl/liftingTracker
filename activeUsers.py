@@ -11,7 +11,7 @@ SCOPES = [
 def getTokens():
     creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=SCOPES)
     client = gspread.authorize(creds)
-    sheet = client.open("Logs").sheet1
+    sheet = client.open("activeUsers").sheet1
     return sheet
 
 def getAllTokens(sheet):
