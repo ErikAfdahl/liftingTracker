@@ -521,8 +521,9 @@ else:
                         col1, col2, col3 = st.columns([4, 1, 1])
 
                         with col1:
-                            st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}, "
-                                     f'Notes: "{log["notes"]}"')
+                            st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}")
+                            if len(log['notes']) != 0:
+                                st.write(f'Notes: "{log["notes"]}"')
 
                         with col2:
                             if st.button("Edit", key=f"edit_log_{log_idx}"):
