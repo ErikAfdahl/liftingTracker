@@ -213,7 +213,7 @@ else:
 
 
                                 if last['reps'] >= ex['maxReps']:
-                                    recWeight = last['weight'] + ex['increment'] + (int((last['weight'] - ex['maxReps'])
+                                    recWeight = last['weight'] + ex['increment'] + (int((last['reps'] - ex['maxReps'])
                                                                                         / 2) * ex['increment'])
                                     st.caption(f"Recommended weight is {recWeight} lbs, for {ex['minReps']} reps.")
                                 elif last['reps'] <= ex['minReps'] - 1:
