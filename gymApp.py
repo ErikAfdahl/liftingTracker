@@ -160,6 +160,8 @@ else:
                     st.write(
                         f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
                         f"{ex['increment']} lb increments")
+                    if len(ex['notes']) != 0:
+                        st.write(f'Notes: "{ex['notes']}"')
                 st.divider()
         else:
             st.write("No Programs Yet!")
@@ -190,6 +192,8 @@ else:
                 for ex in exercises:
                     if i == ex['order']:
                         st.markdown(f"### {ex['exerciseName']}")
+                        if len(ex['notes']) != 0:
+                            st.write(f'Notes: "{ex['notes']}"')
                         for j in range(ex['numSets']):
                             set_num = j + 1
                             st.markdown(f"**Set {set_num}**")
@@ -302,6 +306,7 @@ else:
                 new_inc = st.number_input("Weight Increment", min_value=0.5, step=0.5, key="edit_new_inc")
                 new_min = st.number_input("Min Reps", min_value=0, step=1, key="edit_new_min")
                 new_max = st.number_input("Max Reps", min_value=0, step=1, key="edit_new_max")
+                new_notes = st.text_input("Notes", key="edit_new_notes")
 
                 nextOrder = 0
                 if len(editExercises) > 0:
@@ -339,7 +344,7 @@ else:
 
 
                         row = [int(user["userId"]), selected_edit, new_exercise, int(new_sets), float(new_inc),
-                               int(new_min), int(new_max), int(new_order)]
+                               int(new_min), int(new_max), int(new_order), new_notes]
                         appendProgram(programs, row)
                         if not isOpen(editExercises, new_order):
                             st.success(f"Swapped order for a conflicting exercise!")
@@ -359,6 +364,8 @@ else:
                         st.write(
                             f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
                             f"{ex['increment']} lb increments, exercise number {ex['order']}")
+                        if len(ex['notes']) != 0:
+                            st.write(f'Notes: "{ex['notes']}"')
 
                     with col2:
                         if st.button("Edit", key=f"edit_{ex['exerciseName']}"):
@@ -388,6 +395,8 @@ else:
                                                       key=f"upd_min_{ex['exerciseName']}")
                             upd_max = st.number_input("Max Reps", value=int(ex['maxReps']), step=1,
                                                       key=f"upd_max_{ex['exerciseName']}")
+                            upd_notes = st.text_input("Notes", value=ex['notes'],
+                                                      key=f"upd_notes_{ex['exerciseName']}")
 
                             nextOrder = 0
                             if len(editExercises) > 0:
@@ -421,7 +430,7 @@ else:
                                             row["exerciseName"] == ex["exerciseName"]):
                                         programs.update(f"D{idx + 2}:H{idx + 2}",
                                                         [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
-                                                          int(upd_order)]])
+                                                          int(upd_order), upd_notes]])
 
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
                                 if not isOpen(editExercises, new_order):
