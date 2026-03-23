@@ -449,8 +449,8 @@ else:
                                                           int(upd_order), upd_notes]])
 
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
-                                if not isOpen(editExercises, new_order):
-                                    st.success(f"Swapped order for a conflicting exercise!")
+                                if swapped_name:
+                                    st.success(f"Swapped order of '{ex['exerciseName']}' and '{swapped_name}'!")
                                 st.success("Changes saved!")
                                 st.cache_data.clear()
                                 st.rerun()
