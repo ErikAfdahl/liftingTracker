@@ -15,8 +15,8 @@ def getUsers():
     return sheet
 
 @st.cache_data(ttl=60)
-def getAllUsers(sheet):
-    return sheet.get_all_records()
+def getAllUsers(_sheet):
+    return _sheet.get_all_records()
 
 def appendUser(sheet, row: list):
     sheet.append_row(row)

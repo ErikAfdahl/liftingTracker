@@ -15,8 +15,8 @@ def getLogs():
     return sheet
 
 @st.cache_data(ttl=60)
-def getAllLogs(sheet):
-    return sheet.get_all_records()
+def getAllLogs(_sheet):
+    return _sheet.get_all_records()
 
 def appendLogs(sheet, row: list):
     sheet.append_row(row)

@@ -15,8 +15,8 @@ def getProgram():
     return sheet
 
 @st.cache_data(ttl=60)
-def getAllProgram(sheet):
-    return sheet.get_all_records()
+def getAllProgram(_sheet):
+    return _sheet.get_all_records()
 
 def appendProgram(sheet, row: list):
     sheet.append_row(row)
