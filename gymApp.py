@@ -322,7 +322,7 @@ else:
                 new_sets = st.number_input("Number of Sets", min_value=1, step=1, key="edit_new_sets")
                 new_inc = st.number_input("Weight Increment", min_value=0.5, value = 5.0, step=0.5, key="edit_new_inc")
                 new_min = st.number_input("Min Reps", min_value=0, value=6, step=1, key="edit_new_min")
-                new_max = st.number_input("Max Reps", min_value=new_min, value=8, step=1, key="edit_new_max")
+                new_max = st.number_input("Max Reps", min_value=0, value=8, step=1, key="edit_new_max")
                 new_notes = st.text_input("Notes", key="edit_new_notes")
 
                 nextOrder = 0
@@ -340,6 +340,8 @@ else:
 
                     if not new_exercise:
                         st.warning("Please enter an exercise name.")
+                    elif new_max < new_min:
+                        st.warning("Minimum reps has to be equal to or less than maximum reps.")
                     else:
 
                         if not isOpen(editExercises, new_order):
