@@ -461,6 +461,68 @@ else:
                     chart_df["date"] = pd.to_datetime(chart_df["date"])
                     chart_df = chart_df.sort_values("date")
                     st.line_chart(chart_df.set_index("date")["1rm"])
+                    st.divider()
+
+                    # Log management
+                    st.markdown("#### All Logs")
+                    for log_idx, log in enumerate(exerciseLogs):
+                        col1, col2, col3 = st.columns([4, 1, 1])
+
+                        with col1:
+                            st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}")
+
+                        with col2:
+                            if st.button("Edit", key=f"edit_log_{log_idx}"):
+                                st.session_state[f"editing_log_{log_idx}"] = True
+
+                        with col3:
+                            if st.button("Delete", key=f"delete_log_{log_idx}"):
+                                all_logs = getAllLogs(sheet)
+                                indices_to_delete = [idx + 2 for idx, row in enumerate(all_logs)
+                                                     if (str(row["userId"]) == str(user["userId"]) and
+                                                         row["program"] == selectedProg and
+                                                         row["exerciseName"] == selectedEx and
+                                                         int(row["setNum"]) == int(selectedSet) and
+                                                         row["date"] == log["date"] and
+                                                         float(row["weight"]) == float(log["weight"]) and
+                                                         int(row["reps"]) == int(log["reps"]))]
+                                for idx in reversed(indices_to_delete):
+                                    sheet.delete_rows(idx)
+                                st.success("Log deleted!")
+                                st.rerun()
+
+                        if st.session_state.get(f"editing_log_{log_idx}", False):
+                            with st.expander(f"Editing log from {log['date']}", expanded=True):
+                                upd_date = st.text_input("Date", value=log["date"], key=f"upd_log_date_{log_idx}")
+                                upd_weight = st.number_input("Weight", value=float(log["weight"]),
+                                                             step=float(exerciseData["increment"]),
+                                                             key=f"upd_log_weight_{log_idx}")
+                                upd_reps = st.number_input("Reps", value=int(log["reps"]), step=1, min_value=0,
+                                                           key=f"upd_log_reps_{log_idx}")
+
+                                if st.button("Save", key=f"save_log_{log_idx}"):
+                                    new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
+                                    all_logs = getAllLogs(sheet)
+                                    for idx, row in enumerate(all_logs):
+                                        if (str(row["userId"]) == str(user["userId"]) and
+                                                row["program"] == selectedProg and
+                                                row["exerciseName"] == selectedEx and
+                                                int(row["setNum"]) == int(selectedSet) and
+                                                row["date"] == log["date"] and
+                                                float(row["weight"]) == float(log["weight"]) and
+                                                int(row["reps"]) == int(log["reps"])):
+                                            sheet.update(f"C{idx + 2}:J{idx + 2}",
+                                                         [[upd_date, selectedEx, int(selectedSet),
+                                                           float(upd_weight), int(upd_reps), new_1rm, 0, ""]])
+                                    st.session_state[f"editing_log_{log_idx}"] = False
+                                    st.success("Log updated!")
+                                    st.rerun()
+
+                                if st.button("Cancel", key=f"cancel_log_{log_idx}"):
+                                    st.session_state[f"editing_log_{log_idx}"] = False
+                                    st.rerun()
+
+                        st.divider()
         else:
             st.write("No Programs Yet!")
 
