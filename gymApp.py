@@ -449,60 +449,63 @@ else:
                      'you wish to look at, then the specific exercise, and then the set.')
             selectedProg = st.selectbox("Select Program", myPrograms, key="stats_prog")
             exercises = [row for row in userProg if row["programName"] == selectedProg]
-            exerciseNames = [row["exerciseName"] for row in exercises]
-            selectedEx = st.selectbox("Select Exercise", exerciseNames, key="stats_ex")
-            exerciseData = next(row for row in exercises if row["exerciseName"] == selectedEx)
-            numSets = int(exerciseData["numSets"])
-            selectedSet = st.number_input("Set Number", min_value=1, max_value=numSets, step=1, key="stats_set")
-
-            exerciseLogs = [row for row in user_data if (row["program"] == selectedProg) and
-                            (row["exerciseName"] == selectedEx) and (int(row["setNum"]) == int(selectedSet))]
-
-            if not exerciseLogs:
-                st.info("No logs found for this exercise and set.")
+            if len(exercises) == 0:
+                st.info("No exercises found for this program.")
             else:
-                df = pd.DataFrame(exerciseLogs)
-                df["weight"] = pd.to_numeric(df["weight"])
-                df["reps"] = pd.to_numeric(df["reps"])
-                df["1rm"] = pd.to_numeric(df["1rm"])
-                df["diff"] = pd.to_numeric(df["diff"])
+                exerciseNames = [row["exerciseName"] for row in exercises]
+                selectedEx = st.selectbox("Select Exercise", exerciseNames, key="stats_ex")
+                exerciseData = next(row for row in exercises if row["exerciseName"] == selectedEx)
+                numSets = int(exerciseData["numSets"])
+                selectedSet = st.number_input("Set Number", min_value=1, max_value=numSets, step=1, key="stats_set")
 
-                st.markdown(f"### {selectedEx} — Set {int(selectedSet)}")
-                st.caption(f"{len(df)} logged sessions")
+                exerciseLogs = [row for row in user_data if (row["program"] == selectedProg) and
+                                (row["exerciseName"] == selectedEx) and (int(row["setNum"]) == int(selectedSet))]
 
-                # Top metric cards
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Best 1RM", f"{df['1rm'].max():.1f}")
-                with col2:
-                    st.metric("Avg 1RM", f"{df['1rm'].mean():.1f}")
-                with col3:
-                    st.metric("Best Weight", f"{df['weight'].max():.1f}")
-                with col4:
-                    st.metric("Avg Reps", f"{df['reps'].mean():.1f}")
+                if not exerciseLogs:
+                    st.info("No logs found for this exercise and set.")
+                else:
+                    df = pd.DataFrame(exerciseLogs)
+                    df["weight"] = pd.to_numeric(df["weight"])
+                    df["reps"] = pd.to_numeric(df["reps"])
+                    df["1rm"] = pd.to_numeric(df["1rm"])
+                    df["diff"] = pd.to_numeric(df["diff"])
 
-                st.divider()
+                    st.markdown(f"### {selectedEx} — Set {int(selectedSet)}")
+                    st.caption(f"{len(df)} logged sessions")
 
-                # Summary stats table
-                st.markdown("#### Summary Statistics")
-                cols = ["weight", "reps", "1rm", "diff"]
-                stats_df = df[cols].agg(["mean", "std", "min", "max"]).T
-                stats_df.columns = ["Mean", "Std Dev", "Min", "Max"]
-                stats_df["Q1"] = df[cols].quantile(0.25)
-                stats_df["Median"] = df[cols].quantile(0.50)
-                stats_df["Q3"] = df[cols].quantile(0.75)
-                stats_df = stats_df[["Min", "Q1", "Median", "Mean", "Q3", "Max", "Std Dev"]]
-                stats_df = stats_df.round(2)
-                st.dataframe(stats_df, use_container_width=True)
+                    # Top metric cards
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Best 1RM", f"{df['1rm'].max():.1f}")
+                    with col2:
+                        st.metric("Avg 1RM", f"{df['1rm'].mean():.1f}")
+                    with col3:
+                        st.metric("Best Weight", f"{df['weight'].max():.1f}")
+                    with col4:
+                        st.metric("Avg Reps", f"{df['reps'].mean():.1f}")
 
-                st.divider()
+                    st.divider()
 
-                # 1RM over time chart
-                st.markdown("#### 1RM Over Time")
-                chart_df = df[["date", "1rm"]].copy()
-                chart_df["date"] = pd.to_datetime(chart_df["date"])
-                chart_df = chart_df.sort_values("date")
-                st.line_chart(chart_df.set_index("date")["1rm"])
+                    # Summary stats table
+                    st.markdown("#### Summary Statistics")
+                    cols = ["weight", "reps", "1rm", "diff"]
+                    stats_df = df[cols].agg(["mean", "std", "min", "max"]).T
+                    stats_df.columns = ["Mean", "Std Dev", "Min", "Max"]
+                    stats_df["Q1"] = df[cols].quantile(0.25)
+                    stats_df["Median"] = df[cols].quantile(0.50)
+                    stats_df["Q3"] = df[cols].quantile(0.75)
+                    stats_df = stats_df[["Min", "Q1", "Median", "Mean", "Q3", "Max", "Std Dev"]]
+                    stats_df = stats_df.round(2)
+                    st.dataframe(stats_df, use_container_width=True)
+
+                    st.divider()
+
+                    # 1RM over time chart
+                    st.markdown("#### 1RM Over Time")
+                    chart_df = df[["date", "1rm"]].copy()
+                    chart_df["date"] = pd.to_datetime(chart_df["date"])
+                    chart_df = chart_df.sort_values("date")
+                    st.line_chart(chart_df.set_index("date")["1rm"])
         else:
             st.write("No Programs Yet!")
 
