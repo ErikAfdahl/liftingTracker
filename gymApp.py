@@ -31,6 +31,23 @@ def isOpen(exercises, order):
             return False
     return True
 
+def calculate_diff(data, program, exercise, set_num, current_1rm):
+    for row in reversed(data):
+        if (row["program"] == program and
+                row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num)):
+            return round(current_1rm - float(row["1rm"]), 3)
+    return 0
+
+
+def get_last_entry(data, program, exercise, set_num):
+    for row in reversed(data):
+        if (row["program"] == program and
+                row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num)):
+            return row
+    return None
+
 st.title("Lifting Tracker")
 
 if "logged_in" not in st.session_state:
@@ -145,6 +162,7 @@ else:
                 st.divider()
         else:
             st.write("No Programs Yet!")
+            st.write('Create a program in the "Manage Programs" tab.')
 
     with tab2:
         if len(myPrograms) > 0:
@@ -167,23 +185,6 @@ else:
                      "simply enter the weight and reps for every set, and then click log set.")
             st.write('If you skip a set, simply do not click "Log Set" or if you wish, log 0 reps at 0 pounds.')
 
-
-            def calculate_diff(data, program, exercise, set_num, current_1rm):
-                for row in reversed(data):
-                    if (row["program"] == program and
-                            row["exerciseName"] == exercise and
-                            int(row["setNum"]) == int(set_num)):
-                        return round(current_1rm - float(row["1rm"]), 3)
-                return 0
-
-            def get_last_entry(data, program, exercise, set_num):
-                for row in reversed(data):
-                    if (row["program"] == program and
-                            row["exerciseName"] == exercise and
-                            int(row["setNum"]) == int(set_num)):
-                        return row
-                return None
-
             for i in range(1, 25):
                 for ex in exercises:
                     if i == ex['order']:
@@ -194,6 +195,7 @@ else:
                             last = get_last_entry(user_data, selected, ex['exerciseName'], set_num)
                             if last:
                                 st.caption(f"Last time you hit {last['weight']} lbs, for {last['reps']} reps.")
+                                st.caption(f'Notes from last time ({last['date']}): "{last['notes']}"')
                                 if last['reps'] >= ex['maxReps']:
                                     recWeight = last['weight'] + ex['increment'] + (int((last['weight'] - ex['maxReps'])
                                                                                         / 2) * ex['increment'])
@@ -225,13 +227,15 @@ else:
                                     step=float(ex['increment']),
                                     key=f"weight_{selected}_{ex['exerciseName']}_{set_num}"
                                 )
+                            notes = st.text_input(label="Notes from this session",
+                                          key=f"notes_{selected}_{ex['exerciseName']}_{set_num}")
 
                             if st.button("Log Set", key=f"log_{ex['exerciseName']}_{set_num}"):
                                 one_rm = round(weight * (1 + float(reps) / 30), 3)
                                 diff = calculate_diff(user_data, selected, ex['exerciseName'], set_num, one_rm)
                                 row = [int(user["userId"]), selected, workoutDate, ex['exerciseName'], set_num,
                                        float(weight), int(reps),
-                                       one_rm, diff]
+                                       one_rm, diff, notes]
                                 appendLogs(sheet, row)
                                 st.success(f"Logged! 1RM estimate: {one_rm} | Diff: {diff}")
 
@@ -501,7 +505,8 @@ else:
                         col1, col2, col3 = st.columns([4, 1, 1])
 
                         with col1:
-                            st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}")
+                            st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}, "
+                                     f"Notes: {log["notes"]}")
 
                         with col2:
                             if st.button("Edit", key=f"edit_log_{log_idx}"):
@@ -517,7 +522,8 @@ else:
                                                          int(row["setNum"]) == int(selectedSet) and
                                                          row["date"] == log["date"] and
                                                          float(row["weight"]) == float(log["weight"]) and
-                                                         int(row["reps"]) == int(log["reps"]))]
+                                                         int(row["reps"]) == int(log["reps"]) and
+                                                         str(row["notes"]) == str(log["notes"]))]
                                 for idx in reversed(indices_to_delete):
                                     sheet.delete_rows(idx)
                                 st.success("Log deleted!")
@@ -532,6 +538,7 @@ else:
                                                              key=f"upd_log_weight_{log_idx}")
                                 upd_reps = st.number_input("Reps", value=int(log["reps"]), step=1, min_value=0,
                                                            key=f"upd_log_reps_{log_idx}")
+                                upd_notes = st.text_input("Notes", key=f"upd_log_notes_{log_idx}")
 
                                 if st.button("Save", key=f"save_log_{log_idx}"):
                                     new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
@@ -543,10 +550,11 @@ else:
                                                 int(row["setNum"]) == int(selectedSet) and
                                                 row["date"] == log["date"] and
                                                 float(row["weight"]) == float(log["weight"]) and
-                                                int(row["reps"]) == int(log["reps"])):
+                                                int(row["reps"]) == int(log["reps"]) and
+                                                row["notes"] == log["notes"]):
                                             sheet.update(f"C{idx + 2}:J{idx + 2}",
                                                          [[upd_date, selectedEx, int(selectedSet),
-                                                           float(upd_weight), int(upd_reps), new_1rm, 0, ""]])
+                                                           float(upd_weight), int(upd_reps), new_1rm, 0, upd_notes]])
                                     st.session_state[f"editing_log_{log_idx}"] = False
                                     st.success("Log updated!")
                                     st.cache_data.clear()
