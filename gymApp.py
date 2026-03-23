@@ -114,14 +114,16 @@ if not st.session_state.logged_in:
 else:
     user = st.session_state.user
     st.write(f"Welcome, {user['username']}!")
-    st.write("Recent Update(s):")
-    st.write("Added ordering to programs, making it easier to customize the ordering of your "
-             "programs.")
-    st.write("Added a remember me function using cookies.")
-    st.write('Removed the "Create Program" tab and updated the edit program tab to "Manage Programs" to function '
-             'as well as "Create Program" did.')
-    st.write('Allowed user to edit/delete logs in the "Logs" tab.')
-    st.write('Added notes to logs.')
+    with st.expander("Recent Updates(s)"):
+        st.write("Added ordering to programs, making it easier to customize the ordering of your "
+                 "programs.")
+        st.write("Added a remember me function using cookies.")
+        st.write('Removed the "Create Program" tab and updated the edit program tab to "Manage Programs" to function '
+                 'as well as "Create Program" did.')
+        st.write('Allowed user to edit/delete logs in the "Logs" tab.')
+        st.write('Added notes to logs.')
+        st.write('Added notes to programs.')
+        st.write('Added help bars and legends to "Run Program" and "Manage Programs".')
 
     if st.button("Logout"):
         token = cookies.get("session_token")
