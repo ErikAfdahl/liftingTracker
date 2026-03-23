@@ -309,7 +309,7 @@ else:
                 st.write("Exercise Name: What you want this exercise to be called in this program.")
                 st.write("Number of Sets: How many sets for this exercise in this program.")
                 st.write("Increment: How much the weight can go up or down by, for example, most dumbbells go up by 5 "
-                         "pounds, so for one dumbbell, increment is 5, 10 for wo dumbbells (optional).")
+                         "pounds, so for one dumbbell, increment is 5, 10 for two dumbbells (optional).")
                 st.write("Min Reps: The minimum number of reps you want to aim for (optional).")
                 st.write("Max Reps: The maximum number of reps you want to aim for (optional).")
                 st.write("Notes: Any other information you want to add for this exercise (optional).")
