@@ -54,7 +54,8 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user" not in st.session_state:
     st.session_state.user = None
-
+st.write("Please fill out this feedback form when you can!")
+st.write("https://forms.gle/hpWGCpVu6X5PzWXk8")
 # Login
 if not st.session_state.logged_in:
     # Check for existing cookie on page load
