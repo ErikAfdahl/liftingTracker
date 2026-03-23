@@ -146,7 +146,16 @@ else:
     with tab2:
         if len(myPrograms) > 0:
             st.subheader("Run Program")
-            selected = st.selectbox("Select a Program", myPrograms)
+
+            mostRecentProg = ""
+
+
+            if len(user_data) == 0:
+                selected = st.selectbox("Select a Program", myPrograms)
+            else:
+                selected = st.selectbox("Select a Program", myPrograms,
+                                        index=myPrograms.index(user_data[-1]["program"]))
+
             exercises = [row for row in userProg if row["programName"] == selected]
             today = date.today().strftime("%m/%d/%Y")
             workoutDate = st.text_input("Date", value=today)
