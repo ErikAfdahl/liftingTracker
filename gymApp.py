@@ -428,7 +428,7 @@ else:
                                     if (str(row["userId"]) == str(user["userId"]) and
                                             row["programName"] == selected_edit and
                                             row["exerciseName"] == ex["exerciseName"]):
-                                        programs.update(f"D{idx + 2}:H{idx + 2}",
+                                        programs.update(f"D{idx + 2}:I{idx + 2}",
                                                         [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
                                                           int(upd_order), upd_notes]])
 
