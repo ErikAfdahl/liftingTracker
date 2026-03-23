@@ -48,7 +48,7 @@ def get_last_entry(data, program, exercise, set_num):
             return row
     return None
 
-st.title("L.S.D. - Beta")
+st.title("L.S.D. - Beta") 
 st.write("Lifting Statistical Database. Built for lifters who want to see everything.")
 
 if "logged_in" not in st.session_state:
