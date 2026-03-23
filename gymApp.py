@@ -179,8 +179,9 @@ else:
             if len(user_data) == 0:
                 selected = st.selectbox("Select a Program", myPrograms)
             else:
-                selected = st.selectbox("Select a Program", myPrograms,
-                                        index=myPrograms.index(user_data[-1]["program"]))
+                last_program = user_data[-1]["program"] if user_data else None
+                default_index = myPrograms.index(last_program) if last_program in myPrograms else 0
+                selected = st.selectbox("Select a Program", myPrograms, index=default_index)
 
             exercises = [row for row in userProg if row["programName"] == selected]
             today = date.today().strftime("%m/%d/%Y")
