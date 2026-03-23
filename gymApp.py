@@ -259,12 +259,18 @@ else:
                 st.success(f"Added {exercise} to {program}!")
 
     with tab4:
-        if len(myPrograms) > 0:
-            st.subheader("Edit Programs")
-            st.write('This panel lets you modify your existing programs, delete them, and add to them.')
 
-            if not myPrograms:
-                st.write("No programs found.")
+        st.subheader("Edit Programs")
+        st.write('This panel lets you modify your existing programs, delete them, and add to them.')
+
+        newProgram = st.text_input("New Program Name", key="new_program_name")
+
+        if (not myPrograms) and (not st.button(f"Create Program {newProgram}")):
+            st.write("No programs found.")
+
+        else:
+            if not newProgram:
+                st.warning("Please enter an exercise name.")
             else:
                 selected_edit = st.selectbox("Select a Program to Edit", myPrograms, key="edit_program_select")
                 editExercises = [row for row in userProg if row["programName"] == selected_edit]
@@ -329,91 +335,92 @@ else:
                             st.rerun()
 
                 st.divider()
+                if not myPrograms:
+                    st.write("No exercises found.")
+                else:
+                    # Table of exercises with edit/delete buttons
+                    for ex in editExercises:
+                        col1, col2, col3 = st.columns([3, 1, 1])
 
-                # Table of exercises with edit/delete buttons
-                for ex in editExercises:
-                    col1, col2, col3 = st.columns([3, 1, 1])
+                        with col1:
+                            st.write(
+                                f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
+                                f"{ex['increment']} lb increments, exercise number {ex['order']}")
 
-                    with col1:
-                        st.write(
-                            f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
-                            f"{ex['increment']} lb increments, exercise number {ex['order']}")
+                        with col2:
+                            if st.button("Edit", key=f"edit_{ex['exerciseName']}"):
+                                st.session_state[f"editing_{ex['exerciseName']}"] = True
 
-                    with col2:
-                        if st.button("Edit", key=f"edit_{ex['exerciseName']}"):
-                            st.session_state[f"editing_{ex['exerciseName']}"] = True
-
-                    with col3:
-                        if st.button("Delete", key=f"delete_{ex['exerciseName']}"):
-                            all_rows = getAllProgram(programs)
-                            indices_to_delete = [idx + 2 for idx, row in enumerate(all_rows)
-                                                 if (str(row["userId"]) == str(user["userId"]) and
-                                                     row["programName"] == selected_edit and
-                                                     row["exerciseName"] == ex["exerciseName"])]
-                            for idx in reversed(indices_to_delete):
-                                programs.delete_rows(idx)
-                            st.success(f"Deleted {ex['exerciseName']}!")
-                            st.rerun()
-
-                    # Inline edit form
-                    if st.session_state.get(f"editing_{ex['exerciseName']}", False):
-                        with st.expander(f"Editing {ex['exerciseName']}", expanded=True):
-                            upd_sets = st.number_input("Number of Sets", value=int(ex['numSets']), step=1,
-                                                       key=f"upd_sets_{ex['exerciseName']}")
-                            upd_inc = st.number_input("Weight Increment", value=float(ex['increment']), step=0.5,
-                                                      key=f"upd_inc_{ex['exerciseName']}")
-                            upd_min = st.number_input("Min Reps", value=int(ex['minReps']), step=1,
-                                                      key=f"upd_min_{ex['exerciseName']}")
-                            upd_max = st.number_input("Max Reps", value=int(ex['maxReps']), step=1,
-                                                      key=f"upd_max_{ex['exerciseName']}")
-
-                            nextOrder = 0
-                            if len(editExercises) > 0:
-                                for i in range(len(editExercises)):
-                                    if editExercises[i]['order'] > nextOrder:
-                                        nextOrder = editExercises[i]['order']
-                            nextOrder += 1
-
-                            upd_order = st.number_input("Order", min_value=1, max_value=maxExercises,
-                                                        value=int(ex['order']), step=1,
-                                                        key=f"upd_order_{ex['exerciseName']}")
-
-                            if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
+                        with col3:
+                            if st.button("Delete", key=f"delete_{ex['exerciseName']}"):
                                 all_rows = getAllProgram(programs)
-                                swapped_name = None
-
-                                if not isOpen(editExercises, upd_order) and upd_order != ex['order']:
-                                    for e in editExercises:
-                                        if e['order'] == upd_order:
-                                            swapped_name = e['exerciseName']
-                                            for idx, row in enumerate(all_rows):
-                                                if (str(row["userId"]) == str(user["userId"]) and
-                                                        row["programName"] == selected_edit and
-                                                        row["exerciseName"] == e["exerciseName"]):
-                                                    programs.update(f"H{idx + 2}", [[int(ex['order'])]])
-                                            break
-
-                                for idx, row in enumerate(all_rows):
-                                    if (str(row["userId"]) == str(user["userId"]) and
-                                            row["programName"] == selected_edit and
-                                            row["exerciseName"] == ex["exerciseName"]):
-                                        programs.update(f"D{idx + 2}:H{idx + 2}",
-                                                        [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
-                                                          int(upd_order)]])
-
-                                st.session_state[f"editing_{ex['exerciseName']}"] = False
-                                if swapped_name:
-                                    st.success(f"Swapped order of '{ex['exerciseName']}' and '{swapped_name}'!")
-                                st.success("Changes saved!")
+                                indices_to_delete = [idx + 2 for idx, row in enumerate(all_rows)
+                                                     if (str(row["userId"]) == str(user["userId"]) and
+                                                         row["programName"] == selected_edit and
+                                                         row["exerciseName"] == ex["exerciseName"])]
+                                for idx in reversed(indices_to_delete):
+                                    programs.delete_rows(idx)
+                                st.success(f"Deleted {ex['exerciseName']}!")
                                 st.rerun()
 
-                            if st.button("Cancel", key=f"cancel_{ex['exerciseName']}"):
-                                st.session_state[f"editing_{ex['exerciseName']}"] = False
-                                st.rerun()
+                        # Inline edit form
+                        if st.session_state.get(f"editing_{ex['exerciseName']}", False):
+                            with st.expander(f"Editing {ex['exerciseName']}", expanded=True):
+                                upd_sets = st.number_input("Number of Sets", value=int(ex['numSets']), step=1,
+                                                           key=f"upd_sets_{ex['exerciseName']}")
+                                upd_inc = st.number_input("Weight Increment", value=float(ex['increment']), step=0.5,
+                                                          key=f"upd_inc_{ex['exerciseName']}")
+                                upd_min = st.number_input("Min Reps", value=int(ex['minReps']), step=1,
+                                                          key=f"upd_min_{ex['exerciseName']}")
+                                upd_max = st.number_input("Max Reps", value=int(ex['maxReps']), step=1,
+                                                          key=f"upd_max_{ex['exerciseName']}")
 
-                    st.divider()
-        else:
-            st.write("No Programs Yet!")
+                                nextOrder = 0
+                                if len(editExercises) > 0:
+                                    for i in range(len(editExercises)):
+                                        if editExercises[i]['order'] > nextOrder:
+                                            nextOrder = editExercises[i]['order']
+                                nextOrder += 1
+
+                                upd_order = st.number_input("Order", min_value=1, max_value=maxExercises,
+                                                            value=int(ex['order']), step=1,
+                                                            key=f"upd_order_{ex['exerciseName']}")
+
+                                if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
+                                    all_rows = getAllProgram(programs)
+                                    swapped_name = None
+
+                                    if not isOpen(editExercises, upd_order) and upd_order != ex['order']:
+                                        for e in editExercises:
+                                            if e['order'] == upd_order:
+                                                swapped_name = e['exerciseName']
+                                                for idx, row in enumerate(all_rows):
+                                                    if (str(row["userId"]) == str(user["userId"]) and
+                                                            row["programName"] == selected_edit and
+                                                            row["exerciseName"] == e["exerciseName"]):
+                                                        programs.update(f"H{idx + 2}", [[int(ex['order'])]])
+                                                break
+
+                                    for idx, row in enumerate(all_rows):
+                                        if (str(row["userId"]) == str(user["userId"]) and
+                                                row["programName"] == selected_edit and
+                                                row["exerciseName"] == ex["exerciseName"]):
+                                            programs.update(f"D{idx + 2}:H{idx + 2}",
+                                                            [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
+                                                              int(upd_order)]])
+
+                                    st.session_state[f"editing_{ex['exerciseName']}"] = False
+                                    if swapped_name:
+                                        st.success(f"Swapped order of '{ex['exerciseName']}' and '{swapped_name}'!")
+                                    st.success("Changes saved!")
+                                    st.rerun()
+
+                                if st.button("Cancel", key=f"cancel_{ex['exerciseName']}"):
+                                    st.session_state[f"editing_{ex['exerciseName']}"] = False
+                                    st.rerun()
+
+                        st.divider()
+
 
                 #streamlit run gymApp.py
 
