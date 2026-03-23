@@ -121,6 +121,7 @@ else:
     st.write('Removed the "Create Program" tab and updated the edit program tab to "Manage Programs" to function '
              'as well as "Create Program" did.')
     st.write('Allowed user to edit/delete logs in the "Logs" tab.')
+    st.write('Added notes to logs.')
 
     if st.button("Logout"):
         token = cookies.get("session_token")
@@ -195,7 +196,7 @@ else:
                             last = get_last_entry(user_data, selected, ex['exerciseName'], set_num)
                             if last:
                                 st.caption(f"Last time you hit {last['weight']} lbs, for {last['reps']} reps.")
-                                
+
                                 if len(last['notes']) == 0:
                                     st.caption(f"No notes from last time ({last['date']})")
                                 else:
