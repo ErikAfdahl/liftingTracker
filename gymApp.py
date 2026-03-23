@@ -353,7 +353,7 @@ else:
                         st.rerun()
 
             st.divider()
-            if not myPrograms:
+            if len(editExercises) > 0:
                 st.write("No exercises found.")
             else:
                 # Table of exercises with edit/delete buttons
