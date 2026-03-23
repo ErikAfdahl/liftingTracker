@@ -103,7 +103,7 @@ else:
         st.session_state.user = None
         st.rerun()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["My Programs", "Run Program", "Create Program", "Edit Programs", "Logs"])
+    tab1, tab2, tab3, tab4 = st.tabs(["My Programs", "Run Program", "Manage Programs", "Logs"])
     sheet = getLogs()
     data = getAllLogs(sheet)
     user_data = [row for row in data if str(row["userId"]) == str(user["userId"])]
@@ -214,53 +214,8 @@ else:
             st.write("No Programs Yet!")
 
     with tab3:
-        st.subheader("Create Program")
-        st.write('This panel lets you create your own programs, and add to them. To do this, enter the name of your '
-                 'program then all the specific details of the first exercise, once everything is filled in, '
-                 'then click "Add to Program". And repeat the process, not changing the name of your program, '
-                 'until all exercises are entered.')
-
-        program = st.text_input("Program (e.g. Legs, Push, Pull)")
-        exercise = st.text_input("Exercise Name")
-        set_num = st.number_input("Number of Sets", min_value=1, step=1)
-        inc = st.number_input("Weight Increment", min_value=1.0)
-        minReps = st.number_input("Minimum Number of Reps (Optional)", min_value=0, step=1)
-        maxReps = st.number_input("Maximum Number of Reps (Optional)", min_value=minReps, step=1)
-        exercises = [row for row in userProg if row["programName"] == program]
-        nextOrder = 0
-
-        if len(exercises) > 0:
-            for i in range(len(exercises)):
-                if exercises[i]['order'] > nextOrder:
-                    nextOrder = exercises[i]['order'] # next order
-
-        order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder + 1, step=1)
-
-        if st.button("Add to Program"):
-            if not program or not exercise:
-                st.warning("Please fill in program and exercise name.")
-            elif len(exercises) == maxExercises:
-                st.warning("Cannot add any more exercises to this program.")
-            elif not isOpen(exercises, order):
-                st.warning("Cannot add exercise in that spot.")
-            else:
-                # cap program size at 25 exercises or so
-
-                row = [int(user["userId"]), program, exercise, int(set_num), float(inc), int(minReps), int(maxReps),
-                       int(order)]
-                appendProgram(programs, row)
-
-                for i in range(len(userProg)):
-                    if userProg[i]["programName"] == program:
-                        break
-                    elif i == len(userProg) - 1:
-                        st.success(f"New Program {program} created.")
-
-                st.success(f"Added {exercise} to {program}!")
-
-    with tab4:
-        st.subheader("Edit Programs")
-        st.write('This panel lets you modify your existing programs, delete them, and add to them.')
+        st.subheader("Manage Programs")
+        st.write('This panel lets you modify and create your programs, delete them, and add to them.')
 
         # Create new program
         with st.expander("Create New Program"):
@@ -442,7 +397,7 @@ else:
 
             #streamlit run gymApp.py
 
-    with tab5:
+    with tab4:
         if len(myPrograms) > 0:
             st.subheader("Stats")
             st.write('This panel lets you see the small details and statistics behind your lifts, select the program '
@@ -512,3 +467,48 @@ else:
 st.caption("Developed by Erik Afdahl")
 st.caption('For customer service questions, error messages, and any and all feedback '
            'email "erik.afdahl.1@gmail.com"')
+
+# with tab3:
+#     st.subheader("Create Program")
+#     st.write('This panel lets you create your own programs, and add to them. To do this, enter the name of your '
+#              'program then all the specific details of the first exercise, once everything is filled in, '
+#              'then click "Add to Program". And repeat the process, not changing the name of your program, '
+#              'until all exercises are entered.')
+#
+#     program = st.text_input("Program (e.g. Legs, Push, Pull)")
+#     exercise = st.text_input("Exercise Name")
+#     set_num = st.number_input("Number of Sets", min_value=1, step=1)
+#     inc = st.number_input("Weight Increment", min_value=1.0)
+#     minReps = st.number_input("Minimum Number of Reps (Optional)", min_value=0, step=1)
+#     maxReps = st.number_input("Maximum Number of Reps (Optional)", min_value=minReps, step=1)
+#     exercises = [row for row in userProg if row["programName"] == program]
+#     nextOrder = 0
+#
+#     if len(exercises) > 0:
+#         for i in range(len(exercises)):
+#             if exercises[i]['order'] > nextOrder:
+#                 nextOrder = exercises[i]['order']  # next order
+#
+#     order = st.number_input("Order", min_value=1, max_value=maxExercises, value=nextOrder + 1, step=1)
+#
+#     if st.button("Add to Program"):
+#         if not program or not exercise:
+#             st.warning("Please fill in program and exercise name.")
+#         elif len(exercises) == maxExercises:
+#             st.warning("Cannot add any more exercises to this program.")
+#         elif not isOpen(exercises, order):
+#             st.warning("Cannot add exercise in that spot.")
+#         else:
+#             # cap program size at 25 exercises or so
+#
+#             row = [int(user["userId"]), program, exercise, int(set_num), float(inc), int(minReps), int(maxReps),
+#                    int(order)]
+#             appendProgram(programs, row)
+#
+#             for i in range(len(userProg)):
+#                 if userProg[i]["programName"] == program:
+#                     break
+#                 elif i == len(userProg) - 1:
+#                     st.success(f"New Program {program} created.")
+#
+#             st.success(f"Added {exercise} to {program}!")
