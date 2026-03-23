@@ -99,6 +99,15 @@ else:
              "programs.")
 
     if st.button("Logout"):
+        token = cookies.get("session_token")
+        if token:
+            all_tokens = getAllTokens(tokens_sheet)
+            indices_to_delete = [idx + 2 for idx, row in enumerate(all_tokens)
+                                 if row["token"] == token]
+            for idx in reversed(indices_to_delete):
+                tokens_sheet.delete_rows(idx)
+            cookies["session_token"] = ""
+            cookies.save()
         st.session_state.logged_in = False
         st.session_state.user = None
         st.rerun()
