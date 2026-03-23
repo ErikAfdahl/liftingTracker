@@ -25,6 +25,12 @@ def hashPassword(password: str) -> str:
 def checkPassword(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
+def isOpen(exercises, order):
+    for i in range(len(exercises)):
+        if exercises[i]['order'] == order:
+            return False
+    return True
+
 st.title("Lifting Tracker")
 
 if "logged_in" not in st.session_state:
@@ -230,12 +236,6 @@ else:
 
         order = st.number_input("Order", min_value=1, max_value = maxExercises, value = nextOrder + 1, step=1)
 
-        def isOpen(exercises, order):
-            for i in range(len(exercises)):
-                if exercises[i]['order'] == order:
-                    return False
-            return True
-
         if st.button("Add to Program"):
             if not program or not exercise:
                 st.warning("Please fill in program and exercise name.")
@@ -292,10 +292,6 @@ else:
 
                     nextOrder = 0
 
-                    if len(editExercises) > 0:
-                        for i in range(len(editExercises)):
-                            if editExercises[i]['order'] > nextOrder:
-                                nextOrder = editExercises[i]['order']
 
                     new_order = st.number_input("Order", min_value=1, max_value= maxExercises,
                                                 value=nextOrder + 1,step=1, key="edit_new_order")
@@ -305,6 +301,20 @@ else:
                         if not new_exercise:
                             st.warning("Please enter an exercise name.")
                         else:
+
+                            if not isOpen(editExercises, new_order):
+                                for ex in editExercises:
+                                    if ex['order'] == new_order:
+                                        ex['order'] = nextOrder
+                                        # update the swapped exercise in the sheet
+                                        all_rows = getAllProgram(programs)
+                                        for idx, row in enumerate(all_rows):
+                                            if (str(row["userId"]) == str(user["userId"]) and
+                                                    row["programName"] == selected_edit and
+                                                    row["exerciseName"] == ex["exerciseName"]):
+                                                programs.update(f"H{idx + 2}", [[int(nextOrder)]])
+                                        break
+
                             for i in range(len(editExercises)):
                                 if editExercises[i]['order'] == new_order:
                                     editExercises[i]['order'] = nextOrder
@@ -356,22 +366,33 @@ else:
                                                       key=f"upd_min_{ex['exerciseName']}")
                             upd_max = st.number_input("Max Reps", value=int(ex['maxReps']), step=1,
                                                       key=f"upd_max_{ex['exerciseName']}")
+
                             nextOrder = 0
                             if len(editExercises) > 0:
                                 for i in range(len(editExercises)):
                                     if editExercises[i]['order'] > nextOrder:
                                         nextOrder = editExercises[i]['order']
+                            nextOrder += 1
 
                             upd_order = st.number_input("Order", min_value=1, max_value=maxExercises,
-                                                        value=nextOrder, step=1, key=f"upd_order_{ex['exerciseName']}")
-
-                            for i in range(len(editExercises)):
-                                if editExercises[i]['order'] == upd_order:
-                                    editExercises[i]['order'] = nextOrder
-
+                                                        value=int(ex['order']), step=1,
+                                                        key=f"upd_order_{ex['exerciseName']}")
 
                             if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
                                 all_rows = getAllProgram(programs)
+                                swapped_name = None
+
+                                if not isOpen(editExercises, upd_order) and upd_order != ex['order']:
+                                    for e in editExercises:
+                                        if e['order'] == upd_order:
+                                            swapped_name = e['exerciseName']
+                                            for idx, row in enumerate(all_rows):
+                                                if (str(row["userId"]) == str(user["userId"]) and
+                                                        row["programName"] == selected_edit and
+                                                        row["exerciseName"] == e["exerciseName"]):
+                                                    programs.update(f"H{idx + 2}", [[int(ex['order'])]])
+                                            break
+
                                 for idx, row in enumerate(all_rows):
                                     if (str(row["userId"]) == str(user["userId"]) and
                                             row["programName"] == selected_edit and
@@ -379,9 +400,10 @@ else:
                                         programs.update(f"D{idx + 2}:H{idx + 2}",
                                                         [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
                                                           int(upd_order)]])
+
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
-                                st.success(f"Swapped order values for exercise '{editExercises[i]['exerciseName']}' "
-                                           f"and '{editExercises[i]["exerciseName"]}'.")
+                                if swapped_name:
+                                    st.success(f"Swapped order of '{ex['exerciseName']}' and '{swapped_name}'!")
                                 st.success("Changes saved!")
                                 st.rerun()
 
