@@ -183,10 +183,15 @@ else:
             exercises = [row for row in userProg if row["programName"] == selected]
             today = date.today().strftime("%m/%d/%Y")
             workoutDate = st.text_input("Date", value=today)
-            st.write("This panel enters your lifts into our dataset. First you must have an available program to run, "
-                     "after one has been made, select the program you with to run in the dropdown menu. After that, "
-                     "simply enter the weight and reps for every set, and then click log set.")
-            st.write('If you skip a set, simply do not click "Log Set" or if you wish, log 0 reps at 0 pounds.')
+            with st.expander("Legend/Help"):
+                st.write("This panel enters your lifts into our dataset. First you must have an available program to run, "
+                         "after one has been made, select the program you with to run in the dropdown menu. After that, "
+                         "simply enter the weight and reps for every set, and then click log set.")
+                st.write('If you skip a set, simply do not click "Log Set" or if you wish, log 0 reps at 0 pounds.')
+                st.write("Legend")
+                st.write("Weight: Weight used.")
+                st.write("Reps: Number of repetitions for that specific program, exercise, and set.")
+                st.write("Notes: Any other notes for this set (optional).")
 
             for i in range(1, 25):
                 for ex in exercises:
@@ -222,6 +227,14 @@ else:
 
                             col1, col2 = st.columns(2)
                             with col1:
+                                weight = st.number_input(
+                                    "Weight",
+                                    min_value=0.0,
+                                    value=float(last['weight']) if last else 0.0,
+                                    step=float(ex['increment']),
+                                    key=f"weight_{selected}_{ex['exerciseName']}_{set_num}"
+                                )
+                            with col2:
                                 reps = st.number_input(
                                     "Reps",
                                     min_value=0,
@@ -229,14 +242,6 @@ else:
                                     value=int(last['reps']) if last else ex['minReps'],
                                     step=1,
                                     key=f"reps_{selected}_{ex['exerciseName']}_{set_num}"
-                                )
-                            with col2:
-                                weight = st.number_input(
-                                    "Weight",
-                                    min_value=0.0,
-                                    value=float(last['weight']) if last else 0.0,
-                                    step=float(ex['increment']),
-                                    key=f"weight_{selected}_{ex['exerciseName']}_{set_num}"
                                 )
                             notes = st.text_input(label="Notes from this session",
                                           key=f"notes_{selected}_{ex['exerciseName']}_{set_num}")
@@ -300,6 +305,15 @@ else:
             st.divider()
 
             # Add new exercise to this program
+            with st.expander("Legend"):
+                st.write("Exercise Name: What you want this exercise to be called in this program.")
+                st.write("Number of Sets: How many sets for this exercise in this program.")
+                st.write("Increment: How much the weight can go up or down by, for example, most dumbbells go up by 5 "
+                         "pounds, so for one dumbbell, increment is 5, 10 for wo dumbbells (optional).")
+                st.write("Min Reps: The minimum number of reps you want to aim for (optional).")
+                st.write("Max Reps: The maximum number of reps you want to aim for (optional).")
+                st.write("Notes: Any other information you want to add for this exercise (optional).")
+                st.wriet("Order: Where this exercise appears within the structure of your program (optional).")
             with st.expander("Add Exercise to this Program"):
                 new_exercise = st.text_input("Exercise Name", key="edit_new_exercise")
                 new_sets = st.number_input("Number of Sets", min_value=1, step=1, key="edit_new_sets")
