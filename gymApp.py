@@ -1,13 +1,29 @@
 import streamlit as st
 import pandas as pd
 import bcrypt
+import uuid
 from programs import *
 from sheets import *
 from users import *
+from activeUsers import *
 from datetime import date
+from streamlit_cookies_manager import EncryptedCookieManager
 
+cookies = EncryptedCookieManager(prefix="gymtracker_", password=st.secrets["cookie_password"])
+if not cookies.ready():
+    st.stop()
+
+users_sheet = getUsers()
+users = getAllUsers(users_sheet)
+tokens_sheet = getTokens()
 
 # streamlit run gymApp.py
+
+def hashPassword(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+def checkPassword(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 st.title("Lifting Tracker")
 
@@ -18,26 +34,35 @@ if "user" not in st.session_state:
 
 # Login
 if not st.session_state.logged_in:
+    # Check for existing cookie on page load
+    token = cookies.get("session_token")
+
+    if token:
+        matched = next((row for row in getAllTokens(tokens_sheet) if row["token"] == token), None)
+        if matched:
+            user = next((u for u in users if str(u["userId"]) == str(matched["userId"])), None)
+            if user:
+                st.session_state.logged_in = True
+                st.session_state.user = user
+                st.rerun()
+
     tab1, tab2 = st.tabs(["Login", "Create Account"])
-
-    users_sheet = getUsers()
-    users = getAllUsers(users_sheet)
-
-    def hashPassword(password: str) -> str:
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-    def checkPassword(password: str, hashed: str) -> bool:
-        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
     with tab1:
         st.subheader("Login")
         username = st.text_input("Username", key="login_user")
         password = st.text_input("Password", type="password", key="login_pass")
+        remember_me = st.checkbox("Remember Me")
         if st.button("Login"):
             user = next((u for u in users if u["username"] == username), None)
             if user and checkPassword(password, user["password"]):
                 st.session_state.logged_in = True
                 st.session_state.user = user
+                if remember_me:
+                    token = str(uuid.uuid4())
+                    appendToken(tokens_sheet, [token, user["userId"]])
+                    cookies["session_token"] = token
+                    cookies.save()
                 st.rerun()
             else:
                 st.error("Invalid username or password.")
@@ -283,12 +308,13 @@ else:
                             for i in range(len(editExercises)):
                                 if editExercises[i]['order'] == new_order:
                                     editExercises[i]['order'] = nextOrder
-                                    st.success(f"Swapped order values for exercise '{new_exercise}' and "
-                                               f"'{editExercises[i]["exerciseName"]}'.")
+
 
                             row = [int(user["userId"]), selected_edit, new_exercise, int(new_sets), float(new_inc),
                                    int(new_min), int(new_max), int(new_order)]
                             appendLogs(programs, row)
+                            st.success(f"Swapped order values for exercise '{editExercises[i]['exerciseName']}' "
+                                       f"and '{editExercises[i]["exerciseName"]}'.")
                             st.success(f"Added {new_exercise} to {selected_edit}!")
                             st.rerun()
 
@@ -301,7 +327,7 @@ else:
                     with col1:
                         st.write(
                             f"**{ex['exerciseName']}** — {ex['numSets']} sets, {ex['minReps']}–{ex['maxReps']} reps, "
-                            f"{ex['increment']} lb increments")
+                            f"{ex['increment']} lb increments, exercise number {ex['order']}")
 
                     with col2:
                         if st.button("Edit", key=f"edit_{ex['exerciseName']}"):
@@ -342,8 +368,7 @@ else:
                             for i in range(len(editExercises)):
                                 if editExercises[i]['order'] == upd_order:
                                     editExercises[i]['order'] = nextOrder
-                                    st.success(f"Swapped order values for exercise '{editExercises[i]['exerciseName']}' "
-                                               f"and '{editExercises[i]["exerciseName"]}'.")
+
 
                             if st.button("Save Changes", key=f"save_{ex['exerciseName']}"):
                                 all_rows = getAllProgram(programs)
@@ -355,6 +380,8 @@ else:
                                                         [[int(upd_sets), float(upd_inc), int(upd_min), int(upd_max),
                                                           int(upd_order)]])
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
+                                st.success(f"Swapped order values for exercise '{editExercises[i]['exerciseName']}' "
+                                           f"and '{editExercises[i]["exerciseName"]}'.")
                                 st.success("Changes saved!")
                                 st.rerun()
 
