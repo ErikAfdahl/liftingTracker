@@ -50,6 +50,7 @@ if not st.session_state.logged_in:
             if user:
                 st.session_state.logged_in = True
                 st.session_state.user = user
+                st.cache_data.clear()
                 st.rerun()
 
     tab1, tab2 = st.tabs(["Login", "Create Account"])
@@ -69,6 +70,7 @@ if not st.session_state.logged_in:
                     appendToken(tokens_sheet, [token, user["userId"]])
                     cookies["session_token"] = token
                     cookies.save()
+                st.cache_data.clear()
                 st.rerun()
             else:
                 st.error("Invalid username or password.")
@@ -115,6 +117,7 @@ else:
             cookies.save()
         st.session_state.logged_in = False
         st.session_state.user = None
+        st.cache_data.clear()
         st.rerun()
 
     tab1, tab2, tab3, tab4 = st.tabs(["My Programs", "Run Program", "Manage Programs", "Logs"])
@@ -251,6 +254,7 @@ else:
                 else:
                     st.session_state["pending_program"] = newProgram
                     st.success(f"Program '{newProgram}' created! Now add exercises to it below.")
+                    st.cache_data.clear()
                     st.rerun()
 
         # Merge any pending (not yet saved) program into the list
@@ -275,6 +279,7 @@ else:
                 for idx in reversed(indices_to_delete):
                     programs.delete_rows(idx)
                 st.success(f"Deleted program '{selected_edit}'!")
+                st.cache_data.clear()
                 st.rerun()
 
             st.divider()
@@ -328,6 +333,7 @@ else:
                         if not isOpen(editExercises, new_order):
                             st.success(f"Swapped order for a conflicting exercise!")
                         st.success(f"Added {new_exercise} to {selected_edit}!")
+                        st.cache_data.clear()
                         st.rerun()
 
             st.divider()
@@ -357,6 +363,7 @@ else:
                             for idx in reversed(indices_to_delete):
                                 programs.delete_rows(idx)
                             st.success(f"Deleted {ex['exerciseName']}!")
+                            st.cache_data.clear()
                             st.rerun()
 
                     # Inline edit form
@@ -409,10 +416,12 @@ else:
                                 if not isOpen(editExercises, new_order):
                                     st.success(f"Swapped order for a conflicting exercise!")
                                 st.success("Changes saved!")
+                                st.cache_data.clear()
                                 st.rerun()
 
                             if st.button("Cancel", key=f"cancel_{ex['exerciseName']}"):
                                 st.session_state[f"editing_{ex['exerciseName']}"] = False
+                                st.cache_data.clear()
                                 st.rerun()
 
                     st.divider()
@@ -512,6 +521,7 @@ else:
                                 for idx in reversed(indices_to_delete):
                                     sheet.delete_rows(idx)
                                 st.success("Log deleted!")
+                                st.cache_data.clear()
                                 st.rerun()
 
                         if st.session_state.get(f"editing_log_{log_idx}", False):
@@ -539,10 +549,12 @@ else:
                                                            float(upd_weight), int(upd_reps), new_1rm, 0, ""]])
                                     st.session_state[f"editing_log_{log_idx}"] = False
                                     st.success("Log updated!")
+                                    st.cache_data.clear()
                                     st.rerun()
 
                                 if st.button("Cancel", key=f"cancel_log_{log_idx}"):
                                     st.session_state[f"editing_log_{log_idx}"] = False
+                                    st.cache_data.clear()
                                     st.rerun()
 
                         st.divider()
