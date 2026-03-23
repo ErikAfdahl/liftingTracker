@@ -291,9 +291,11 @@ else:
             # Delete entire program button
             if st.button("Delete Entire Program", key="delete_program"):
                 all_rows = getAllProgram(programs)
-                for idx, row in enumerate(all_rows):
-                    if str(row["userId"]) == str(user["userId"]) and row["programName"] == selected_edit:
-                        programs.delete_rows(idx + 2)  # +2 because sheet is 1-indexed and has header row
+                indices_to_delete = [idx + 2 for idx, row in enumerate(all_rows)
+                                     if str(row["userId"]) == str(user["userId"])
+                                     and row["programName"] == selected_edit]
+                for idx in reversed(indices_to_delete):
+                    programs.delete_rows(idx)
                 st.success(f"Deleted program '{selected_edit}'!")
                 st.rerun()
 
