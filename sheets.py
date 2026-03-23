@@ -14,6 +14,7 @@ def getLogs():
     sheet = client.open("Logs").sheet1
     return sheet
 
+@st.cache_data(ttl=60)
 def getAllLogs(sheet):
     return sheet.get_all_records()
 

@@ -14,6 +14,7 @@ def getProgram():
     sheet = client.open("Programs").sheet1
     return sheet
 
+@st.cache_data(ttl=60)
 def getAllProgram(sheet):
     return sheet.get_all_records()
 

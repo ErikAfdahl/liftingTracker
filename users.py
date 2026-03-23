@@ -14,6 +14,7 @@ def getUsers():
     sheet = client.open("Accounts").sheet1
     return sheet
 
+@st.cache_data(ttl=60)
 def getAllUsers(sheet):
     return sheet.get_all_records()
 

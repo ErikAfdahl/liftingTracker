@@ -14,6 +14,7 @@ def getTokens():
     sheet = client.open("activeUsers").sheet1
     return sheet
 
+@st.cache_data(ttl=60)
 def getAllTokens(sheet):
     return sheet.get_all_records()
 
