@@ -313,7 +313,7 @@ else:
                 st.write("Min Reps: The minimum number of reps you want to aim for (optional).")
                 st.write("Max Reps: The maximum number of reps you want to aim for (optional).")
                 st.write("Notes: Any other information you want to add for this exercise (optional).")
-                st.wriet("Order: Where this exercise appears within the structure of your program (optional).")
+                st.write("Order: Where this exercise appears within the structure of your program (optional).")
             with st.expander("Add Exercise to this Program"):
                 new_exercise = st.text_input("Exercise Name", key="edit_new_exercise")
                 new_sets = st.number_input("Number of Sets", min_value=1, step=1, key="edit_new_sets")
