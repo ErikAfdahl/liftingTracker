@@ -195,7 +195,13 @@ else:
                             last = get_last_entry(user_data, selected, ex['exerciseName'], set_num)
                             if last:
                                 st.caption(f"Last time you hit {last['weight']} lbs, for {last['reps']} reps.")
-                                st.caption(f'Notes from last time ({last['date']}): "{last['notes']}"')
+                                
+                                if len(last['notes']) == 0:
+                                    st.caption(f"No notes from last time ({last['date']})")
+                                else:
+                                    st.caption(f'Notes from last time ({last['date']}): "{last['notes']}"')
+
+
                                 if last['reps'] >= ex['maxReps']:
                                     recWeight = last['weight'] + ex['increment'] + (int((last['weight'] - ex['maxReps'])
                                                                                         / 2) * ex['increment'])
@@ -506,7 +512,7 @@ else:
 
                         with col1:
                             st.write(f"**{log['date']}** — {log['weight']} lbs, {log['reps']} reps, 1RM: {log['1rm']}, "
-                                     f"Notes: {log["notes"]}")
+                                     f'Notes: "{log["notes"]}"')
 
                         with col2:
                             if st.button("Edit", key=f"edit_log_{log_idx}"):
