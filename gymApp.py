@@ -7,11 +7,8 @@ from sheets import *
 from users import *
 from activeUsers import *
 from datetime import date
-from streamlit_cookies_manager import EncryptedCookieManager
-
-cookies = EncryptedCookieManager(prefix="gymtracker_", password=st.secrets["cookie_password"])
-if not cookies.ready():
-    st.stop()
+from streamlit_cookies_controller import CookieController
+cookies = CookieController()
 
 users_sheet = getUsers()
 users = getAllUsers(users_sheet)
@@ -87,8 +84,7 @@ if not st.session_state.logged_in:
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
-                    cookies["session_token"] = token
-                    cookies.save()
+                    cookies.set("session_token", token)
                 st.cache_data.clear()
                 st.rerun()
             else:
@@ -135,8 +131,7 @@ else:
                                  if row["token"] == token]
             for idx in reversed(indices_to_delete):
                 tokens_sheet.delete_rows(idx)
-            cookies["session_token"] = ""
-            cookies.save()
+            cookies.remove("session_token")
         st.session_state.logged_in = False
         st.session_state.user = None
         st.cache_data.clear()
