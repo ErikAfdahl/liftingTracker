@@ -1,6 +1,6 @@
-streamlit
 gspread
 google-auth
 pandas
 bcrypt
-extra-streamlit-components
+flask
+flask-session

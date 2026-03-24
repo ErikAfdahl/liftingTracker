@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">Run Program</h2>
+
+{% if not my_programs %}
+    <div class="text-center mt-5">
+        <p class="text-secondary">No programs yet!</p>
+        <a href="/manage" class="btn btn-primary">Create Your First Program</a>
+    </div>
+{% else %}
+
+    {% if success_message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ success_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+
+    <!-- Program selector -->
+    <form method="GET" action="/run" class="mb-4">
+        <div class="row align-items-end g-3">
+            <div class="col-md-4">
+                <label class="form-label text-secondary">Select Program</label>
+                <select name="program" class="form-select" onchange="this.form.submit()">
+                    {% for prog in my_programs %}
+                        <option value="{{ prog }}" {% if prog == selected %}selected{% endif %}>{{ prog }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Help section -->
+    <div class="mb-4">
+        <a class="text-secondary" data-bs-toggle="collapse" href="#helpSection">Legend / Help ▾</a>
+        <div class="collapse mt-2" id="helpSection">
+            <div class="card card-body text-secondary small">
+                <p>Select the program you wish to run, enter the weight and reps for every set, then click Log Set.</p>
+                <p>If you skip a set, simply don't click Log Set, or log 0 reps at 0 lbs.</p>
+                <p><strong>Weight</strong> — Weight used.</p>
+                <p><strong>Reps</strong> — Number of repetitions for that set.</p>
+                <p><strong>Notes</strong> — Any notes for this set (optional).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercises -->
+    {% for ex in exercises %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>{{ ex.exerciseName }}</span>
+            {% if ex.notes %}
+                <small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% for s in range(1, ex.numSets | int + 1) %}
+                {% set key = ex.exerciseName ~ "_" ~ s %}
+                {% set last = last_entries.get(key) %}
+                {% set rec = recommendations.get(key) %}
+
+                <div class="mb-4">
+                    <h6 class="fw-bold">Set {{ s }}</h6>
+
+                    {% if last %}
+                        <small class="text-secondary">
+                            Last time: {{ last.weight }} lbs for {{ last.reps }} reps
+                            {% if last.notes %} — "{{ last.notes }}"{% endif %}
+                            ({{ last.date }})
+                        </small><br>
+                        {% if rec %}
+                            <small class="text-secondary fst-italic">{{ rec }}</small>
+                        {% endif %}
+                    {% else %}
+                        <small class="text-secondary">No previous entry found.</small>
+                    {% endif %}
+
+                    <form method="POST" action="/run" class="mt-2">
+                        <input type="hidden" name="action" value="log_set">
+                        <input type="hidden" name="selected_program" value="{{ selected }}">
+                        <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                        <input type="hidden" name="set_num" value="{{ s }}">
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Date</label>
+                                <input type="text" name="workout_date" class="form-control form-control-sm"
+                                       value="{{ today }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Weight (lbs)</label>
+                                <input type="number" name="weight" class="form-control form-control-sm"
+                                       step="{{ ex.increment }}" min="0"
+                                       value="{{ last.weight if last else 0 }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Reps</label>
+                                <input type="number" name="reps" class="form-control form-control-sm"
+                                       step="1" min="0" max="100"
+                                       value="{{ last.reps if last else ex.minReps }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-secondary small">Notes (optional)</label>
+                                <input type="text" name="notes" class="form-control form-control-sm"
+                                       placeholder="Any notes...">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+{% endif %}
+
+{% endblock %}

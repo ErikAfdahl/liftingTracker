@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold">L.S.D.</h1>
+            <p class="text-secondary fst-italic">For lifters who want to see everything.</p>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="login">
+                    <div class="mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="remember_me" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember Me</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Create Account</div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="register">
+                    <div class="mb-3">
+                        <input type="text" name="new_username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="new_password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
