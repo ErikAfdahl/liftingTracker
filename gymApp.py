@@ -82,11 +82,14 @@ if not st.session_state.logged_in:
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
-                    cookie_manager.set("session_token", token, max_age=2592000)
-                st.session_state.logged_in = True
-                st.session_state.user = user
-                st.cache_data.clear()
-                st.rerun()
+                    st.markdown(f'<meta http-equiv="refresh" content="0; url=?token={token}">',
+                                unsafe_allow_html=True)
+                    st.stop()
+                else:
+                    st.session_state.logged_in = True
+                    st.session_state.user = user
+                    st.cache_data.clear()
+                    st.rerun()
             else:
                 st.error("Invalid username or password.")
 
