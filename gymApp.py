@@ -83,7 +83,7 @@ if not st.session_state.logged_in:
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
-                    cookies.set("session_token", token)
+                    cookies.set("session_token", token, max_age=2592000)  # 30 days
                 st.cache_data.clear()
                 st.rerun()
             else:
