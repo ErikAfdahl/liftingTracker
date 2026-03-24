@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import bcrypt
 import uuid
+import extra_streamlit_components as stx
 from programs import *
 from sheets import *
 from users import *
@@ -11,6 +12,8 @@ from datetime import date
 users_sheet = getUsers()
 users = getAllUsers(users_sheet)
 tokens_sheet = getTokens()
+
+cookie_manager = stx.CookieManager()
 
 # streamlit run gymApp.py
 
@@ -34,7 +37,6 @@ def calculate_diff(data, program, exercise, set_num, current_1rm):
             return round(current_1rm - float(row["1rm"]), 3)
     return 0
 
-
 def get_last_entry(data, program, exercise, set_num):
     for row in reversed(data):
         if (row["program"] == program and
@@ -52,11 +54,11 @@ if "user" not in st.session_state:
     st.session_state.user = None
 st.write("Please fill out this feedback form when you can!")
 st.write("https://forms.gle/hpWGCpVu6X5PzWXk8")
+
 # Login
 if not st.session_state.logged_in:
-    # Check for existing cookie on page load
-    token = st.query_params.get("token", None)
-    st.write(f"DEBUG token: {token}")  # temporary, remove later
+    token = cookie_manager.get("session_token")
+    st.write(f"DEBUG token: {token}")  # remove later
 
     if token:
         matched = next((row for row in getAllTokens(tokens_sheet) if row["token"] == token), None)
@@ -66,6 +68,7 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.user = user
                 st.rerun()
+
     tab1, tab2 = st.tabs(["Login", "Create Account"])
 
     with tab1:
@@ -79,7 +82,7 @@ if not st.session_state.logged_in:
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
-                    st.query_params["token"] = token
+                    cookie_manager.set("session_token", token, max_age=2592000)
                 st.session_state.logged_in = True
                 st.session_state.user = user
                 st.cache_data.clear()
@@ -101,7 +104,7 @@ if not st.session_state.logged_in:
                 st.error("Username already taken.")
             else:
                 new_id = getNextUserId(users)
-                appendUser(users_sheet, [new_username, hashPassword(new_password),new_id,])
+                appendUser(users_sheet, [new_username, hashPassword(new_password), new_id])
                 st.success("Account created! You can now log in.")
     st.markdown("---")
 
@@ -110,25 +113,23 @@ else:
     user = st.session_state.user
     st.write(f"Welcome, {user['username']}!")
     with st.expander("Recent Updates(s)"):
-        st.write("Added ordering to programs, making it easier to customize the ordering of your "
-                 "programs.")
+        st.write("Added ordering to programs, making it easier to customize the ordering of your programs.")
         st.write("Added a remember me function using cookies.")
-        st.write('Removed the "Create Program" tab and updated the edit program tab to "Manage Programs" to function '
-                 'as well as "Create Program" did.')
+        st.write('Removed the "Create Program" tab and updated the edit program tab to "Manage Programs" to function as well as "Create Program" did.')
         st.write('Allowed user to edit/delete logs in the "Logs" tab.')
         st.write('Added notes to logs.')
         st.write('Added notes to programs.')
         st.write('Added help bars and legends to "Run Program" and "Manage Programs".')
 
     if st.button("Logout"):
-        token = st.query_params.get("token", None)
+        token = cookie_manager.get("session_token")
         if token:
             all_tokens = getAllTokens(tokens_sheet)
             indices_to_delete = [idx + 2 for idx, row in enumerate(all_tokens)
                                  if row["token"] == token]
             for idx in reversed(indices_to_delete):
                 tokens_sheet.delete_rows(idx)
-            st.query_params.clear()
+            cookie_manager.delete("session_token")
         st.session_state.logged_in = False
         st.session_state.user = None
         st.cache_data.clear()
