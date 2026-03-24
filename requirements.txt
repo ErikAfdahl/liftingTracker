@@ -3,4 +3,4 @@ gspread
 google-auth
 pandas
 bcrypt
-streamlit-cookies-manager
+streamlit-cookies-controller
