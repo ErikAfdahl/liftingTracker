@@ -66,8 +66,9 @@ if not st.session_state.logged_in:
             if user:
                 st.session_state.logged_in = True
                 st.session_state.user = user
-                st.cache_data.clear()
                 st.rerun()
+    elif token is None:
+        st.stop()  # cookies not loaded yet, wait
 
     tab1, tab2 = st.tabs(["Login", "Create Account"])
 
