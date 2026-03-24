@@ -58,6 +58,7 @@ st.write("https://forms.gle/hpWGCpVu6X5PzWXk8")
 if not st.session_state.logged_in:
     # Check for existing cookie on page load
     token = cookies.get("session_token")
+    st.write(f"DEBUG token: {token}")  # temporary, remove later
 
     if token:
         matched = next((row for row in getAllTokens(tokens_sheet) if row["token"] == token), None)
@@ -67,9 +68,6 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.user = user
                 st.rerun()
-    elif token is None:
-        st.stop()  # cookies not loaded yet, wait
-
     tab1, tab2 = st.tabs(["Login", "Create Account"])
 
     with tab1:
