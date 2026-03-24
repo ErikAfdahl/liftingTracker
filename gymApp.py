@@ -76,12 +76,12 @@ if not st.session_state.logged_in:
         if st.button("Login"):
             user = next((u for u in users if u["username"] == username), None)
             if user and checkPassword(password, user["password"]):
-                st.session_state.logged_in = True
-                st.session_state.user = user
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
                     st.query_params["token"] = token
+                st.session_state.logged_in = True
+                st.session_state.user = user
                 st.cache_data.clear()
                 st.rerun()
             else:
