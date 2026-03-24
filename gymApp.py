@@ -7,8 +7,6 @@ from sheets import *
 from users import *
 from activeUsers import *
 from datetime import date
-from streamlit_cookies_controller import CookieController
-cookies = CookieController()
 
 users_sheet = getUsers()
 users = getAllUsers(users_sheet)
@@ -57,7 +55,7 @@ st.write("https://forms.gle/hpWGCpVu6X5PzWXk8")
 # Login
 if not st.session_state.logged_in:
     # Check for existing cookie on page load
-    token = cookies.get("session_token")
+    token = st.query_params.get("token", None)
     st.write(f"DEBUG token: {token}")  # temporary, remove later
 
     if token:
@@ -83,7 +81,7 @@ if not st.session_state.logged_in:
                 if remember_me:
                     token = str(uuid.uuid4())
                     appendToken(tokens_sheet, [token, user["userId"]])
-                    cookies.set("session_token", token, max_age=2592000)  # 30 days
+                    st.query_params["token"] = token
                 st.cache_data.clear()
                 st.rerun()
             else:
@@ -123,14 +121,14 @@ else:
         st.write('Added help bars and legends to "Run Program" and "Manage Programs".')
 
     if st.button("Logout"):
-        token = cookies.get("session_token")
+        token = st.query_params.get("token", None)
         if token:
             all_tokens = getAllTokens(tokens_sheet)
             indices_to_delete = [idx + 2 for idx, row in enumerate(all_tokens)
                                  if row["token"] == token]
             for idx in reversed(indices_to_delete):
                 tokens_sheet.delete_rows(idx)
-            cookies.remove("session_token")
+            st.query_params.clear()
         st.session_state.logged_in = False
         st.session_state.user = None
         st.cache_data.clear()
