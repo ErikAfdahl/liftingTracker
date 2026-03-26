@@ -91,13 +91,13 @@
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">Weight (lbs)</label>
                                 <input type="number" name="weight" class="form-control form-control-sm"
-                                       step="{{ ex.increment }}" min="0"
+                                       min="0"
                                        value="{{ last.weight if last else 0 }}">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">Reps</label>
                                 <input type="number" name="reps" class="form-control form-control-sm"
-                                       step="1" min="0" max="100"
+                                       step="1" min="0"
                                        value="{{ last.reps if last else ex.minReps }}">
                             </div>
                             <div class="col-md-4">
