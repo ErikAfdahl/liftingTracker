@@ -118,7 +118,6 @@ def run():
     if not my_programs:
         return render_template("run.html", my_programs=[], exercises=[], user_data=[], selected=None, today="")
 
-    # Default to last used program
     selected = request.args.get("program") or request.form.get("selected_program")
     if not selected or selected not in my_programs:
         last_program = user_data[-1]["program"] if user_data else None
@@ -130,8 +129,11 @@ def run():
     )
 
     today = date.today().strftime("%m/%d/%Y")
-
     success_message = None
+
+    # Get current exercise index
+    ex_index = int(request.args.get("ex_index", request.form.get("ex_index", 0)))
+    ex_index = max(0, min(ex_index, len(exercises) - 1))
 
     if request.method == "POST" and request.form.get("action") == "log_set":
         exercise_name = request.form.get("exercise_name")
@@ -149,39 +151,36 @@ def run():
         appendLogs(logs_sheet, row)
         success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
-        # Reload data after logging
         user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
         exercises = sorted(
             [row for row in user_prog if row["programName"] == selected],
             key=lambda x: int(x["order"])
         )
 
-    # Build last entry lookup for template
+    # Build last entry lookup and recommendations for all exercises
     last_entries = {}
-    for ex in exercises:
-        for s in range(1, int(ex["numSets"]) + 1):
-            last_entries[f"{ex['exerciseName']}_{s}"] = get_last_entry(user_data, selected, ex["exerciseName"], s)
-
-    # Build recommendations
     recommendations = {}
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
-            last = last_entries.get(f"{ex['exerciseName']}_{s}")
+            key = f"{ex['exerciseName']}_{s}"
+            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
+            last = last_entries[key]
             if last:
                 if int(last["reps"]) >= int(ex["maxReps"]):
                     rec_weight = float(last["weight"]) + float(ex["increment"]) + (
                         int((int(last["reps"]) - int(ex["maxReps"])) / 2) * float(ex["increment"]))
-                    recommendations[f"{ex['exerciseName']}_{s}"] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
                 elif int(last["reps"]) <= int(ex["minReps"]) - 1:
                     rec_weight = float(last["weight"]) - float(ex["increment"])
-                    recommendations[f"{ex['exerciseName']}_{s}"] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
                 else:
-                    recommendations[f"{ex['exerciseName']}_{s}"] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
+                    recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
 
     return render_template("run.html",
                            my_programs=my_programs,
                            selected=selected,
                            exercises=exercises,
+                           ex_index=ex_index,
                            today=today,
                            last_entries=last_entries,
                            recommendations=recommendations,

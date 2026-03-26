@@ -36,8 +36,7 @@
         <a class="text-secondary" data-bs-toggle="collapse" href="#helpSection">Legend / Help ▾</a>
         <div class="collapse mt-2" id="helpSection">
             <div class="card card-body text-secondary small">
-                <p>Select the program you wish to run, enter the weight and reps for every set, then click Log Set.</p>
-                <p>If you skip a set, simply don't click Log Set, or log 0 reps at 0 lbs.</p>
+                <p>Use the Back and Next buttons to move between exercises. Log each set individually before moving on.</p>
                 <p><strong>Weight</strong> — Weight used.</p>
                 <p><strong>Reps</strong> — Number of repetitions for that set.</p>
                 <p><strong>Notes</strong> — Any notes for this set (optional).</p>
@@ -45,8 +44,20 @@
         </div>
     </div>
 
-    <!-- Exercises -->
-    {% for ex in exercises %}
+    <!-- Exercise progress indicator -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-secondary small">Exercise {{ ex_index + 1 }} of {{ exercises | length }}</span>
+        <div class="d-flex gap-1">
+            {% for i in range(exercises | length) %}
+                <span class="rounded-circle d-inline-block"
+                      style="width:10px;height:10px;background:{% if i == ex_index %}#fff{% else %}#444{% endif %}">
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Current exercise -->
+    {% set ex = exercises[ex_index] %}
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>{{ ex.exerciseName }}</span>
@@ -81,6 +92,7 @@
                         <input type="hidden" name="selected_program" value="{{ selected }}">
                         <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
                         <input type="hidden" name="set_num" value="{{ s }}">
+                        <input type="hidden" name="ex_index" value="{{ ex_index }}">
 
                         <div class="row g-2 align-items-end">
                             <div class="col-md-2">
@@ -116,7 +128,23 @@
             {% endfor %}
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Back / Next navigation -->
+    <div class="d-flex justify-content-between">
+        {% if ex_index > 0 %}
+            <a href="/run?program={{ selected }}&ex_index={{ ex_index - 1 }}"
+               class="btn btn-secondary">← Back</a>
+        {% else %}
+            <span></span>
+        {% endif %}
+
+        {% if ex_index < exercises | length - 1 %}
+            <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
+               class="btn btn-primary">Next →</a>
+        {% else %}
+            <a href="/programs" class="btn btn-success">Finish Workout ✓</a>
+        {% endif %}
+    </div>
 
 {% endif %}
 
