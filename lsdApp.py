@@ -155,7 +155,7 @@ def run():
         exercises = sorted(
             [row for row in user_prog if row["programName"] == selected],
             key=lambda x: int(x["order"])
-        )
+        ) # funky
 
     # Build last entry lookup and recommendations for all exercises
     last_entries = {}
