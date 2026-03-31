@@ -440,7 +440,7 @@ def logs():
             "count": len(df),
             "table": df[["weight", "reps", "1rm", "diff"]].agg(["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
-        chart_data = df[["date", "1rm"]].sort_values("date").to_dict(orient="records")
+        chart_data = df[["date", "weight", "reps", "1rm", "diff"]].sort_values("date").to_dict(orient="records")
 
     return render_template("logs.html",
                            my_programs=my_programs,

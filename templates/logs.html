@@ -125,14 +125,60 @@
             </div>
         </div>
 
-        <!-- 1RM chart -->
+        <!-- Chart -->
         <div class="card mb-4">
-            <div class="card-header">1RM Over Time</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Progress Over Time</span>
+                <select id="chartMetric" class="form-select form-select-sm w-auto">
+                    <option value="1rm">Estimated 1RM</option>
+                    <option value="weight">Weight</option>
+                    <option value="reps">Reps</option>
+                    <option value="diff">Diff (vs Last)</option>
+                </select>
+            </div>
             <div class="card-body">
                 <canvas id="oneRmChart"></canvas>
             </div>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const rawData = {{ chart_data | tojson }};
+            const labels = rawData.map(r => r.date);
+
+            let currentMetric = "1rm";
+
+            const ctx = document.getElementById("oneRmChart").getContext("2d");
+            const chart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Estimated 1RM",
+                        data: rawData.map(r => r["1rm"]),
+                        borderColor: "#0d6efd",
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: "#aaa" } },
+                        y: { ticks: { color: "#aaa" } }
+                    }
+                }
+            });
+
+            document.getElementById("chartMetric").addEventListener("change", function() {
+                const metric = this.value;
+                const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)" };
+                chart.data.datasets[0].label = labels[metric];
+                chart.data.datasets[0].data = rawData.map(r => r[metric]);
+                chart.update();
+            });
+        </script>
         <!-- All logs -->
         <div class="card">
             <div class="card-header">All Logs</div>
