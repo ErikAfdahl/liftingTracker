@@ -31,6 +31,23 @@
         </div>
     </form>
 
+    <!-- Exercise jump dropdown -->
+    <form method="GET" action="/run" class="mb-3">
+        <input type="hidden" name="program" value="{{ selected }}">
+        <div class="row align-items-end g-2">
+            <div class="col-md-4">
+                <label class="form-label text-secondary small">Jump to Exercise</label>
+                <select name="ex_index" class="form-select form-select-sm" onchange="this.form.submit()">
+                    {% for i in range(exercises | length) %}
+                        <option value="{{ i }}" {% if i == ex_index %}selected{% endif %}>
+                            {{ exercises[i].exerciseName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
     <!-- Help section -->
     <div class="mb-4">
         <a class="text-secondary" data-bs-toggle="collapse" href="#helpSection">Legend / Help ▾</a>
@@ -146,22 +163,7 @@
         {% endif %}
     </div>
 
-    <!-- Exercise jump dropdown -->
-    <form method="GET" action="/run" class="mb-3">
-        <input type="hidden" name="program" value="{{ selected }}">
-        <div class="row align-items-end g-2">
-            <div class="col-md-4">
-                <label class="form-label text-secondary small">Jump to Exercise</label>
-                <select name="ex_index" class="form-select form-select-sm" onchange="this.form.submit()">
-                    {% for i in range(exercises | length) %}
-                        <option value="{{ i }}" {% if i == ex_index %}selected{% endif %}>
-                            {{ exercises[i].exerciseName }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </form>
+
 
 {% endif %}
 
