@@ -142,9 +142,26 @@
             <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
                class="btn btn-primary">Next →</a>
         {% else %}
-            <a href="/programs" class="btn btn-success">Finish Workout ✓</a>
+            <a href="/programs" class="btn btn-success">Finish Workout</a>
         {% endif %}
     </div>
+
+    <!-- Exercise jump dropdown -->
+    <form method="GET" action="/run" class="mb-3">
+        <input type="hidden" name="program" value="{{ selected }}">
+        <div class="row align-items-end g-2">
+            <div class="col-md-4">
+                <label class="form-label text-secondary small">Jump to Exercise</label>
+                <select name="ex_index" class="form-select form-select-sm" onchange="this.form.submit()">
+                    {% for i in range(exercises | length) %}
+                        <option value="{{ i }}" {% if i == ex_index %}selected{% endif %}>
+                            {{ exercises[i].exerciseName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
 
 {% endif %}
 
