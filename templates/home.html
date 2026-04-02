@@ -5,6 +5,9 @@
     <div>
         <h2 class="fw-bold mb-0">Welcome back, {{ username }}!</h2>
         <p class="text-secondary fst-italic mb-0">For lifters who want to see everything.</p>
+        {% if user_data %}
+            <p class="text-secondary small mb-0">Last session: <span class="text-light">{{ user_data[-1]["program"] }}</span> on {{ user_data[-1]["date"] }}</p>
+        {% endif %}
     </div>
     <div class="d-flex gap-2">
         <a href="/run" class="btn btn-primary">Run Program</a>
@@ -21,6 +24,8 @@
             <p><strong>03/31/26</strong> — Added exercise jump dropdown on the Run page.</p>
             <p><strong>03/31/26</strong> — Fixed chart on the Logs page.</p>
             <p><strong>03/31/26</strong> — User can now customize the chart on the Logs page.</p>
+            <p><strong>04/2/26</strong> — Fixed bug issues around creating new programs, editing previous logs, and font color on input boxes.</p>
+            <p><strong>04/2/26</strong> — Added most recent log entry on home page.</p>
         </div>
     </div>
 </div>

@@ -96,11 +96,14 @@ def home():
     prog_data = getAllProgram(programs_sheet)
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
+    logs_sheet = getLogs()
+    user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
 
     return render_template("home.html",
                            username=session["username"],
                            user_prog=user_prog,
-                           my_programs=my_programs)
+                           my_programs=my_programs,
+                           user_data=user_data,)
 
 @app.route("/run", methods=["GET", "POST"])
 def run():
