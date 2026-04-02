@@ -167,8 +167,11 @@ def run():
             last = last_entries[key]
             if last:
                 if int(last["reps"]) >= int(ex["maxReps"]):
-                    rec_weight = float(last["weight"]) + float(ex["increment"]) + (
-                        int((int(last["reps"]) - int(ex["maxReps"])) / 2) * float(ex["increment"]))
+                    rec_weight = round((last["1rm"]/(1 + (ex["minReps"]/30)) - last["weight"]) /
+                                       ex["increment"]) * ex["increment"] + last["weight"]
+
+                    # rec_weight = float(last["weight"]) + float(ex["increment"]) + (
+                    #     int((int(last["reps"]) - int(ex["maxReps"])) / 2) * float(ex["increment"]))
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
                 elif int(last["reps"]) <= int(ex["minReps"]) - 1:
                     rec_weight = float(last["weight"]) - float(ex["increment"])
