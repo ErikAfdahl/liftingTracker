@@ -208,7 +208,6 @@ def manage():
     action = request.form.get("action")
 
     if request.method == "POST":
-
         if action == "create_program":
             new_program_name = request.form.get("new_program_name", "").strip()
             if not new_program_name:
@@ -216,6 +215,10 @@ def manage():
             elif new_program_name in my_programs:
                 error_message = "A program with that name already exists."
             else:
+                # Actually persist the program by writing a placeholder row
+                placeholder_row = [int(session["user_id"]), new_program_name, "", 0, 0, 0, 0, 0, ""]
+                appendProgram(programs_sheet, placeholder_row)
+
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
@@ -318,7 +321,7 @@ def manage():
             user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
-        [row for row in user_prog if row["programName"] == selected_edit],
+        [row for row in user_prog if row["programName"] == selected_edit and row["exerciseName"] != ""],
         key=lambda x: int(x["order"])
     ) if selected_edit else []
 
