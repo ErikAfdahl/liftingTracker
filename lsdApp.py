@@ -135,7 +135,17 @@ def run():
     success_message = None
 
     # Get current exercise index
-    ex_index = int(request.args.get("ex_index", request.form.get("ex_index", 0)))
+    ex_index = request.args.get("ex_index", type=int)
+
+    if ex_index is None:
+        programLogs = [row for row in user_data if row["program"] == selected]
+        last_ex = programLogs[-1]["exerciseName"] if programLogs else None
+        if last_ex:
+            match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
+            ex_index = int(match["order"]) - 1 if match else 0
+        else:
+            ex_index = 0
+
     ex_index = max(0, min(ex_index, len(exercises) - 1))
 
     if request.method == "POST" and request.form.get("action") == "log_set":
