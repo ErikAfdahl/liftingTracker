@@ -37,12 +37,15 @@ def calculate_diff(data, program, exercise, set_num, current_1rm):
             return round(current_1rm - float(row["1rm"]), 3)
     return 0
 
-def get_last_entry(data, program, exercise, set_num):
+def get_last_entry(data, program, exercise, set_num, back = 0):
+    acc = 0
     for row in reversed(data):
-        if (row["program"] == program and
-                row["exerciseName"] == exercise and
+        if (row["program"] == program and row["exerciseName"] == exercise and
                 int(row["setNum"]) == int(set_num)):
-            return row
+            if acc == back:
+                return row
+        acc += 1
+
     return None
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -123,7 +126,8 @@ def run():
     user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
 
     if not my_programs:
-        return render_template("run.html", my_programs=[], exercises=[], user_data=[], selected=None, today="")
+        return render_template("run.html", my_programs=[], exercises=[], user_data=[],
+                               selected=None, today="")
 
     selected = request.args.get("program") or request.form.get("selected_program")
     if not selected or selected not in my_programs:
@@ -196,16 +200,58 @@ def run():
                 else:
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
 
+    prev_entries = {}
+    for ex in exercises:
+        for set_num in range(1, int(ex["numSets"]) + 1):
+            key = f"{ex['exerciseName']}_{set_num}"
+            prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], set_num, back=1)
+
     return render_template("run.html",
-                           my_programs=my_programs,
+                           my_programs=my_programs, # all program entries for the user
+                           selected=selected, # the selected program
+                           exercises=exercises, # list of all exercise names
+                           ex_index=ex_index, # index for the specific exercise
+                           today=today, # date (MM/DD/YYYY)
+                           last_entries=last_entries, # most recent instance of same program, exercise, and set
+                           prev_entries=prev_entries, # second most recent instance of same program, exercise, and set
+                           recommendations=recommendations, # recommended weight
+                           success_message=success_message, # success
+                           user_data=user_data) # user logs
+
+@app.route("/run/results")
+def run_results():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    selected = request.args.get("program")
+
+    programs_sheet = getProgram()
+    prog_data = getAllProgram(programs_sheet)
+    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    my_programs = list(set(row["programName"] for row in user_prog))
+
+    exercises = sorted(
+        [row for row in user_prog if row["programName"] == selected],
+        key=lambda x: int(x["order"])
+    )
+
+    logs_sheet = getLogs()
+    log_data = getAllLogs(logs_sheet)
+    user_data = [row for row in log_data if str(row["userId"]) == str(session["user_id"])]
+
+    last_entries = {}
+    prev_entries = {}
+    for ex in exercises:
+        for s in range(1, int(ex["numSets"]) + 1):
+            key = f"{ex['exerciseName']}_{s}"
+            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
+            prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
+
+    return render_template("results.html",
                            selected=selected,
                            exercises=exercises,
-                           ex_index=ex_index,
-                           today=today,
                            last_entries=last_entries,
-                           recommendations=recommendations,
-                           success_message=success_message,
-                           user_data=user_data)
+                           prev_entries=prev_entries)
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
@@ -461,7 +507,8 @@ def logs():
             "best_weight": round(df["weight"].max(), 1),
             "avg_reps": round(df["reps"].mean(), 1),
             "count": len(df),
-            "table": df[["weight", "reps", "1rm", "diff"]].agg(["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
+            "table": df[["weight", "reps", "1rm", "diff"]].agg(
+                ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
         chart_data = df[["date", "weight", "reps", "1rm", "diff"]].sort_values("date").to_dict(orient="records")
 

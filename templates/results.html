@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Workout Complete 💪</h2>
+    <a href="/run?program={{ selected }}" class="btn btn-secondary btn-sm">Back to Program</a>
+</div>
+
+<p class="text-secondary mb-4">Here's how <strong class="text-light">{{ selected }}</strong> went today compared to last time.</p>
+
+{% for ex in exercises %}
+    <div class="card mb-4">
+        <div class="card-header">{{ ex.exerciseName }}</div>
+        <div class="card-body p-0">
+            <table class="table table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-secondary small">Set</th>
+                        <th class="text-secondary small" colspan="3">Today</th>
+                        <th class="text-secondary small" colspan="3">Last Time</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th class="text-secondary small">Weight</th>
+                        <th class="text-secondary small">Reps</th>
+                        <th class="text-secondary small">1RM</th>
+                        <th class="text-secondary small">Weight</th>
+                        <th class="text-secondary small">Reps</th>
+                        <th class="text-secondary small">1RM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in range(1, ex.numSets | int + 1) %}
+                        {% set key = ex.exerciseName ~ "_" ~ s %}
+                        {% set today = last_entries.get(key) %}
+                        {% set prev = prev_entries.get(key) %}
+
+                        {% set t_weight = today.weight | float if today else 0 %}
+                        {% set t_reps = today.reps | int if today else 0 %}
+                        {% set t_1rm = today["1rm"] | float if today else 0 %}
+
+                        {% set p_weight = prev.weight | float if prev else 0 %}
+                        {% set p_reps = prev.reps | int if prev else 0 %}
+                        {% set p_1rm = prev["1rm"] | float if prev else 0 %}
+
+                        {% set improved = t_1rm > p_1rm %}
+
+                        <tr>
+                            <td class="text-secondary">{{ s }}</td>
+                            <td class="{% if improved %}text-success{% endif %}">{{ t_weight }} lbs</td>
+                            <td class="{% if improved %}text-success{% endif %}">{{ t_reps }}</td>
+                            <td class="{% if improved %}text-success{% endif %}">{{ t_1rm | round(1) }}</td>
+                            <td class="text-secondary">{{ p_weight }} lbs</td>
+                            <td class="text-secondary">{{ p_reps }}</td>
+                            <td class="text-secondary">{{ p_1rm | round(1) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Per exercise feedback -->
+        <div class="card-footer text-secondary small">
+            {% set key1 = ex.exerciseName ~ "_1" %}
+            {% set today1 = last_entries.get(key1) %}
+            {% set prev1 = prev_entries.get(key1) %}
+            {% set t1 = today1["1rm"] | float if today1 else 0 %}
+            {% set p1 = prev1["1rm"] | float if prev1 else 0 %}
+
+            {% if t1 > p1 %}
+                <span class="text-success">↑ Stronger than last time on this exercise. Keep it up!</span>
+            {% elif t1 < p1 %}
+                <span class="text-warning">↓ Slightly off from last time — happens to everyone. Stay consistent.</span>
+            {% else %}
+                <span>Matched your last performance. Push for more next session!</span>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<!-- Session summary -->
+{% set ns = namespace(total=0) %}
+{% for ex in exercises %}
+    {% for s in range(1, ex.numSets | int + 1) %}
+        {% set key = ex.exerciseName ~ "_" ~ s %}
+        {% set entry = last_entries.get(key) %}
+        {% if entry %}
+            {% set ns.total = ns.total + (entry.weight | float * entry.reps | int) %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+
+<div class="card mb-4">
+    <div class="card-header">Session Summary</div>
+    <div class="card-body text-center">
+        <h3 class="fw-bold text-light">{{ "{:,.0f}".format(ns.total) }} lbs</h3>
+        <p class="text-secondary mb-0">total weight moved this session</p>
+    </div>
+</div>
+
+<div class="text-center mt-2 mb-5">
+    <a href="/home" class="btn btn-primary me-2">Home</a>
+    <a href="/run?program={{ selected }}" class="btn btn-secondary">Run Again</a>
+</div>
+
+{% endblock %}
