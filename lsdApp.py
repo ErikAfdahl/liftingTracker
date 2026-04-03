@@ -142,7 +142,7 @@ def run():
         last_ex = programLogs[-1]["exerciseName"] if programLogs else None
         if last_ex:
             match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
-            ex_index = int(match["order"]) - 1 if match else 0
+            ex_index = (int(match["order"]) % len(exercises)) if match else 0
         else:
             ex_index = 0
 
