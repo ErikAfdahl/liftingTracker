@@ -89,6 +89,20 @@
             {% else %}
                 {% if wt1 > wp1 %}
                     <span class="text-success">Same 1RM but at higher weight.</span>
+                {% elif ex.numSets | int >= 2 %}
+                    {% set key2 = ex.exerciseName ~ "_2" %}
+                    {% set today2 = last_entries.get(key2) %}
+                    {% set prev2 = prev_entries.get(key2) %}
+                    {% set t2 = today2["1rm"] | float if today2 else 0 %}
+                    {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
+
+                    {% if t2 > p2 %}
+                        <span class="text-success">Set 1 matched, but set 2 1RM improved.</span>
+                    {% elif t2 < p2 %}
+                        <span class="text-warning">Both sets didn't improve. Check your recovery.</span>
+                    {% else %}
+                        <span>Matched your last performance across all sets.</span>
+                    {% endif %}
                 {% else %}
                     <span>Matched your last performance.</span>
                 {% endif %}
