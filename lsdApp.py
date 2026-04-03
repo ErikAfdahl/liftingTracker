@@ -332,11 +332,11 @@ def manage():
                 row = [int(session["user_id"]), selected_edit, new_exercise, new_sets,
                        new_inc, new_min, new_max, new_order, new_notes]
                 all_rows = getAllProgram(programs_sheet)
-                for idx, row in enumerate(all_rows):
-                    if (str(row["userId"]) == str(session["user_id"]) and
-                            row["programName"] == selected_edit and
-                            not row["exerciseName"].strip()):
-                        programs_sheet.delete_rows(idx + 2)  # +2 for header offset
+                for idx, existing_row in enumerate(all_rows):
+                    if (str(existing_row["userId"]) == str(session["user_id"]) and
+                            existing_row["programName"] == selected_edit and
+                            not existing_row["exerciseName"].strip()):
+                        programs_sheet.delete_rows(idx + 2)
                         break
                 appendProgram(programs_sheet, row)
                 success_message = f"Added {new_exercise} to {selected_edit}!"
