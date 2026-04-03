@@ -135,7 +135,7 @@ def run():
         key=lambda x: int(x["order"])
     )
 
-    today = now.strftime("%Y-%m-%d")
+    today = now.strftime("%m/%d/%Y")
     success_message = None
 
     # Get current exercise index
