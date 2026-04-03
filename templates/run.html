@@ -150,7 +150,7 @@
     <div class="d-flex justify-content-between">
         {% if ex_index > 0 %}
             <a href="/run?program={{ selected }}&ex_index={{ ex_index - 1 }}"
-               class="btn btn-secondary">← Back</a>
+               class="btn btn-secondary">Back</a>
         {% else %}
             <span></span>
         {% endif %}
@@ -159,7 +159,7 @@
             <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
                class="btn btn-primary">Next →</a>
         {% else %}
-            <a href="/run/results?program={{ selected }}" class="btn btn-success">Finish Workout ✓</a>
+            <a href="/run/results?program={{ selected }}" class="btn btn-success">Finish Workout</a>
         {% endif %}
     </div>
 
