@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import timedelta, date
+from datetime import *
+import pytz
 import bcrypt
 import uuid
 from sheets import *
@@ -8,6 +9,9 @@ from programs import *
 from activeUsers import *
 
 # python liftingTracker/lsdapp.py
+
+timezone = pytz.timezone("America/Chicago")  # Minneapolis is Central time
+now = datetime.now(timezone)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -131,7 +135,7 @@ def run():
         key=lambda x: int(x["order"])
     )
 
-    today = date.today().strftime("%m/%d/%Y")
+    today = now.strftime("%Y-%m-%d")
     success_message = None
 
     # Get current exercise index
