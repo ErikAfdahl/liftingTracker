@@ -120,7 +120,7 @@ def run():
     programs_sheet = getProgram()
     prog_data = getAllProgram(programs_sheet)
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog))
+    my_programs = list(set(row["programName"] for row in user_prog if row["programName"]))
 
     logs_sheet = getLogs()
     user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
@@ -150,7 +150,7 @@ def run():
         last_ex = programLogs[-1]["exerciseName"] if programLogs else None
         if last_ex:
             match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
-            ex_index = (int(match["order"]) % len(exercises)) if match else 0
+            ex_index = min(int(match["order"]), len(exercises) - 1) if match else 0
         else:
             ex_index = 0
 
