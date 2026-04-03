@@ -68,6 +68,8 @@
             {% set p1 = prev1["1rm"] | float if prev1 else 0 %}
             {% set wt1 = today1["weight"] | float if today1 else 0 %}
             {% set wp1 = prev1["weight"] | float if prev1 else 0 %}
+            {% set tr1 = today1["reps"] | int if today1 else 0 %}
+            {% set pr1 = prev1["reps"] | int if prev1 else 0 %}
 
             {% if t1 > p1 %}
                 <span class="text-success">1RM is up compared to last time.</span>
@@ -88,7 +90,7 @@
                 {% endif %}
             {% else %}
                 {% if wt1 > wp1 %}
-                    <span class="text-success">↑ Same 1RM but at higher weight.</span>
+                    <span class="text-success">Same 1RM but at higher weight.</span>
                 {% else %}
                     <span>Matched your last performance.</span>
                 {% endif %}
