@@ -158,7 +158,7 @@
         {% if ex_index < exercises | length - 1 %}
             <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
                class="btn btn-primary">Next →</a>
-        {% if ex_index == exercises | length - 1 %}
+        {% else %}
             <a href="/run/results?program={{ selected }}" class="btn btn-success">Finish Workout ✓</a>
         {% endif %}
     </div>
