@@ -44,7 +44,7 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
                 int(row["setNum"]) == int(set_num)):
             if acc == back:
                 return row
-        acc += 1
+            acc += 1
 
     return None
 @app.route("/", methods=["GET", "POST"])
