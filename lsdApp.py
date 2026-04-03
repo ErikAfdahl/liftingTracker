@@ -120,7 +120,7 @@ def run():
     programs_sheet = getProgram()
     prog_data = getAllProgram(programs_sheet)
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog if row["programName"]))
+    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
 
     logs_sheet = getLogs()
     user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
