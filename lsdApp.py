@@ -10,8 +10,7 @@ from activeUsers import *
 
 # python liftingTracker/lsdapp.py
 
-timezone = pytz.timezone("America/Chicago")  # Minneapolis is Central time
-now = datetime.now(timezone)
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -139,6 +138,8 @@ def run():
         key=lambda x: int(x["order"])
     )
 
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
     today = now.strftime("%m/%d/%Y")
     success_message = None
 
