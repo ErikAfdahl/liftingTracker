@@ -188,17 +188,19 @@ def run():
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
             if last:
-                if int(last["reps"]) >= int(ex["maxReps"]):
+                if int(last["reps"]) >= int(ex["maxReps"]) + 2: # if last time was more than max reps
                     rec_weight = round((last["1rm"]/(1 + (ex["minReps"]/30)) - last["weight"]) /
                                        ex["increment"]) * ex["increment"] + last["weight"]
 
                     # rec_weight = float(last["weight"]) + float(ex["increment"]) + (
                     #     int((int(last["reps"]) - int(ex["maxReps"])) / 2) * float(ex["increment"]))
+                elif int(last["reps"]) >= int(ex["maxReps"]):  # if last time was less weight
+                    rec_weight = float(last["weight"]) + float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
-                elif int(last["reps"]) <= int(ex["minReps"]) - 1:
+                elif int(last["reps"]) < int(ex["minReps"]) - 1: # if last time was less weight
                     rec_weight = float(last["weight"]) - float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
-                else:
+                else: # if last time reps were within range
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
 
     prev_entries = {}
