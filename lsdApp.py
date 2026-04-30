@@ -169,8 +169,6 @@ def run():
         else:
             ex_index = 0
 
-    ex_index = max(0, min(ex_index, len(exercises) - 1))
-
     if request.method == "POST" and request.form.get("action") == "log_set":
         exercise_name = request.form.get("exercise_name")
         set_num = int(request.form.get("set_num"))
@@ -192,6 +190,22 @@ def run():
             [row for row in user_prog if row["programName"] == selected],
             key=lambda x: int(x["order"])
         ) # funky
+        # Advance index after logging
+        match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
+        if match:
+            current_index = int(match["order"]) - 1
+            if set_num >= int(match["numSets"]):
+                # Last set done — advance or wrap
+                if int(match["order"]) == int(exercises[-1]["order"]):
+                    ex_index = 0
+                else:
+                    ex_index = current_index + 1
+            else:
+                ex_index = current_index
+        else:
+            ex_index = 0
+
+    ex_index = max(0, min(ex_index, len(exercises) - 1))
 
     # Build last entry lookup and recommendations for all exercises
     last_entries = {}
