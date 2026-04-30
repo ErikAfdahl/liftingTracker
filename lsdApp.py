@@ -282,7 +282,8 @@ def run_results():
                            selected=selected,
                            exercises=exercises,
                            last_entries=last_entries,
-                           prev_entries=prev_entries)
+                           prev_entries=prev_entries,
+                           mommy_mode=session.get("settings", {}).get("mommy_mode", False))
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():

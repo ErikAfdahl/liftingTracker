@@ -72,13 +72,25 @@
             {% set pr1 = prev1["reps"] | int if prev1 else 0 %}
 
             {% if t1 > p1 %}
-                <span class="text-success">1RM is up compared to last time.</span>
+                {% if mommy_mode %}
+                    <span class="text-success">Good boy, mommy likes to see you getting stronger.</span>
+                {% else %}
+                    <span class="text-success">1RM is up compared to last time.</span>
+                {% endif %}
             {% elif t1 < p1 %}
                 {% if wt1 > wp1 %}
-                    <span class="text-success">Weight went up, don't worry, expect a couple sessions to adjust before the 1RM catches up.</span>
+                    {% if mommy_mode %}
+                        <span class="text-success">You did move more weight, but you better work harder next time.</span>
+                    {% else %}
+                        <span class="text-success">Weight went up, don't worry, expect a couple sessions to adjust before the 1RM catches up.</span>
+                    {% endif %}
                 {% elif wt1 < wp1 %}
-                    <span class="text-warning">Weight dropped from last time. If intentional, no worries, otherwise check recovery.</span>
-                {% else %} <!-- 1rm went down, weight stayed the same -->
+                    {% if mommy_mode %}
+                        <span class="text-warning">You've been a bad boy, have you been skipping you fat chud?</span>
+                    {% else %}
+                        <span class="text-warning">Weight dropped from last time. If intentional, no worries, otherwise check recovery.</span>
+                    {% endif %}
+                {% else %}
                     {% if ex.numSets | int >= 2 %}
                         {% set key2 = ex.exerciseName ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
@@ -87,24 +99,48 @@
                         {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
 
                         {% if t2 > p2 %}
-                            <span class="text-success">Set 1 dropped, but set 2 1RM improved.</span>
+                            {% if mommy_mode %}
+                                <span class="text-success">Next time you only improve on your second set I'd spank you, but you'd probably like that</span>
+                            {% else %}
+                                <span class="text-success">Set 1 dropped, but set 2 1RM improved.</span>
+                            {% endif %}
                         {% elif t2 < p2 %}
-                            <span class="text-warning">Both sets regressed. Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% if mommy_mode %}
+                                <span class="text-warning">Looks like someone is getting pegged tonight.</span>
+                            {% else %}
+                                <span class="text-warning">Both sets regressed. Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% endif %}
                         {% else %}
-                            <span class="text-warning">Set 1 dropped, set 2 matched. Check your recovery.</span>
+                            {% if mommy_mode %}
+                                <span class="text-warning">I'd expect nothing less from a goyim like you.</span>
+                            {% else %}
+                                <span class="text-warning">Set 1 dropped, set 2 matched. Check your recovery.</span>
+                            {% endif %}
                         {% endif %}
                     {% else %}
                         {% if loop.index0 > 0 %}
-                            <span class="text-warning">Check prior exercises, if those went up, don't worry.</span>
-                            <span class="text-warning">If not, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% if mommy_mode %}
+                                <span class="text-warning">What a fat piece of shit you are.</span>
+                            {% else %}
+                                <span class="text-warning">Check prior exercises, if those went up, don't worry.</span>
+                                <span class="text-warning">If not, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% endif %}
                         {% else %}
-                            <span class="text-warning">Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% if mommy_mode %}
+                                <span class="text-warning">Do you need mommy to spank you?</span>
+                            {% else %}
+                                <span class="text-warning">Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
             {% else %}
                 {% if wt1 > wp1 %}
-                    <span class="text-success">Same 1RM but at higher weight.</span>
+                    {% if mommy_mode %}
+                        <span class="text-success">How did you even get here?</span>
+                    {% else %}
+                        <span class="text-success">Same 1RM but at higher weight.</span>
+                    {% endif %}
                 {% elif ex.numSets | int >= 2 %}
                     {% set key2 = ex.exerciseName ~ "_2" %}
                     {% set today2 = last_entries.get(key2) %}
@@ -113,14 +149,30 @@
                     {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
 
                     {% if t2 > p2 %}
-                        <span class="text-success">Set 1 matched, but set 2 1RM improved.</span>
+                        {% if mommy_mode %}
+                            <span class="text-success">Don't worry, because you were good I'll go gentle tonight.</span>
+                        {% else %}
+                            <span class="text-success">Set 1 matched, but set 2 1RM improved.</span>
+                        {% endif %}
                     {% elif t2 < p2 %}
-                        <span class="text-warning">Both sets didn't improve. Check your recovery.</span>
+                        {% if mommy_mode %}
+                            <span class="text-warning">Maybe you need to start working a little harder, then mommy can start giving you more attention.</span>
+                        {% else %}
+                            <span class="text-warning">Both sets didn't improve. Check your recovery.</span>
+                        {% endif %}
                     {% else %}
-                        <span>Matched your last performance across all sets.</span>
+                        {% if mommy_mode %}
+                            <span>You plan on staying small forever?</span>
+                        {% else %}
+                            <span>Matched your last performance across all sets.</span>
+                        {% endif %}
                     {% endif %}
                 {% else %}
-                    <span>Matched your last performance.</span>
+                    {% if mommy_mode %}
+                        <span>Oink oink my little fat piggie.</span>
+                    {% else %}
+                        <span>Matched your last performance.</span>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>
