@@ -157,7 +157,10 @@ def run():
             if match:
                 if int(last["setNum"]) >= int(match["numSets"]):
                     # Last set was completed — move to next exercise
-                    ex_index = int(match["order"])
+                    if last["order"] == exercises[-1]["order"]:
+                        ex_index = int(exercises[0]["order"])
+                    else:
+                        ex_index = int(match["order"])
                 else:
                     # Mid-exercise — stay on current
                     ex_index = int(match["order"]) - 1
