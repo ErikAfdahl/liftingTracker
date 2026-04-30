@@ -73,20 +73,20 @@
 
             {% if t1 > p1 %}
                 {% if mommy_mode %}
-                    <span class="text-success">Good boy, mommy likes to see you getting stronger.</span>
+                    <span class="text-success">Mommy likes to see you getting stronger.</span>
                 {% else %}
                     <span class="text-success">1RM is up compared to last time.</span>
                 {% endif %}
             {% elif t1 < p1 %}
                 {% if wt1 > wp1 %}
                     {% if mommy_mode %}
-                        <span class="text-success">You did move more weight, but you better work harder next time.</span>
+                        <span class="text-success">You did move more weight, don't worry about the 1rm drop.</span>
                     {% else %}
                         <span class="text-success">Weight went up, don't worry, expect a couple sessions to adjust before the 1RM catches up.</span>
                     {% endif %}
                 {% elif wt1 < wp1 %}
                     {% if mommy_mode %}
-                        <span class="text-warning">You've been a bad boy, have you been skipping you fat chud?</span>
+                        <span class="text-warning">It's okay sweetie, I still love you.</span>
                     {% else %}
                         <span class="text-warning">Weight dropped from last time. If intentional, no worries, otherwise check recovery.</span>
                     {% endif %}
@@ -100,19 +100,19 @@
 
                         {% if t2 > p2 %}
                             {% if mommy_mode %}
-                                <span class="text-success">Next time you only improve on your second set I'd spank you, but you'd probably like that</span>
+                                <span class="text-success">That's okay my big strong boy, you still improved somewhere.</span>
                             {% else %}
                                 <span class="text-success">Set 1 dropped, but set 2 1RM improved.</span>
                             {% endif %}
                         {% elif t2 < p2 %}
                             {% if mommy_mode %}
-                                <span class="text-warning">Looks like someone is getting pegged tonight.</span>
+                                <span class="text-warning">Get some good sleep these next couple days, okay?</span>
                             {% else %}
                                 <span class="text-warning">Both sets regressed. Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
                             {% endif %}
                         {% else %}
                             {% if mommy_mode %}
-                                <span class="text-warning">I'd expect nothing less from a goyim like you.</span>
+                                <span class="text-warning">It's okay my sweet baby boy, rest up for next time now, okay?.</span>
                             {% else %}
                                 <span class="text-warning">Set 1 dropped, set 2 matched. Check your recovery.</span>
                             {% endif %}
@@ -120,14 +120,14 @@
                     {% else %}
                         {% if loop.index0 > 0 %}
                             {% if mommy_mode %}
-                                <span class="text-warning">What a fat piece of shit you are.</span>
+                                <span class="text-warning">You probably just worked too hard on your other exercises, don't worry.</span>
                             {% else %}
                                 <span class="text-warning">Check prior exercises, if those went up, don't worry.</span>
                                 <span class="text-warning">If not, get more sleep, eat better or more, and maybe add in a rest day.</span>
                             {% endif %}
                         {% else %}
                             {% if mommy_mode %}
-                                <span class="text-warning">Do you need mommy to spank you?</span>
+                                <span class="text-warning">Do you need mommy to hold you?</span>
                             {% else %}
                                 <span class="text-warning">Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
                             {% endif %}
@@ -137,7 +137,7 @@
             {% else %}
                 {% if wt1 > wp1 %}
                     {% if mommy_mode %}
-                        <span class="text-success">How did you even get here?</span>
+                        <span class="text-success">How did you even get here? It's okay don't worry.</span>
                     {% else %}
                         <span class="text-success">Same 1RM but at higher weight.</span>
                     {% endif %}
@@ -150,26 +150,26 @@
 
                     {% if t2 > p2 %}
                         {% if mommy_mode %}
-                            <span class="text-success">Don't worry, because you were good I'll go gentle tonight.</span>
+                            <span class="text-success">Don't worry, sweetie, you improved somewhere.</span>
                         {% else %}
                             <span class="text-success">Set 1 matched, but set 2 1RM improved.</span>
                         {% endif %}
                     {% elif t2 < p2 %}
                         {% if mommy_mode %}
-                            <span class="text-warning">Maybe you need to start working a little harder, then mommy can start giving you more attention.</span>
+                            <span class="text-warning">I know someone who needs a bubble bath when he gets home.</span>
                         {% else %}
                             <span class="text-warning">Both sets didn't improve. Check your recovery.</span>
                         {% endif %}
                     {% else %}
                         {% if mommy_mode %}
-                            <span>You plan on staying small forever?</span>
+                            <span>At least you didn't regress pookie.</span>
                         {% else %}
                             <span>Matched your last performance across all sets.</span>
                         {% endif %}
                     {% endif %}
                 {% else %}
                     {% if mommy_mode %}
-                        <span>Oink oink my little fat piggie.</span>
+                        <span>This just means you're bound to exceed next time!</span>
                     {% else %}
                         <span>Matched your last performance.</span>
                     {% endif %}
