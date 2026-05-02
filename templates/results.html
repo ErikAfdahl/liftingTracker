@@ -71,105 +71,147 @@
             {% set tr1 = today1["reps"] | int if today1 else 0 %}
             {% set pr1 = prev1["reps"] | int if prev1 else 0 %}
 
+<!--            set one did better than last time-->
             {% if t1 > p1 %}
                 {% if narrator == "mommy" %}
-                    <span class="text-success">Mommy likes to see you getting stronger.</span>
+                    <span class="text-success">Look at my big strong boy!</span>
+                {% elif narrator == "hard" %}
+                    <span class="text-success">Acceptable.</span>
                 {% else %}
                     <span class="text-success">1RM is up compared to last time.</span>
                 {% endif %}
+<!--            set one did worse than last time-->
             {% elif t1 < p1 %}
+<!--            worse 1rm but more weight-->
                 {% if wt1 > wp1 %}
                     {% if narrator == "mommy" %}
-                        <span class="text-success">You did move more weight, don't worry about the 1rm drop.</span>
+                        <span class="text-success">You did move more weight, don't worry about the 1rm drop honey!</span>
+                    {% elif narrator == "hard" %}
+                        <span class="text-success">You lost your grip or something?</span>
                     {% else %}
-                        <span class="text-success">Weight went up, don't worry, expect a couple sessions to adjust before the 1RM catches up.</span>
+                        <span class="text-success">Weight went up, slight 1RM drop is expected.</span>
                     {% endif %}
+<!--            worse 1rm and less weight-->
                 {% elif wt1 < wp1 %}
                     {% if narrator == "mommy" %}
                         <span class="text-warning">It's okay sweetie, I still love you.</span>
+                    {% elif narrator == "hard" %}
+                        <span class="text-success">Oink oink piggy! Who's my good little fat piggy?</span>
                     {% else %}
-                        <span class="text-warning">Weight dropped from last time. If intentional, no worries, otherwise check recovery.</span>
+                        <span class="text-warning">Weight dropped from last time.</span>
                     {% endif %}
+<!--            worse 1rm and the same weight-->
                 {% else %}
+<!--            if this exercise has more than 1 set-->
                     {% if ex.numSets | int >= 2 %}
                         {% set key2 = ex.exerciseName ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
                         {% set prev2 = prev_entries.get(key2) %}
                         {% set t2 = today2["1rm"] | float if today2 else 0 %}
                         {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
-
+<!--                worse 1rm first set, if set 2 has a higher 1rm-->
                         {% if t2 > p2 %}
                             {% if narrator == "mommy" %}
                                 <span class="text-success">That's okay my big strong boy, you still improved somewhere.</span>
+                            {% elif narrator == "hard" %}
+                                <span class="text-success">Acceptable.</span>
                             {% else %}
-                                <span class="text-success">Set 1 dropped, but set 2 1RM improved.</span>
+                                <span class="text-success">Set 1 dropped, set 2 1RM improved.</span>
                             {% endif %}
+<!--                    worse 1rm first set, if set 2 has a lower 1rm-->
                         {% elif t2 < p2 %}
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Get some good sleep these next couple days, okay?</span>
+                            {% elif narrator == "hard" %}
+                                <span class="text-success">What a pathetic little manchild, do better.</span>
                             {% else %}
-                                <span class="text-warning">Both sets regressed. Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                                <span class="text-warning">Both sets regressed.</span>
                             {% endif %}
+<!--                        worse 1rm first set, if set 2 had the same 1rm-->
                         {% else %}
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">It's okay my sweet baby boy, rest up for next time now, okay?.</span>
+                            {% elif narrator == "hard" %}
+                                <span class="text-success">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
                             {% else %}
-                                <span class="text-warning">Set 1 dropped, set 2 matched. Check your recovery.</span>
+                                <span class="text-warning">Set 1 dropped, set 2 matched.</span>
                             {% endif %}
                         {% endif %}
+<!--            if this exercise doesnt have more than one set, worse 1rm-->
                     {% else %}
+<!--                        if this was not the first exercise-->
                         {% if loop.index0 > 0 %}
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">You probably just worked too hard on your other exercises, don't worry.</span>
+                            {% elif narrator == "hard" %}
+                                <span class="text-success">Oh did piggy over here get tired from other exercises?</span>
                             {% else %}
-                                <span class="text-warning">Check prior exercises, if those went up, don't worry.</span>
-                                <span class="text-warning">If not, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                                <span class="text-warning">Both sets regressed.</span>
                             {% endif %}
+<!--                        if it was the first-->
                         {% else %}
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Do you need mommy to hold you?</span>
+                            {% elif narrator == "hard" %}
+                                <span class="text-success">Pathetic, first thing you do in the gym and you give this performance?</span>
                             {% else %}
-                                <span class="text-warning">Check your recovery, get more sleep, eat better or more, and maybe add in a rest day.</span>
+                                <span class="text-warning">Both sets regressed.</span>
                             {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
+<!--            same 1rm as last time-->
             {% else %}
+<!--                if weight jumped but same 1rm-->
                 {% if wt1 > wp1 %}
                     {% if narrator == "mommy" %}
                         <span class="text-success">How did you even get here? It's okay don't worry.</span>
+                    {% elif narrator == "hard" %}
+                        <span class="text-success">What the heck did you do to get here?</span>
                     {% else %}
                         <span class="text-success">Same 1RM but at higher weight.</span>
                     {% endif %}
+<!--                if there is more than one set-->
                 {% elif ex.numSets | int >= 2 %}
                     {% set key2 = ex.exerciseName ~ "_2" %}
                     {% set today2 = last_entries.get(key2) %}
                     {% set prev2 = prev_entries.get(key2) %}
                     {% set t2 = today2["1rm"] | float if today2 else 0 %}
                     {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
-
+<!--                    if set 2 improved and set 1 maintained-->
                     {% if t2 > p2 %}
                         {% if narrator == "mommy" %}
                             <span class="text-success">Don't worry, sweetie, you improved somewhere.</span>
+                        {% elif narrator == "hard" %}
+                            <span class="text-success">Oink! Oink! Oink! Oink!.</span>
                         {% else %}
-                            <span class="text-success">Set 1 matched, but set 2 1RM improved.</span>
+                            <span class="text-success">Set 1 matched, set 2 1RM improved.</span>
                         {% endif %}
+<!--                    if set 2 regressed and set 1 maintained-->
                     {% elif t2 < p2 %}
                         {% if narrator == "mommy" %}
                             <span class="text-warning">I know someone who needs a bubble bath when he gets home.</span>
+                        {% elif narrator == "hard" %}
+                            <span class="text-success">Did you even try? Or did you just give up after that first set?</span>
                         {% else %}
-                            <span class="text-warning">Both sets didn't improve. Check your recovery.</span>
+                            <span class="text-warning">Both sets didn't improve.</span>
                         {% endif %}
+<!--                    if set 2 maintained and set 1 maintained-->
                     {% else %}
                         {% if narrator == "mommy" %}
                             <span>At least you didn't regress pookie.</span>
+                        {% elif narrator == "hard" %}
+                            <span class="text-success">Minimal effort I see eh?</span>
                         {% else %}
                             <span>Matched your last performance across all sets.</span>
                         {% endif %}
                     {% endif %}
+<!--                if 1rm maintained-->
                 {% else %}
                     {% if narrator == "mommy" %}
                         <span>This just means you're bound to exceed next time!</span>
+                    {% elif narrator == "hard" %}
+                        <span class="text-success">If you weren't even going to try in the first place you should've just said so.</span>
                     {% else %}
                         <span>Matched your last performance.</span>
                     {% endif %}

@@ -600,3 +600,9 @@ def settings():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# to do list
+# do not return to the first exercise when the last one is complete
+# add in a drill sargent like narrator
+# let the narrators make comments as you log
