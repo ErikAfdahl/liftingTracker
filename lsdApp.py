@@ -417,7 +417,7 @@ def manage():
                 if (str(log_row["userId"]) == str(session["user_id"]) and
                         log_row["program"] == selected_edit and
                         log_row["exerciseName"] == exercise_name):
-                    logs_sheet.update_cell(idx + 2, 4, "deleted")  # adjust col to match your logs sheet
+                    logs_sheet.update_cell(idx + 2, 2, "deleted")  # adjust col to match your logs sheet
 
             success_message = f"Deleted {exercise_name}!"
             prog_data = getAllProgram(programs_sheet)
