@@ -283,7 +283,7 @@ def run_results():
                            exercises=exercises,
                            last_entries=last_entries,
                            prev_entries=prev_entries,
-                           mommy_mode=session.get("settings", {}).get("mommy_mode", False))
+                           narrator=session.get("settings", {}).get("narrator", "default")
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
@@ -578,29 +578,21 @@ def settings():
     success_message = None
 
     if request.method == "POST" and request.form.get("action") == "save_settings":
-        mommy_mode = 1 if request.form.get("mommy_mode") else 0
-        setting_two = 1 if request.form.get("setting_two") else 0
+        narrator = request.form.get("narrator", "default")
 
-        # Find the row number for this user in the sheet (1-indexed, +1 for header)
         user_row = next((i + 2 for i, u in enumerate(users) if str(u["userId"]) == str(session["user_id"])), None)
 
         if user_row:
-            # Update the columns in your users sheet — adjust col letters to match your sheet
-            users_sheet.update_cell(user_row, 4, mommy_mode)  # col D — mommy_mode
-            users_sheet.update_cell(user_row, 5, setting_two)  # col E — setting_two
+            users_sheet.update_cell(user_row, 4, narrator)  # col D — narrator
 
-        # Keep session in sync
         session["settings"] = {
-            "mommy_mode": bool(mommy_mode),
-            "setting_two": bool(setting_two),
+            "narrator": narrator,
         }
 
         success_message = "Settings saved!"
 
-    # Build settings from user row, defaulting to 0 if column doesn't exist yet
     settings = {
-        "mommy_mode": bool(int(user.get("mommy_mode", 0))) if user else False,
-        "setting_two": bool(int(user.get("setting_two", 0))) if user else False,
+        "narrator": user.get("narrator", "default") if user else "default",
     }
 
     return render_template("settings.html", settings=settings, success_message=success_message)
