@@ -190,7 +190,6 @@ def run():
             success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         else:
             success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
-        success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
         user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
         exercises = sorted(
