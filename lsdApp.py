@@ -183,6 +183,13 @@ def run():
         row = [int(session["user_id"]), selected, workout_date, exercise_name,
                set_num, weight, reps, one_rm, diff, notes]
         appendLogs(logs_sheet, row)
+        narrator = session.get("settings", {}).get("narrator", "default")
+        if narrator == "mommy":
+            success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+        elif narrator == "hard":
+            success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+        else:
+            success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
         success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
         user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]

@@ -96,7 +96,7 @@
                     {% if narrator == "mommy" %}
                         <span class="text-warning">It's okay sweetie, I still love you.</span>
                     {% elif narrator == "hard" %}
-                        <span class="text-success">Oink oink piggy! Who's my good little fat piggy?</span>
+                        <span class="text-warning">Oink oink piggy! Who's my good little fat piggy?</span>
                     {% else %}
                         <span class="text-warning">Weight dropped from last time.</span>
                     {% endif %}
@@ -123,7 +123,7 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Get some good sleep these next couple days, okay?</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-success">What a pathetic little manchild, do better.</span>
+                                <span class="text-warning">What a pathetic little manchild, do better.</span>
                             {% else %}
                                 <span class="text-warning">Both sets regressed.</span>
                             {% endif %}
@@ -132,7 +132,7 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">It's okay my sweet baby boy, rest up for next time now, okay?.</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-success">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
+                                <span class="text-warning">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
                             {% else %}
                                 <span class="text-warning">Set 1 dropped, set 2 matched.</span>
                             {% endif %}
@@ -144,18 +144,18 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">You probably just worked too hard on your other exercises, don't worry.</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-success">Oh did piggy over here get tired from other exercises?</span>
+                                <span class="text-warning">Oh did piggy over here get tired from other exercises?</span>
                             {% else %}
-                                <span class="text-warning">Both sets regressed.</span>
+                                <span class="text-warning">Set regressed.</span>
                             {% endif %}
 <!--                        if it was the first-->
                         {% else %}
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Do you need mommy to hold you?</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-success">Pathetic, first thing you do in the gym and you give this performance?</span>
+                                <span class="text-warning">Pathetic, first thing you do in the gym and you give this performance?</span>
                             {% else %}
-                                <span class="text-warning">Both sets regressed.</span>
+                                <span class="text-warning">Set regressed.</span>
                             {% endif %}
                         {% endif %}
                     {% endif %}
@@ -183,7 +183,7 @@
                         {% if narrator == "mommy" %}
                             <span class="text-success">Don't worry, sweetie, you improved somewhere.</span>
                         {% elif narrator == "hard" %}
-                            <span class="text-success">Oink! Oink! Oink! Oink!.</span>
+                            <span class="text-warning">Oink! Oink! Oink! Oink!.</span>
                         {% else %}
                             <span class="text-success">Set 1 matched, set 2 1RM improved.</span>
                         {% endif %}
@@ -192,7 +192,7 @@
                         {% if narrator == "mommy" %}
                             <span class="text-warning">I know someone who needs a bubble bath when he gets home.</span>
                         {% elif narrator == "hard" %}
-                            <span class="text-success">Did you even try? Or did you just give up after that first set?</span>
+                            <span class="text-warning">Did you even try? Or did you just give up after that first set?</span>
                         {% else %}
                             <span class="text-warning">Both sets didn't improve.</span>
                         {% endif %}
@@ -201,7 +201,7 @@
                         {% if narrator == "mommy" %}
                             <span>At least you didn't regress pookie.</span>
                         {% elif narrator == "hard" %}
-                            <span class="text-success">Minimal effort I see eh?</span>
+                            <span class="text-warning">Minimal effort I see eh?</span>
                         {% else %}
                             <span>Matched your last performance across all sets.</span>
                         {% endif %}
@@ -211,7 +211,7 @@
                     {% if narrator == "mommy" %}
                         <span>This just means you're bound to exceed next time!</span>
                     {% elif narrator == "hard" %}
-                        <span class="text-success">If you weren't even going to try in the first place you should've just said so.</span>
+                        <span class="text-warning">If you weren't even going to try in the first place you should've just said so.</span>
                     {% else %}
                         <span>Matched your last performance.</span>
                     {% endif %}
