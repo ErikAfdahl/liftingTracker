@@ -6,3 +6,4 @@ flask
 flask-session
 gunicorn
 pytz
+supabase==2.3.0
