@@ -197,7 +197,7 @@ def run():
             if set_num >= int(match["numSets"]):
                 # Last set done — advance or wrap
                 if int(match["order"]) == int(exercises[-1]["order"]):
-                    ex_index = 0
+                    ex_index = current_index
                 else:
                     ex_index = current_index + 1
             else:
@@ -604,5 +604,4 @@ if __name__ == "__main__":
 
 # to do list
 # do not return to the first exercise when the last one is complete
-# add in a drill sargent like narrator
 # let the narrators make comments as you log
