@@ -197,19 +197,21 @@ def run():
             key=lambda x: int(x["order"])
         ) # funky
         # Advance index after logging
+        quick_index = session.get("settings", {}).get("quick_indexing", 1)
         match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
-        if match:
-            current_index = int(match["order"]) - 1
-            if set_num >= int(match["numSets"]):
-                # Last set done — advance or wrap
-                if int(match["order"]) == int(exercises[-1]["order"]):
-                    ex_index = current_index
+        if quick_index == 1:
+            if match:
+                current_index = int(match["order"]) - 1
+                if set_num >= int(match["numSets"]):
+                    # Last set done — advance or wrap
+                    if int(match["order"]) == int(exercises[-1]["order"]):
+                        ex_index = current_index
+                    else:
+                        ex_index = current_index + 1
                 else:
-                    ex_index = current_index + 1
+                    ex_index = current_index
             else:
-                ex_index = current_index
-        else:
-            ex_index = 0
+                ex_index = 0
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
 
@@ -595,10 +597,19 @@ def settings():
             "narrator": narrator,
         }
 
+        quick_indexing = 1 if request.form.get("quick_indexing") else 0
+        users_sheet.update_cell(user_row, 5, quick_indexing)  # col E — adjust to match your sheet
+
+        session["settings"] = {
+            "narrator": narrator,
+            "quick_indexing": bool(quick_indexing),
+        }
+
         success_message = "Settings saved!"
 
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
+        "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
     }
 
     return render_template("settings.html", settings=settings, success_message=success_message)
