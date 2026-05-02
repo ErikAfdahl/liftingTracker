@@ -2,43 +2,56 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0">Deleted Logs</h2>
+    <div>
+        <h2 class="fw-bold mb-0">Deleted Logs</h2>
+        <p class="text-secondary fst-italic mb-0">These entries have been removed from your active programs.</p>
+    </div>
     <a href="/logs" class="btn btn-secondary btn-sm">Back to Logs</a>
 </div>
 
 {% if not deleted %}
     <p class="text-secondary">No deleted logs found.</p>
 {% else %}
-    <div class="table-responsive">
-        <table class="table table-dark">
-            <thead>
-                <tr>
-                    <th class="text-secondary small">Date</th>
-                    <th class="text-secondary small">Program</th>
-                    <th class="text-secondary small">Exercise</th>
-                    <th class="text-secondary small">Set</th>
-                    <th class="text-secondary small">Weight</th>
-                    <th class="text-secondary small">Reps</th>
-                    <th class="text-secondary small">1RM</th>
-                    <th class="text-secondary small">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in deleted %}
-                <tr>
-                    <td>{{ row.date }}</td>
-                    <td>{{ row.program }}</td>
-                    <td>{{ row.exerciseName }}</td>
-                    <td>{{ row.setNum }}</td>
-                    <td>{{ row.weight }} lbs</td>
-                    <td>{{ row.reps }}</td>
-                    <td>{{ row["1rm"] | round(1) }}</td>
-                    <td class="text-secondary">{{ row.notes }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="d-flex justify-content-end mb-3">
+        <form method="POST" onsubmit="return confirm('Permanently delete all deleted logs? This cannot be undone.')">
+            <input type="hidden" name="action" value="clear_all">
+            <button type="submit" class="btn btn-danger btn-sm">Clear All</button>
+        </form>
     </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            {% for log in deleted %}
+            <div class="p-3 border-bottom border-secondary">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="fw-bold">{{ log.date }}</span>
+                        <span class="text-secondary ms-2 small">{{ log.program }} · {{ log.exerciseName }} · Set {{ log.setNum }}</span>
+                        <br>
+                        <span class="text-secondary">{{ log.weight }} lbs · {{ log.reps }} reps · 1RM: {{ log["1rm"] }}</span>
+                        {% if log.notes %}
+                            <br><small class="text-secondary fst-italic">"{{ log.notes }}"</small>
+                        {% endif %}
+                    </div>
+                    <form method="POST" onsubmit="return confirm('Permanently delete this log? This cannot be undone.')">
+                        <input type="hidden" name="action" value="delete_one">
+                        <input type="hidden" name="log_date" value="{{ log.date }}">
+                        <input type="hidden" name="log_program" value="{{ log.program }}">
+                        <input type="hidden" name="log_exercise" value="{{ log.exerciseName }}">
+                        <input type="hidden" name="log_set" value="{{ log.setNum }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
 {% endif %}
+
+<div class="text-end mt-4">
+    <a href="/logs" class="text-secondary small">← Back to Logs</a>
+</div>
 
 {% endblock %}
