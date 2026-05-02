@@ -399,9 +399,16 @@ def manage():
                 prog_data = getAllProgram(programs_sheet)
                 user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
+
         elif action == "delete_exercise":
             exercise_name = request.form.get("exercise_name")
             all_rows = getAllProgram(programs_sheet)
+            # Get the order of the deleted exercise before removing it
+            deleted_order = next((int(row["order"]) for row in all_rows
+                                  if str(row["userId"]) == str(session["user_id"])
+                                  and row["programName"] == selected_edit
+                                  and row["exerciseName"] == exercise_name), None)
+
             indices = [idx + 2 for idx, row in enumerate(all_rows)
                        if (str(row["userId"]) == str(session["user_id"]) and
                            row["programName"] == selected_edit and
@@ -409,15 +416,26 @@ def manage():
 
             for idx in reversed(indices):
                 programs_sheet.delete_rows(idx)
+            # Shift order down for all exercises that came after the deleted one
+            if deleted_order is not None:
+                all_rows = getAllProgram(programs_sheet)
+
+                for idx, row in enumerate(all_rows):
+                    if (str(row["userId"]) == str(session["user_id"]) and
+                            row["programName"] == selected_edit and
+                            int(row["order"]) > deleted_order):
+                        programs_sheet.update_cell(idx + 2, 8,
+                                                   int(row["order"]) - 1)  # adjust col to match order column
 
             all_logs = getAllLogs(logs_sheet)
 
             for idx, log_row in enumerate(all_logs):
-
                 if (str(log_row["userId"]) == str(session["user_id"]) and
+
                         log_row["program"] == selected_edit and
+
                         log_row["exerciseName"] == exercise_name):
-                    logs_sheet.update_cell(idx + 2, 3, 0)  # adjust col to match your logs sheet
+                    logs_sheet.update_cell(idx + 2, 3, 0)
 
             success_message = f"Deleted {exercise_name}!"
             prog_data = getAllProgram(programs_sheet)
