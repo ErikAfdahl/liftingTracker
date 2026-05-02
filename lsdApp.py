@@ -283,7 +283,7 @@ def run_results():
                            exercises=exercises,
                            last_entries=last_entries,
                            prev_entries=prev_entries,
-                           narrator=session.get("settings", {}).get("narrator", "default")
+                           narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
