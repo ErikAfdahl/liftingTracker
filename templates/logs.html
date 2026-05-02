@@ -1,292 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2 class="fw-bold mb-4">Logs</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Deleted Logs</h2>
+        <p class="text-secondary fst-italic mb-0">These entries have been removed from your active programs.</p>
+    </div>
+    <a href="/logs" class="btn btn-secondary btn-sm">Back to Logs</a>
+</div>
 
-{% if success_message %}
-    <div class="alert alert-success alert-dismissible fade show">
-        {{ success_message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-{% endif %}
-{% if error_message %}
-    <div class="alert alert-danger alert-dismissible fade show">
-        {{ error_message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-{% endif %}
-
-{% if not my_programs %}
-    <div class="text-center mt-5">
-        <p class="text-secondary">No programs yet!</p>
-        <a href="/manage" class="btn btn-primary">Create Your First Program</a>
-    </div>
+{% if not deleted %}
+    <p class="text-secondary">No deleted logs found.</p>
 {% else %}
 
-    <!-- Selectors -->
-    <form method="GET" action="/logs" class="mb-4">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label text-secondary small">Program</label>
-                <select name="program" class="form-select" onchange="this.form.submit()">
-                    {% for prog in my_programs %}
-                        <option value="{{ prog }}" {% if prog == selected_prog %}selected{% endif %}>{{ prog }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label text-secondary small">Exercise</label>
-                <select name="exercise" class="form-select" onchange="this.form.submit()">
-                    {% for ex in exercise_names %}
-                        <option value="{{ ex }}" {% if ex == selected_ex %}selected{% endif %}>{{ ex }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-secondary small">Set Number</label>
-                <select name="set_num" class="form-select" onchange="this.form.submit()">
-                    {% for s in range(1, num_sets + 1) %}
-                        <option value="{{ s }}" {% if s == selected_set %}selected{% endif %}>Set {{ s }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </form>
+    <div class="d-flex justify-content-end mb-3">
+        <form method="POST" onsubmit="return confirm('Permanently delete all deleted logs? This cannot be undone.')">
+            <input type="hidden" name="action" value="clear_all">
+            <button type="submit" class="btn btn-danger btn-sm">Clear All</button>
+        </form>
+    </div>
 
-    {% if not exercise_logs %}
-        <div class="alert alert-info">No logs found for this exercise and set.</div>
-    {% else %}
-
-        <h4 class="fw-bold mb-1">{{ selected_ex }} — Set {{ selected_set }}</h4>
-        <p class="text-secondary small mb-4">{{ stats.count }} logged sessions</p>
-
-        <!-- Metric cards -->
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="text-secondary small">Best 1RM</div>
-                        <div class="fw-bold fs-4">{{ stats.best_1rm }}</div>
+    <div class="card">
+        <div class="card-body p-0">
+            {% for log in deleted %}
+            <div class="p-3 border-bottom border-secondary">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="fw-bold">{{ log.date }}</span>
+                        <span class="text-secondary ms-2 small">{{ log.program }} · {{ log.exerciseName }} · Set {{ log.setNum }}</span>
+                        <br>
+                        <span class="text-secondary">{{ log.weight }} lbs · {{ log.reps }} reps · 1RM: {{ log["1rm"] }}</span>
+                        {% if log.notes %}
+                            <br><small class="text-secondary fst-italic">"{{ log.notes }}"</small>
+                        {% endif %}
                     </div>
+                    <form method="POST" onsubmit="return confirm('Permanently delete this log? This cannot be undone.')">
+                        <input type="hidden" name="action" value="delete_one">
+                        <input type="hidden" name="log_date" value="{{ log.date }}">
+                        <input type="hidden" name="log_program" value="{{ log.program }}">
+                        <input type="hidden" name="log_exercise" value="{{ log.exerciseName }}">
+                        <input type="hidden" name="log_set" value="{{ log.setNum }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="text-secondary small">Avg 1RM</div>
-                        <div class="fw-bold fs-4">{{ stats.avg_1rm }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="text-secondary small">Best Weight</div>
-                        <div class="fw-bold fs-4">{{ stats.best_weight }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="text-secondary small">Avg Reps</div>
-                        <div class="fw-bold fs-4">{{ stats.avg_reps }}</div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
+    </div>
 
-        <!-- Stats table -->
-        <div class="card mb-4">
-            <div class="card-header">Summary Statistics</div>
-            <div class="card-body p-0">
-                <table class="table table-dark table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Mean</th>
-                            <th>Std Dev</th>
-                            <th>Min</th>
-                            <th>Max</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for metric in ["weight", "reps", "1rm", "diff"] %}
-                        <tr>
-                            <td>{{ metric }}</td>
-                            <td>{{ stats.table.mean[metric] }}</td>
-                            <td>{{ stats.table.std[metric] }}</td>
-                            <td>{{ stats.table.min[metric] }}</td>
-                            <td>{{ stats.table.max[metric] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Chart -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Progress Over Time</span>
-                <select id="chartMetric" class="form-select form-select-sm w-auto">
-                    <option value="1rm">Estimated 1RM</option>
-                    <option value="weight">Weight</option>
-                    <option value="reps">Reps</option>
-                    <option value="diff">Diff (vs Last)</option>
-                </select>
-            </div>
-            <div class="card-body">
-                <canvas id="oneRmChart"></canvas>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            const rawData = {{ chart_data | tojson }};
-            const labels = rawData.map(r => r.date);
-
-            let currentMetric = "1rm";
-
-            const ctx = document.getElementById("oneRmChart").getContext("2d");
-            const chart = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "Estimated 1RM",
-                        data: rawData.map(r => r["1rm"]),
-                        borderColor: "#0d6efd",
-                        tension: 0.3,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { ticks: { color: "#aaa" } },
-                        y: { ticks: { color: "#aaa" } }
-                    }
-                }
-            });
-
-            document.getElementById("chartMetric").addEventListener("change", function() {
-                const metric = this.value;
-                const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)" };
-                chart.data.datasets[0].label = labels[metric];
-                chart.data.datasets[0].data = rawData.map(r => r[metric]);
-                chart.update();
-            });
-        </script>
-        <!-- All logs -->
-        <div class="card">
-            <div class="card-header">All Logs</div>
-            <div class="card-body p-0">
-                {% for log in exercise_logs %}
-                <div class="p-3 border-bottom border-secondary">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="fw-bold">{{ log.date }}</span>
-                            <span class="text-secondary ms-2">{{ log.weight }} lbs · {{ log.reps }} reps · 1RM: {{ log["1rm"] }}</span>
-                            {% if log.notes %}
-                                <br><small class="text-secondary fst-italic">"{{ log.notes }}"</small>
-                            {% endif %}
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-secondary btn-sm"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#edit_log_{{ loop.index }}">Edit</button>
-                            <form method="POST" onsubmit="return confirm('Delete this log?')">
-                                <input type="hidden" name="action" value="delete_log">
-                                <input type="hidden" name="selected_prog" value="{{ selected_prog }}">
-                                <input type="hidden" name="selected_ex" value="{{ selected_ex }}">
-                                <input type="hidden" name="selected_set" value="{{ selected_set }}">
-                                <input type="hidden" name="log_date" value="{{ log.date }}">
-                                <input type="hidden" name="log_weight" value="{{ log.weight }}">
-                                <input type="hidden" name="log_reps" value="{{ log.reps }}">
-                                <input type="hidden" name="log_notes" value="{{ log.notes }}">
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Edit form -->
-                    <div class="collapse mt-3" id="edit_log_{{ loop.index }}">
-                        <form method="POST">
-                            <input type="hidden" name="action" value="save_log">
-                            <input type="hidden" name="selected_prog" value="{{ selected_prog }}">
-                            <input type="hidden" name="selected_ex" value="{{ selected_ex }}">
-                            <input type="hidden" name="selected_set" value="{{ selected_set }}">
-                            <input type="hidden" name="orig_date" value="{{ log.date }}">
-                            <input type="hidden" name="orig_weight" value="{{ log.weight }}">
-                            <input type="hidden" name="orig_reps" value="{{ log.reps }}">
-                            <input type="hidden" name="orig_notes" value="{{ log.notes }}">
-                            <div class="row g-2 align-items-end">
-                                <div class="col-md-2">
-                                    <label class="form-label text-secondary small">Date</label>
-                                    <input type="text" name="upd_date" class="form-control form-control-sm" value="{{ log.date }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label text-secondary small">Weight</label>
-                                    <input type="number" name="upd_weight" class="form-control form-control-sm"
-                                           value="{{ log.weight }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label text-secondary small">Reps</label>
-                                    <input type="number" name="upd_reps" class="form-control form-control-sm"
-                                           value="{{ log.reps }}" min="0">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-secondary small">Notes</label>
-                                    <input type="text" name="upd_notes" class="form-control form-control-sm"
-                                           value="{{ log.notes }}">
-                                </div>
-                                <div class="col-md-3 d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                                    <button type="button" class="btn btn-secondary btn-sm"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#edit_log_{{ loop.index }}">Cancel</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-    {% endif %}
 {% endif %}
 
-<!-- Chart.js -->
-<!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
-<!--<script>-->
-<!--    {% if chart_data %}-->
-<!--    const ctx = document.getElementById('oneRmChart').getContext('2d');-->
-<!--    new Chart(ctx, {-->
-<!--        type: 'line',-->
-<!--        data: {-->
-<!--            labels: {{ chart_data | map(attribute='date') | list | tojson }},-->
-<!--            datasets: [{-->
-<!--                label: '1RM',-->
-<!--                data: {{ chart_data | map(attribute='1rm') | list | tojson }},-->
-<!--                borderColor: '#aaaaaa',-->
-<!--                backgroundColor: 'rgba(170,170,170,0.1)',-->
-<!--                tension: 0.3,-->
-<!--                fill: true-->
-<!--            }]-->
-<!--        },-->
-<!--        options: {-->
-<!--            responsive: true,-->
-<!--            plugins: { legend: { display: false } },-->
-<!--            scales: {-->
-<!--                x: { ticks: { color: '#aaaaaa' }, grid: { color: '#333' } },-->
-<!--                y: { ticks: { color: '#aaaaaa' }, grid: { color: '#333' } }-->
-<!--            }-->
-<!--        }-->
-<!--    });-->
-<!--    {% endif %}-->
-<!--</script>-->
+<div class="text-end mt-4">
+    <a href="/logs" class="text-secondary small">← Back to Logs</a>
+</div>
 
 {% endblock %}

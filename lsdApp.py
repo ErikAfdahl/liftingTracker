@@ -180,7 +180,7 @@ def run():
 
         one_rm = round(weight * (1 + float(reps) / 30), 3)
         diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
-        row = [int(session["user_id"]), selected, workout_date, exercise_name,
+        row = [int(session["user_id"]), selected, 1, workout_date, exercise_name,
                set_num, weight, reps, one_rm, diff, notes]
         appendLogs(logs_sheet, row)
         narrator = session.get("settings", {}).get("narrator", "default")
@@ -350,7 +350,7 @@ def manage():
             for idx, row in enumerate(all_logs):
 
                 if str(row["userId"]) == str(session["user_id"]) and row["program"] == selected_edit:
-                    logs_sheet.update_cell(idx + 2, 2, "deleted")  # adjust col number to match your logs sheet
+                    logs_sheet.update_cell(idx + 2, 3, 0)  # adjust col number to match your logs sheet
 
             success_message = f"Deleted program '{selected_edit}'!"
             my_programs = [p for p in my_programs if p != selected_edit]
@@ -417,7 +417,7 @@ def manage():
                 if (str(log_row["userId"]) == str(session["user_id"]) and
                         log_row["program"] == selected_edit and
                         log_row["exerciseName"] == exercise_name):
-                    logs_sheet.update_cell(idx + 2, 2, "deleted")  # adjust col to match your logs sheet
+                    logs_sheet.update_cell(idx + 2, 3, 0)  # adjust col to match your logs sheet
 
             success_message = f"Deleted {exercise_name}!"
             prog_data = getAllProgram(programs_sheet)
@@ -461,7 +461,7 @@ def manage():
                     if (str(log_row["userId"]) == str(session["user_id"]) and
                             log_row["program"] == selected_edit and
                             log_row["exerciseName"] == exercise_name):
-                        logs_sheet.update_cell(idx + 2, 4, upd_name)  # adjust col to match your logs sheet
+                        logs_sheet.update_cell(idx + 2, 5, upd_name)  # adjust col to match your logs sheet
 
             success_message = f"Saved changes to {exercise_name}!"
             if swapped_name:
@@ -563,7 +563,7 @@ def logs():
                         float(row["weight"]) == float(orig_weight) and
                         int(row["reps"]) == int(orig_reps) and
                         str(row["notes"]) == str(orig_notes)):
-                    logs_sheet.update(f"C{idx + 2}:J{idx + 2}",
+                    logs_sheet.update(f"D{idx + 2}:K{idx + 2}",
                                       [[upd_date, selected_ex, selected_set,
                                         upd_weight, upd_reps, new_1rm, 0, upd_notes]])
             success_message = "Log updated!"
@@ -610,6 +610,50 @@ def logs():
                            success_message=success_message,
                            error_message=error_message)
 
+@app.route("/logs/deleted", methods=["GET", "POST"])
+def deleted_logs():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    logs_sheet = getLogs()
+    all_logs = getAllLogs(logs_sheet)
+
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        if action == "delete_one":
+            # Match on enough fields to uniquely identify the row
+            date = request.form.get("log_date")
+            program = request.form.get("log_program")
+            exercise = request.form.get("log_exercise")
+            set_num = request.form.get("log_set")
+
+            indices = [idx + 2 for idx, row in enumerate(all_logs)
+                       if str(row["userId"]) == str(session["user_id"])
+                       and str(row["status"]) == "0"
+                       and row["date"] == date
+                       and row["program"] == program
+                       and row["exerciseName"] == exercise
+                       and str(row["setNum"]) == str(set_num)]
+            for idx in reversed(indices):
+                logs_sheet.delete_rows(idx)
+
+        elif action == "clear_all":
+            indices = [idx + 2 for idx, row in enumerate(all_logs)
+                       if str(row["userId"]) == str(session["user_id"])
+                       and str(row["status"]) == "0"]
+            for idx in reversed(indices):
+                logs_sheet.delete_rows(idx)
+
+        return redirect(url_for("deleted_logs"))
+
+    all_logs = getAllLogs(logs_sheet)
+    deleted = [row for row in all_logs
+               if str(row["userId"]) == str(session["user_id"])
+               and str(row["status"]) == "0"]
+
+    return render_template("deleted_logs.html", deleted=deleted)
+
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if "user_id" not in session:
@@ -651,5 +695,4 @@ if __name__ == "__main__":
 
 
 # to do list
-# do not return to the first exercise when the last one is complete
-# let the narrators make comments as you log
+# fix ordering issues when deleting an exercise
