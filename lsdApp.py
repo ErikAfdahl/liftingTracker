@@ -302,6 +302,8 @@ def manage():
     prog_data = getAllProgram(programs_sheet)
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
+    logs_sheet = getLogs()
+    user_data = [row for row in getAllLogs(logs_sheet) if str(row["userId"]) == str(session["user_id"])]
 
     max_exercises = 25
     success_message = None
@@ -311,6 +313,7 @@ def manage():
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
+    prog_logs = [row for row in user_data if str(row["program"]) == str(selected_edit)]
     action = request.form.get("action")
 
     if request.method == "POST":
@@ -329,13 +332,26 @@ def manage():
                 selected_edit = new_program_name
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
 
+
         elif action == "delete_program":
             all_rows = getAllProgram(programs_sheet)
             indices = [idx + 2 for idx, row in enumerate(all_rows)
+
                        if str(row["userId"]) == str(session["user_id"])
+
                        and row["programName"] == selected_edit]
+
             for idx in reversed(indices):
                 programs_sheet.delete_rows(idx)
+
+            # Rename program in logs to "deleted"
+            all_logs = getAllLogs(logs_sheet)
+
+            for idx, row in enumerate(all_logs):
+
+                if str(row["userId"]) == str(session["user_id"]) and row["program"] == selected_edit:
+                    logs_sheet.update_cell(idx + 2, 2, "deleted")  # adjust col number to match your logs sheet
+
             success_message = f"Deleted program '{selected_edit}'!"
             my_programs = [p for p in my_programs if p != selected_edit]
             selected_edit = my_programs[0] if my_programs else None
@@ -390,14 +406,26 @@ def manage():
                        if (str(row["userId"]) == str(session["user_id"]) and
                            row["programName"] == selected_edit and
                            row["exerciseName"] == exercise_name)]
+
             for idx in reversed(indices):
                 programs_sheet.delete_rows(idx)
+
+            all_logs = getAllLogs(logs_sheet)
+
+            for idx, log_row in enumerate(all_logs):
+
+                if (str(log_row["userId"]) == str(session["user_id"]) and
+                        log_row["program"] == selected_edit and
+                        log_row["exerciseName"] == exercise_name):
+                    logs_sheet.update_cell(idx + 2, 4, "deleted")  # adjust col to match your logs sheet
+
             success_message = f"Deleted {exercise_name}!"
             prog_data = getAllProgram(programs_sheet)
             user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
+            upd_name = request.form.get("upd_name", exercise_name).strip()
             upd_sets = int(request.form.get("upd_sets"))
             upd_inc = float(request.form.get("upd_inc"))
             upd_min = int(request.form.get("upd_min"))
@@ -424,8 +452,16 @@ def manage():
                 if (str(row["userId"]) == str(session["user_id"]) and
                         row["programName"] == selected_edit and
                         row["exerciseName"] == exercise_name):
-                    programs_sheet.update(f"D{idx + 2}:I{idx + 2}",
-                                          [[upd_sets, upd_inc, upd_min, upd_max, upd_order, upd_notes]])
+                    programs_sheet.update(f"C{idx + 2}:I{idx + 2}",
+                                          [[upd_name, upd_sets, upd_inc, upd_min, upd_max, upd_order, upd_notes]])
+
+            if upd_name != exercise_name:
+                all_logs = getAllLogs(logs_sheet)
+                for idx, log_row in enumerate(all_logs):
+                    if (str(log_row["userId"]) == str(session["user_id"]) and
+                            log_row["program"] == selected_edit and
+                            log_row["exerciseName"] == exercise_name):
+                        logs_sheet.update_cell(idx + 2, 4, upd_name)  # adjust col to match your logs sheet
 
             success_message = f"Saved changes to {exercise_name}!"
             if swapped_name:
