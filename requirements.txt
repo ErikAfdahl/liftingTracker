@@ -7,3 +7,5 @@ flask-session
 gunicorn
 pytz
 supabase==2.3.0
+httpcore==0.17.3
+httpx==0.24.1
