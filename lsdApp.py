@@ -9,9 +9,6 @@ from programs import *
 from activeUsers import *
 
 # python liftingTracker/lsdapp.py
-
-
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 app.permanent_session_lifetime = timedelta(days=30)
