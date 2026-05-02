@@ -583,29 +583,24 @@ def settings():
     users = getAllUsers(users_sheet)
     user = next((u for u in users if str(u["userId"]) == str(session["user_id"])), None)
 
-    success_message = None
-
     if request.method == "POST" and request.form.get("action") == "save_settings":
         narrator = request.form.get("narrator", "default")
+        quick_indexing = 1 if request.form.get("quick_indexing") else 0
 
         user_row = next((i + 2 for i, u in enumerate(users) if str(u["userId"]) == str(session["user_id"])), None)
 
         if user_row:
-            users_sheet.update_cell(user_row, 4, narrator)  # col D — narrator
-
-        session["settings"] = {
-            "narrator": narrator,
-        }
-
-        quick_indexing = 1 if request.form.get("quick_indexing") else 0
-        users_sheet.update_cell(user_row, 5, quick_indexing)  # col E — adjust to match your sheet
+            users_sheet.update_cell(user_row, 4, narrator)
+            users_sheet.update_cell(user_row, 5, quick_indexing)
 
         session["settings"] = {
             "narrator": narrator,
             "quick_indexing": bool(quick_indexing),
         }
 
-        success_message = "Settings saved!"
+        return redirect(url_for("settings", success=1))
+
+    success_message = "Settings saved!" if request.args.get("success") else None
 
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
