@@ -82,7 +82,7 @@ def login():
                 error = "Username already taken."
             else:
                 new_id = getNextUserId(users)
-                appendUser(users_sheet, [new_username, hashPassword(new_password), new_id])
+                appendUser(users_sheet, [new_username, hashPassword(new_password), new_id, "default", 1])
                 error = "Account created! You can now log in."
 
     return render_template("login.html", error=error)
