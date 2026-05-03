@@ -710,6 +710,9 @@ def settings():
 
     return render_template("settings.html", settings=settings, success_message=success_message)
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
