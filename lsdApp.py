@@ -393,6 +393,15 @@ def manage():
                     "order": new_order,
                     "notes": new_notes
                 })
+
+                # check for deleted logs, if any exist, set their status to alive again
+                logs_to_update = [row for row in user_data
+                                  if row["program"] == selected_edit
+                                  and row["exerciseName"] == new_exercise
+                                  and int(row["status"]) == 0]  # only dead logs
+                for row in logs_to_update:
+                    updateLog(row["id"], {"status": 1})
+
                 success_message = f"Added {new_exercise} to {selected_edit}!"
                 prog_data = getAllProgram()
                 user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
@@ -466,6 +475,14 @@ def manage():
                                   and row["exerciseName"] == exercise_name]
                 for row in logs_to_update:
                     updateLog(row["id"], {"exerciseName": upd_name})
+
+                # check for deleted logs, if any exist, set their status to alive again
+                logs_to_update = [row for row in user_data
+                                  if row["program"] == selected_edit
+                                  and row["exerciseName"] == upd_name  # use upd_name, not exercise_name
+                                  and int(row["status"]) == 0]
+                for row in logs_to_update:
+                    updateLog(row["id"], {"status": 1})
 
             success_message = f"Saved changes to {upd_name}!"
             if swapped_name:
