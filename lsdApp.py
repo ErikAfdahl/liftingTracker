@@ -4,11 +4,7 @@ import pytz
 import bcrypt
 import uuid
 from db import *
-from supabase import create_client
 
-SUPABASE_URL = "https://egammnendtfwylrugwjj.supabase.co/rest/v1/"
-SUPABASE_KEY = "sb_publishable_NUAPuV91X3F1rFOotXjlGw_ICFYujh2"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # python liftingTracker/lsdapp.py
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
