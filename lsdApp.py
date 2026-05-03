@@ -195,6 +195,8 @@ def run():
             success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         elif narrator == "hard":
             success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+        elif narrator == "mort":
+            success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         else:
             success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
