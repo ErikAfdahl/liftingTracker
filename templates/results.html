@@ -73,14 +73,64 @@
 
 <!--            set one did better than last time-->
             {% if t1 > p1 %}
-                {% if narrator == "mommy" %}
-                    <span class="text-success">Look at my big strong boy!</span>
-                {% elif narrator == "hard" %}
-                    <span class="text-success">Acceptable.</span>
-                {% elif narrator == "mort" %}
-                    <span class="text-success">I love you King Julien!</span>
+                {% if ex.numSets | int >= 2 %}
+                    {% set key2 = ex.exerciseName ~ "_2" %}
+                    {% set today2 = last_entries.get(key2) %}
+                    {% set prev2 = prev_entries.get(key2) %}
+                    {% set t2 = today2["1rm"] | float if today2 else 0 %}
+                    {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
+<!--                better 1rm first set, if set 2 has a higher 1rm-->
+                    {% if t2 > p2 %}
+                        {% if narrator == "mommy" %}
+                            <span class="text-success">I know someone who's been a very special boy!</span>
+                        {% elif narrator == "hard" %}
+                            <span class="text-success">I'm fine with this.</span>
+                        {% elif narrator == "goth" %}
+                            <span class="text-success">Mmmmhh... Good boy.</span>
+                        {% elif narrator == "mort" %}
+                            <span class="text-success">Take me my King. I am yours.</span>
+                        {% else %}
+                            <span class="text-success">Both sets improved.</span>
+                        {% endif %}
+<!--                    better 1rm first set, if set 2 has a lower 1rm-->
+                    {% elif t2 < p2 %}
+                        {% if narrator == "mommy" %}
+                            <span class="text-success">That's okay sweetie, you improved on your first set!</span>
+                        {% elif narrator == "hard" %}
+                            <span class="text-warning">You had to go and ruin it by flopping on your next set.</span>
+                        {% elif narrator == "goth" %}
+                            <span class="text-warning">You're going to have to do better than this for my attention.</span>
+                        {% elif narrator == "mort" %}
+                            <span class="text-success">GIVE ME BANANAAAAAAAAA!!!!!!</span>
+                        {% else %}
+                            <span>Set 1 improved, set 2 regressed.</span>
+                        {% endif %}
+<!--                        better 1rm first set, if set 2 had the same 1rm-->
+                    {% else %}
+                        {% if narrator == "mommy" %}
+                            <span class="text-success">Look how strong you're getting!</span>
+                        {% elif narrator == "hard" %}
+                            <span>You think you can just barely put forth any effort after your first set?</span>
+                        {% elif narrator == "goth" %}
+                            <span>Oh, what happened? Did you remember how weak you are?</span>
+                        {% elif narrator == "mort" %}
+                            <span class="text-success">FEEEET!</span>
+                        {% else %}
+                            <span class="text-success">Set 1 improved, set 2 matched.</span>
+                        {% endif %}
+                    {% endif %}
                 {% else %}
-                    <span class="text-success">1RM is up compared to last time.</span>
+                    {% if narrator == "mommy" %}
+                        <span class="text-success">Look at my big strong boy!</span>
+                    {% elif narrator == "hard" %}
+                        <span class="text-success">Acceptable.</span>
+                    {% elif narrator == "goth" %}
+                        <span class="text-success">Maybe next time I can make you your preworkout myself.</span>
+                    {% elif narrator == "mort" %}
+                        <span class="text-success">I love you King Julien!</span>
+                    {% else %}
+                        <span class="text-success">Set 1 improved.</span>
+                    {% endif %}
                 {% endif %}
 <!--            set one did worse than last time-->
             {% elif t1 < p1 %}
@@ -90,10 +140,12 @@
                         <span class="text-success">You did move more weight, don't worry about the 1rm drop honey!</span>
                     {% elif narrator == "hard" %}
                         <span class="text-success">You lost your grip or something?</span>
+                    {% elif narrator == "goth" %}
+                        <span class="text-success">If you're going to be strong enough to do more weight, you'll have to be man enough to match your last performance.</span>
                     {% elif narrator == "mort" %}
                         <span class="text-success">It's a miracle. King Julien has cured my drinking problem!</span>
                     {% else %}
-                        <span class="text-success">Weight went up, slight 1RM drop is expected.</span>
+                        <span class="text-success">Increase in weight, set 1 regressed (normal).</span>
                     {% endif %}
 <!--            worse 1rm and less weight-->
                 {% elif wt1 < wp1 %}
@@ -101,10 +153,12 @@
                         <span class="text-warning">It's okay sweetie, I still love you.</span>
                     {% elif narrator == "hard" %}
                         <span class="text-warning">Oink oink piggy! Who's my good little fat piggy?</span>
+                    {% elif narrator == "goth" %}
+                        <span class="text-warning">Do I need to stand on your balls more often?</span>
                     {% elif narrator == "mort" %}
                         <span class="text-warning">Going out for milk, guys. Be right back. (sobbing) Goodbye, my friend.</span>
                     {% else %}
-                        <span class="text-warning">Weight dropped from last time.</span>
+                        <span class="text-warning">Decrease in weight, set 1 regressed.</span>
                     {% endif %}
 <!--            worse 1rm and the same weight-->
                 {% else %}
@@ -120,11 +174,13 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-success">That's okay my big strong boy, you still improved somewhere.</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-success">Acceptable.</span>
+                                <span>At least you did something better you fat slob.</span>
+                            {% elif narrator == "goth" %}
+                                <span>You think this would impress me?</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-success">I found it! The amazing tree! I know it is small and ugly, but if somebody was nice to it and loved it, it could grow up to be a beautiful swan.</span>
                             {% else %}
-                                <span class="text-success">Set 1 dropped, set 2 1RM improved.</span>
+                                <span class="text-success">Set 1 regressed, set 2 improved.</span>
                             {% endif %}
 <!--                    worse 1rm first set, if set 2 has a lower 1rm-->
                         {% elif t2 < p2 %}
@@ -132,6 +188,8 @@
                                 <span class="text-warning">Get some good sleep these next couple days, okay?</span>
                             {% elif narrator == "hard" %}
                                 <span class="text-warning">What a pathetic little manchild, do better.</span>
+                            {% elif narrator == "goth" %}
+                                <span class="text-warning">I had no idea you were such a chud.</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">The feet seem different today.</span>
                             {% else %}
@@ -143,10 +201,12 @@
                                 <span class="text-warning">It's okay my sweet baby boy, rest up for next time now, okay?.</span>
                             {% elif narrator == "hard" %}
                                 <span class="text-warning">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
+                            {% elif narrator == "goth" %}
+                                <span class="text-warning">I'd spank you, except you would probably like that.</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">Just pretend that I'm not here.</span>
                             {% else %}
-                                <span class="text-warning">Set 1 dropped, set 2 matched.</span>
+                                <span class="text-warning">Set 1 regressed, set 2 matched.</span>
                             {% endif %}
                         {% endif %}
 <!--            if this exercise doesnt have more than one set, worse 1rm-->
@@ -157,6 +217,8 @@
                                 <span class="text-warning">You probably just worked too hard on your other exercises, don't worry.</span>
                             {% elif narrator == "hard" %}
                                 <span class="text-warning">Oh did piggy over here get tired from other exercises?</span>
+                            {% elif narrator == "goth" %}
+                                <span class="text-warning">Did you get tired out big guy?</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">Tonight we die.</span>
                             {% else %}
@@ -168,6 +230,8 @@
                                 <span class="text-warning">Do you need mommy to hold you?</span>
                             {% elif narrator == "hard" %}
                                 <span class="text-warning">Pathetic, first thing you do in the gym and you give this performance?</span>
+                            {% elif narrator == "goth" %}
+                                <span class="text-warning">This is how you started this? This is what you came here for?</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">I write about anger! Back off, danger! Never talk to strangers! Sometimes I just want to hit things with a coat hanger!</span>
                             {% else %}
@@ -184,10 +248,12 @@
                         <span class="text-success">How did you even get here? It's okay don't worry.</span>
                     {% elif narrator == "hard" %}
                         <span class="text-success">What the heck did you do to get here?</span>
+                    {% elif narrator == "goth" %}
+                        <span class="text-success">I highly doubt you'll ever see this, pegging time!</span>
                     {% elif narrator == "mort" %}
                         <span class="text-success">POTATO!</span>
                     {% else %}
-                        <span class="text-success">Same 1RM but at higher weight.</span>
+                        <span class="text-success">Increase in weight, set 1 matched.</span>
                     {% endif %}
 <!--                if there is more than one set-->
                 {% elif ex.numSets | int >= 2 %}
@@ -201,11 +267,13 @@
                         {% if narrator == "mommy" %}
                             <span class="text-success">Don't worry, sweetie, you improved somewhere.</span>
                         {% elif narrator == "hard" %}
-                            <span class="text-warning">Oink! Oink! Oink! Oink!.</span>
+                            <span class="text-warning">Oink! Oink! Oink! Oink!</span>
+                        {% elif narrator == "goth" %}
+                            <span class="text-warning">Are you known for your minimum effort?</span>
                         {% elif narrator == "mort" %}
                             <span class="text-success">Happiness is a warm foot!</span>
                         {% else %}
-                            <span class="text-success">Set 1 matched, set 2 1RM improved.</span>
+                            <span class="text-success">Set 1 matched, set 2 improved.</span>
                         {% endif %}
 <!--                    if set 2 regressed and set 1 maintained-->
                     {% elif t2 < p2 %}
@@ -213,10 +281,12 @@
                             <span class="text-warning">I know someone who needs a bubble bath when he gets home.</span>
                         {% elif narrator == "hard" %}
                             <span class="text-warning">Did you even try? Or did you just give up after that first set?</span>
-                        {% elif narrator == "hard" %}
+                        {% elif narrator == "goth" %}
+                            <span class="text-warning">Mark your calendar for the dragon tonight.</span>
+                        {% elif narrator == "mort" %}
                             <span class="text-warning">It makes me pokey dottie.</span>
                         {% else %}
-                            <span class="text-warning">Both sets didn't improve.</span>
+                            <span class="text-warning">Both sets regressed.</span>
                         {% endif %}
 <!--                    if set 2 maintained and set 1 maintained-->
                     {% else %}
@@ -224,10 +294,12 @@
                             <span>At least you didn't regress pookie.</span>
                         {% elif narrator == "hard" %}
                             <span class="text-warning">Minimal effort I see eh?</span>
+                        {% elif narrator == "goth" %}
+                            <span class="text-warning">This isn't helping your case here.</span>
                         {% elif narrator == "mort" %}
                             <span>Hi! Hello, yes it is still me waving to you, my arm is getting hurty.</span>
                         {% else %}
-                            <span>Matched your last performance across all sets.</span>
+                            <span>Both sets matched.</span>
                         {% endif %}
                     {% endif %}
 <!--                if 1rm maintained-->
@@ -236,10 +308,12 @@
                         <span>This just means you're bound to exceed next time!</span>
                     {% elif narrator == "hard" %}
                         <span class="text-warning">If you weren't even going to try in the first place you should've just said so.</span>
+                    {% elif narrator == "goth" %}
+                        <span class="text-warning">Why did you come in the first place?</span>
                     {% elif narrator == "mort" %}
-                            <span>I like beans.</span>
+                        <span>I like beans.</span>
                     {% else %}
-                        <span>Matched your last performance.</span>
+                        <span>Set matched.</span>
                     {% endif %}
                 {% endif %}
             {% endif %}

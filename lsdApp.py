@@ -83,7 +83,8 @@ def login():
                     "password": hashPassword(new_password),
                     "userId": new_id,
                     "narrator": "default",
-                    "quick_indexing": 1
+                    "quick_indexing": 1,
+                    "quick_fill": 0
                 })
                 error = "Account created! You can now log in."
 
@@ -195,6 +196,8 @@ def run():
             success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         elif narrator == "hard":
             success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+        elif narrator == "goth":
+            success_message = f"You like this, don't you baby? Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         elif narrator == "mort":
             success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
         else:
@@ -231,16 +234,21 @@ def run():
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
             if last:
-                if int(last["reps"]) >= int(ex["maxReps"]) + 2:
+                if int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25): # if last reps are drastically more than max
                     rec_weight = round((last["1rm"]/(1 + (ex["minReps"]/30)) - last["weight"]) /
                                        ex["increment"]) * ex["increment"] + last["weight"]
-                elif int(last["reps"]) >= int(ex["maxReps"]):
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
+                elif int(last["reps"]) >= int(ex["maxReps"]): # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
-                elif int(last["reps"]) < int(ex["minReps"]) - 1:
+                elif int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75): # if last reps are less than min
+                    rec_weight = round(last["weight"] - ((last["1rm"] / (1 + (ex["maxReps"] / 30)) - last["weight"]) /
+                                       ex["increment"]) * ex["increment"])
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
+                elif int(last["reps"]) < int(ex["minReps"]) - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
-                else:
+                else: # if last reps are between max and min
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
 
     prev_entries = {}
@@ -259,7 +267,8 @@ def run():
                            prev_entries=prev_entries,
                            recommendations=recommendations,
                            success_message=success_message,
-                           user_data=user_data)
+                           user_data=user_data,
+                           quick_fill=session.get("settings", {}).get("quick_fill", 0))
 
 @app.route("/run/results")
 def run_results():
