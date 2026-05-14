@@ -148,7 +148,7 @@ def run():
         programLogs = [row for row in user_data if row["program"] == selected]
         last = programLogs[-1] if programLogs else None
 
-        if last:
+        if last and (today == last["date"]):
             last_ex = last["exerciseName"]
             match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
             if match:
