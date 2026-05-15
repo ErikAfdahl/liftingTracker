@@ -106,11 +106,28 @@ def home():
     my_programs = list(set(row["programName"] for row in user_prog))
     user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
 
+    welcome_message = None
+
+    narrator = session.get("settings", {}).get("narrator", "default")
+    if narrator == "mommy":
+        welcome_message = f"Mommy is so happy to see you again!"
+    elif narrator == "hard":
+        welcome_message = f"Surprised to see you here again fatso."
+    elif narrator == "goth":
+        welcome_message = f"Look who came back for more."
+    elif narrator == "mort":
+        welcome_message = f"ALL HAIL KING JULIEN!"
+    else:
+        welcome_message = f"Welcome back {session["username"]}"
+
+
     return render_template("home.html",
                            username=session["username"],
                            user_prog=user_prog,
                            my_programs=my_programs,
-                           user_data=user_data)
+                           user_data=user_data,
+                           welcome_message=welcome_message
+                           )
 
 @app.route("/run", methods=["GET", "POST"])
 def run():
