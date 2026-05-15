@@ -118,7 +118,7 @@ def home():
     elif narrator == "mort":
         welcome_message = f"ALL HAIL KING JULIEN!"
     else:
-        welcome_message = f"Welcome back {session["username"]}"
+        welcome_message = f"Welcome back {session['username']}"
 
 
     return render_template("home.html",
