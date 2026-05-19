@@ -303,8 +303,10 @@ def run_results():
 
     last_entries = {}
     prev_entries = {}
-    hp = 0
+    currentImprov = 0
+    currentHvy = 0
     highlight = None
+    heaviest = None
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
@@ -313,10 +315,15 @@ def run_results():
             last_entries[key] = last
             prev_entries[key] = prev
 
-            np = 1.0 - (prev["1rm"] / last["1rm"]) # find the move improved exercise
-            if np > hp:
-                hp = np
-                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {round(hp * 100.0)}%."
+            newImprov = 1.0 - (prev["1rm"] / last["1rm"]) # find the move improved exercise
+            newHvy = last["weight"]
+            if newImprov > currentImprov:
+                currentImprov = newImprov
+                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {round(currentImprov * 100.0)}%."
+
+            if newHvy > currentHvy:
+                currentHvy = newHvy
+                heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, with a 1RM of {last["weight"]}."
 
     return render_template("results.html",
                            selected=selected,
@@ -324,6 +331,7 @@ def run_results():
                            last_entries=last_entries,
                            prev_entries=prev_entries,
                            highlight=highlight,
+                           heaviest=heaviest,
                            narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])
