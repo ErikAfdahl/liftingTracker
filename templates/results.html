@@ -338,6 +338,11 @@
     <div class="card-body text-center">
         <h3 class="fw-bold text-light">{{ "{:,.0f}".format(ns.total) }} lbs</h3>
         <p class="text-secondary mb-0">total weight moved this session</p>
+
+        {% if highlight %}
+        <hr class="border-secondary my-3">
+        <p class="text-success fst-italic mb-0">{{ highlight }}</p>
+        {% endif %}
     </div>
 </div>
 

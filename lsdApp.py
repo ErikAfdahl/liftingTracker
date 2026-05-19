@@ -303,17 +303,25 @@ def run_results():
 
     last_entries = {}
     prev_entries = {}
+    hp = 0
+    highlight = None
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
             prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
 
+            np = last_entries[key] / prev_entries[key]
+            if (np > hp) and (np > 1.0):
+                hp = np
+                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {hp}."
+
     return render_template("results.html",
                            selected=selected,
                            exercises=exercises,
                            last_entries=last_entries,
                            prev_entries=prev_entries,
+                           highlight=highlight,
                            narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])
