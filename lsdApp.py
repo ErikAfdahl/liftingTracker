@@ -313,10 +313,10 @@ def run_results():
             last_entries[key] = last
             prev_entries[key] = prev
 
-            np = last["1rm"] / prev["1rm"] # find the move improved exercise
-            if (np > hp) and (np > 1.0):
+            np = 1.0 - (prev["1rm"] / last["1rm"]) # find the move improved exercise
+            if np > hp:
                 hp = np
-                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {hp}."
+                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {round(hp * 100.0)}%."
 
     return render_template("results.html",
                            selected=selected,
