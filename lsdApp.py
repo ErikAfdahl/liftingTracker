@@ -311,7 +311,7 @@ def run_results():
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
             prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
 
-            np = last_entries[key] / prev_entries[key]
+            np = last_entries[key] / prev_entries[key] # find the move improved exercise
             if (np > hp) and (np > 1.0):
                 hp = np
                 highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {hp}."
