@@ -323,7 +323,7 @@ def run_results():
 
             if newHvy > currentHvy:
                 currentHvy = newHvy
-                heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, with a 1RM of {last["weight"]}."
+                heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, using {last['weight']} pounds." # could make a setting to switch between this and kgs
 
     return render_template("results.html",
                            selected=selected,
