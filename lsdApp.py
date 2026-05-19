@@ -313,7 +313,7 @@ def run_results():
             last_entries[key] = last
             prev_entries[key] = prev
 
-            np = last / prev # find the move improved exercise
+            np = last["1rm"] / prev["1rm"] # find the move improved exercise
             if (np > hp) and (np > 1.0):
                 hp = np
                 highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {hp}."
