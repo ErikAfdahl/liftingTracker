@@ -42,18 +42,15 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
     return None
 
 def get_best_entry(data, program, exercise, set_num):
-    best = None
-    bestWeight = 0
+    best_1rm = 0
 
-    for row in reversed(data):
+    for row in data:
         if (row["program"] == program and row["exerciseName"] == exercise and
                 int(row["setNum"]) == int(set_num)):
-            if bestWeight < row["1rm"]:
-                best = row
-                bestWeight = row["1rm"]
+            if row["1rm"] > best_1rm:
+                best_1rm = row["1rm"]
 
-
-    return best
+    return best_1rm
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -347,9 +344,9 @@ def run_results():
                 heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, using {last['weight']} pounds." # could make a setting to switch between this and kgs
 
             if s == 1:
-                best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
-                if best['date'] == today:
-                    newPRs.append(best["exerciseName"])
+                all_time_best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
+                if last["1rm"] >= all_time_best:
+                    newPRs.append(ex['exerciseName'])
 
     return render_template("results.html",
                            selected=selected,
