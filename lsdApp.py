@@ -40,6 +40,21 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
             acc += 1
 
     return None
+
+def get_best_entry(data, program, exercise, set_num):
+    best = None
+    bestWeight = 0
+
+    for row in reversed(data):
+        if (row["program"] == program and row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num)):
+            if bestWeight < row["1rm"]:
+                best = row
+                bestWeight = row["1rm"]
+
+
+    return best
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
@@ -301,12 +316,18 @@ def run_results():
 
     user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
 
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
+    today = now.strftime("%m/%d/%Y")
+
     last_entries = {}
     prev_entries = {}
     currentImprov = 0
     currentHvy = 0
     highlight = None
     heaviest = None
+    newPRs = []
+
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
@@ -325,6 +346,11 @@ def run_results():
                 currentHvy = newHvy
                 heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, using {last['weight']} pounds." # could make a setting to switch between this and kgs
 
+            if s == 1:
+                best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
+                if best['date'] == today:
+                    newPRs.append(best["exerciseName"])
+
     return render_template("results.html",
                            selected=selected,
                            exercises=exercises,
@@ -332,6 +358,7 @@ def run_results():
                            prev_entries=prev_entries,
                            highlight=highlight,
                            heaviest=heaviest,
+                           newPRs=newPRs,
                            narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])

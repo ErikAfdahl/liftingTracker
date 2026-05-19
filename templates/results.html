@@ -335,19 +335,38 @@
 
 <div class="card mb-4">
     <div class="card-header">Session Summary</div>
-    <div class="card-body text-center">
-        <h3 class="fw-bold text-light">{{ "{:,.0f}".format(ns.total) }} lbs</h3>
-        <p class="text-secondary mb-0">Total weight moved this session.</p>
+    <div class="card-body">
 
-        {% if highlight %}
-        <hr class="border-secondary my-3">
-        <p class="text-success fst-italic mb-0">{{ highlight }}</p>
-        {% endif %}
+        <div class="text-center mb-3">
+            <h3 class="fw-bold text-light">{{ "{:,.0f}".format(ns.total) }} lbs</h3>
+            <p class="text-secondary mb-0">Total weight moved this session.</p>
+        </div>
 
-        {% if heaviest %}
-        <hr class="border-secondary my-3">
-        <p class="text-success fst-italic mb-0">{{ heaviest }}</p>
-        {% endif %}
+        <div class="d-flex gap-4">
+
+            {% if newPRs %}
+            <div class="flex-shrink-0" style="min-width: 180px;">
+                <p class="text-secondary mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">New PRs</p>
+                <ul class="list-unstyled mb-0">
+                    {% for exercise in newPRs %}
+                    <li class="text-warning fst-italic mb-1">🏆 {{ exercise }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="flex-grow-1">
+                {% if highlight %}
+                <p class="text-success fst-italic mb-2">{{ highlight }}</p>
+                {% endif %}
+
+                {% if heaviest %}
+                <p class="text-success fst-italic mb-0">{{ heaviest }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
     </div>
 </div>
 
