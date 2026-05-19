@@ -308,10 +308,12 @@ def run_results():
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
-            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
-            prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
+            last = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
+            prev = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
+            last_entries[key] = last
+            prev_entries[key] = prev
 
-            np = last_entries[key] / prev_entries[key] # find the move improved exercise
+            np = last / prev # find the move improved exercise
             if (np > hp) and (np > 1.0):
                 hp = np
                 highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {hp}."
