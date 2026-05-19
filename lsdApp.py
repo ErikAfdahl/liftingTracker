@@ -251,17 +251,14 @@ def run():
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
             if last:
-                if int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25): # if last reps are drastically more than max
-                    rec_weight = round((last["1rm"]/(1 + (ex["minReps"]/30)) - last["weight"]) /
-                                       ex["increment"]) * ex["increment"] + last["weight"]
+                if ((int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25)) or
+                        int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75)):
+                    # if last reps are significantly more than max or significantly less than min
+                    rec_weight = round((last["1rm"] / (1 + (ex["maxReps"]))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
                 elif int(last["reps"]) >= int(ex["maxReps"]): # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
-                elif int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75): # if last reps are less than min
-                    rec_weight = round(last["weight"] - ((last["1rm"] / (1 + (ex["maxReps"] / 30)) - last["weight"]) /
-                                       ex["increment"]) * ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
                 elif int(last["reps"]) < int(ex["minReps"]) - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
