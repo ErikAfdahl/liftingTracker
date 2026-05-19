@@ -152,9 +152,9 @@
                     {% if narrator == "mommy" %}
                         <span class="text-warning">It's okay sweetie, I still love you.</span>
                     {% elif narrator == "hard" %}
-                        <span class="text-warning">Oink oink piggy! Who's my good little fat piggy?</span>
+                        <span class="text-danger">Oink oink piggy! Who's my good little fat piggy?</span>
                     {% elif narrator == "goth" %}
-                        <span class="text-warning">Do I need to stand on your balls more often?</span>
+                        <span class="text-danger">Do I need to stand on your balls more often?</span>
                     {% elif narrator == "mort" %}
                         <span class="text-warning">Going out for milk, guys. Be right back. (sobbing) Goodbye, my friend.</span>
                     {% else %}
@@ -187,9 +187,9 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Get some good sleep these next couple days, okay?</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-warning">What a pathetic little manchild, do better.</span>
+                                <span class="text-danger">What a pathetic little manchild, do better.</span>
                             {% elif narrator == "goth" %}
-                                <span class="text-warning">I had no idea you were such a chud.</span>
+                                <span class="text-danger">I had no idea you were such a chud.</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">The feet seem different today.</span>
                             {% else %}
@@ -200,9 +200,9 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">It's okay my sweet baby boy, rest up for next time now, okay?.</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-warning">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
+                                <span class="text-danger">Looks like you need to spend less time in the McDonalds drive through and more time in the gym.</span>
                             {% elif narrator == "goth" %}
-                                <span class="text-warning">I'd spank you, except you would probably like that.</span>
+                                <span class="text-danger">I'd spank you, except you would probably like that.</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">Just pretend that I'm not here.</span>
                             {% else %}
@@ -229,9 +229,9 @@
                             {% if narrator == "mommy" %}
                                 <span class="text-warning">Do you need mommy to hold you?</span>
                             {% elif narrator == "hard" %}
-                                <span class="text-warning">Pathetic, first thing you do in the gym and you give this performance?</span>
+                                <span class="text-danger">Pathetic, first thing you do in the gym and you give this performance?</span>
                             {% elif narrator == "goth" %}
-                                <span class="text-warning">This is how you started this? This is what you came here for?</span>
+                                <span class="text-danger">This is how you started this? This is what you came here for?</span>
                             {% elif narrator == "mort" %}
                                 <span class="text-warning">I write about anger! Back off, danger! Never talk to strangers! Sometimes I just want to hit things with a coat hanger!</span>
                             {% else %}
@@ -280,9 +280,9 @@
                         {% if narrator == "mommy" %}
                             <span class="text-warning">I know someone who needs a bubble bath when he gets home.</span>
                         {% elif narrator == "hard" %}
-                            <span class="text-warning">Did you even try? Or did you just give up after that first set?</span>
+                            <span class="text-danger">Did you even try? Or did you just give up after that first set?</span>
                         {% elif narrator == "goth" %}
-                            <span class="text-warning">Mark your calendar for the dragon tonight.</span>
+                            <span class="text-danger">Mark your calendar for the dragon tonight.</span>
                         {% elif narrator == "mort" %}
                             <span class="text-warning">It makes me pokey dottie.</span>
                         {% else %}
@@ -349,7 +349,7 @@
                 <p class="text-secondary mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">New PRs</p>
                 <ul class="list-unstyled mb-0">
                     {% for exercise in newPRs %}
-                    <li class="text-warning fst-italic mb-1">🏆 {{ exercise }}</li>
+                    <li class="fst-italic mb-1">{{ exercise }}</li>
                     {% endfor %}
                 </ul>
             </div>
