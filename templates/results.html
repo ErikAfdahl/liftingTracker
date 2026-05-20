@@ -342,8 +342,9 @@
             <p class="text-secondary mb-3">Total weight moved this session.</p>
 
             <div class="text-start">
-                {% if highlight %}
-                <p class="text-success fst-italic mb-2">{{ report }}</p>
+                {% if report %}
+                <h5 class="mb-1">Report</h5>
+                <p class="fst-italic mb-2">{{ report }}</p>
                 {% endif %}
             </div>
         </div>
