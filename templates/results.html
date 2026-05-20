@@ -333,29 +333,15 @@
     {% endfor %}
 {% endfor %}
 
-<div class="card mb-4">
-    <div class="card-header">Session Summary</div>
-    <div class="card-body">
+<div class="d-flex gap-4 mb-4">
 
-        <div class="text-center mb-3">
+    <div class="card flex-grow-1">
+        <div class="card-header">Session Summary</div>
+        <div class="card-body text-center">
             <h3 class="fw-bold text-light">{{ "{:,.0f}".format(ns.total) }} lbs</h3>
-            <p class="text-secondary mb-0">Total weight moved this session.</p>
-        </div>
+            <p class="text-secondary mb-3">Total weight moved this session.</p>
 
-        <div class="d-flex gap-4">
-
-            {% if newPRs %}
-            <div class="flex-shrink-0" style="min-width: 180px;">
-                <p class="text-secondary mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">New PRs</p>
-                <ul class="list-unstyled mb-0">
-                    {% for exercise in newPRs %}
-                    <li class="fst-italic mb-1">{{ exercise }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <div class="flex-grow-1">
+            <div class="text-start">
                 {% if highlight %}
                 <p class="text-success fst-italic mb-2">{{ highlight }}</p>
                 {% endif %}
@@ -364,10 +350,22 @@
                 <p class="text-success fst-italic mb-0">{{ heaviest }}</p>
                 {% endif %}
             </div>
-
         </div>
-
     </div>
+
+    <div class="card flex-shrink-0" style="min-width: 200px;">
+        <div class="card-header">New PRs</div>
+        <div class="card-body">
+            {% if newPRs %}
+            <ul class="list-unstyled mb-0">
+                {% for exercise in newPRs %}
+                <li class="fst-italic mb-1">{{ exercise }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
 
 <div class="text-center mt-2 mb-5">
