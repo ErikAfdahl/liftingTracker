@@ -165,7 +165,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             report += " There was"
         report += f" {pick_adj(len(stagnant), total)} amount of stagnation compared to last session, "
         report += f"as {'1 exercise was' if len(stagnant) == 1 else f'{len(stagnant)} exercises were'} flat "
-        report += f"in the first set out of {total} — {list_exercises(stagnant)} {'didn\'t move' if len(stagnant) > 1 else 'didn\'t move'}."
+        report += f"in the first set out of {total} — {list_exercises(stagnant)} didn't move."
 
     # Improvement
     if improved:
