@@ -3,6 +3,7 @@ from datetime import *
 import pytz
 import bcrypt
 import uuid
+import random
 from db import *
 
 # python liftingTracker/lsdapp.py
@@ -51,6 +52,146 @@ def get_best_entry(data, program, exercise, set_num):
                 best_1rm = row["1rm"]
 
     return best_1rm
+
+def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, today):
+    import random
+
+    prd = newPRs
+    exercise_names = [ex["exerciseName"] for ex in exercises]
+
+    declined = []
+    improved = []
+    stagnant = []
+
+    for ex in exercises:
+        key = f"{ex['exerciseName']}_1"
+        last = last_entries.get(key)
+        prev = prev_entries.get(key)
+
+        if not last or not prev:
+            continue
+
+        delta = last["1rm"] - prev["1rm"]
+        if delta > 0:
+            improved.append(ex["exerciseName"])
+        elif delta < 0:
+            declined.append(ex["exerciseName"])
+        else:
+            stagnant.append(ex["exerciseName"])
+
+    total = len(exercise_names)
+    numQuality = 1.0 - (len(declined) / total) + (len(improved) / total)
+    if numQuality >= .75:
+        quality = "excellent"
+    elif numQuality >= .5:
+        quality = "good"
+    elif numQuality >= .25:
+        quality = "okay"
+    else:
+        quality = "poor"
+
+    excellent = ["a marked", "a substantial", "a significant", "a considerable", "a notable"]
+    good = ["a clear", "a meaningful", "a visible", "a distinct", "a measurable"]
+    okay = ["some", "a moderate", "a partial", "a mild", "a slight"]
+    poor = ["a minor", "a marginal", "a negligible", "a barely noticeable", "a trivial"]
+    bad = ["an imperceptible", "a questionable", "a dubious", "a supposed", "an alleged"]
+
+    def pick_adj(count, total):
+        ratio = count / total
+        if ratio >= .8:
+            return random.choice(excellent)
+        elif ratio >= .6:
+            return random.choice(good)
+        elif ratio >= .4:
+            return random.choice(okay)
+        elif ratio >= .2:
+            return random.choice(poor)
+        else:
+            return random.choice(bad)
+
+    def list_exercises(lst):
+        if len(lst) == 1:
+            return lst[0]
+        elif len(lst) == 2:
+            return f"{lst[0]} and {lst[1]}"
+        else:
+            return ", ".join(lst[:-1]) + f", and {lst[-1]}"
+
+    report = ""
+
+    # Opening
+    pr_ratio = len(prd) / total if total > 0 else 0
+    if pr_ratio >= .8:
+        report += f"Just want to say, today was an excellent day, with you setting new PRs in {len(prd)} exercises."
+    elif pr_ratio >= .6:
+        report += f"First of all, today was a great day, with you setting new PRs in {len(prd)} exercises."
+    elif pr_ratio > 0:
+        report += "Before anything else, good work on the new PRs!"
+
+    # Overall + highlight + heaviest
+    highlight_name = highlight.split(" was")[0] if highlight else None
+    heaviest_name = heaviest.split(" was")[0] if heaviest else None
+    heaviest_weight = heaviest.split("using ")[-1] if heaviest else None
+
+    overall = f"Overall today was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
+    details = []
+    if highlight_name:
+        details.append(f"{highlight_name} was the highlight")
+    if heaviest_name and heaviest_weight:
+        details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight}")
+
+    if details:
+        overall += ", " + " and ".join(details) + "."
+    else:
+        overall += "."
+
+    if report:
+        connector = " And" if pr_ratio > 0 else " But"
+        report += f"{connector} {overall} "
+    else:
+        report += f"{overall} "
+
+    # Regression
+    if declined:
+        report += f"There was {pick_adj(len(declined), total)} amount of regression compared to last session, "
+        report += f"as {'1 exercise declined' if len(declined) == 1 else f'{len(declined)} exercises declined'} "
+        report += f"in the first set out of {total} total — {list_exercises(declined)} {'regressed' if len(declined) > 1 else 'regressed'}."
+
+    # Stagnation
+    if stagnant:
+        if declined:
+            report += " There was also"
+        else:
+            report += " There was"
+        report += f" {pick_adj(len(stagnant), total)} amount of stagnation compared to last session, "
+        report += f"as {'1 exercise was' if len(stagnant) == 1 else f'{len(stagnant)} exercises were'} flat "
+        report += f"in the first set out of {total} — {list_exercises(stagnant)} {'didn\'t move' if len(stagnant) > 1 else 'didn\'t move'}."
+
+    # Improvement
+    if improved:
+        if declined and stagnant:
+            report += " However there was"
+        elif declined or stagnant:
+            report += " But there was also"
+        else:
+            report += " There was"
+        report += f" {pick_adj(len(improved), total)} amount of improvement compared to last session, "
+        report += f"as {'1 exercise improved' if len(improved) == 1 else f'{len(improved)} exercises improved'} "
+        report += f"in the first set out of {total} — {list_exercises(improved)} improved."
+
+    # Closing
+    if prd:
+        report += " Setting a PR today makes this one worth remembering."
+    elif numQuality >= .75:
+        report += " Keep up the great work!"
+    elif numQuality >= .5:
+        report += " Good job today overall."
+    elif numQuality >= .25:
+        report += " As long as you gave it your all, that's what counts."
+    else:
+        report += " Get some rest and come back stronger next time."
+
+    return report
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -348,6 +489,9 @@ def run_results():
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
 
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest,
+                             today)
+
     return render_template("results.html",
                            selected=selected,
                            exercises=exercises,
@@ -356,6 +500,7 @@ def run_results():
                            highlight=highlight,
                            heaviest=heaviest,
                            newPRs=newPRs,
+                           report=report,
                            narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])
