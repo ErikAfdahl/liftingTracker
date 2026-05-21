@@ -214,7 +214,8 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
                        f"declining for {streaks[0][1]} and {streaks[1][1]} sessions respectively.")
         elif len(streaks) > 2:
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
-            report += f" Several exercises have been on a declining streak: {list_exercises(streak_parts)}."
+            joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
+            report += f" Several exercises have been on a declining streak: {joined}."
 
     # Stagnation
     if stagnant:
