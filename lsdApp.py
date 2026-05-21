@@ -62,6 +62,35 @@ def get_best_entry(data, program, exercise, set_num):
 
     return best_1rm
 
+# for each list, regressed, stagnant, progressed, for each exercise, run to check it in this function,
+# it will basically check to see if the previous log has a difference positive, negative, or 0. And based on what
+# direction is valued at (either being a -1 to represent checking if diff has been regressing, 1 to represent if diff
+# has been progressing, and 0 if it has been stagnating) and then count how many occurances of that there are
+
+def get_occurrences(data, program, exercise, set_num, direction=0):
+    acc = 0
+
+    for row in reversed(data):
+        if (row["program"] == program and row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num)):
+
+            if direction == -1:
+                if row["diff"] < 0:
+                    acc += 1
+                else:
+                    return acc
+            elif direction == 0:
+                if row["diff"] == 0:
+                    acc += 1
+                else:
+                    return acc
+            else:
+                if row["diff"] > 0:
+                    acc += 1
+                else:
+                    return acc
+    return acc
+
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, today):
     import random
 
@@ -166,6 +195,28 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += f"There was {pick_adj(len(declined), total)} amount of regression compared to last session, "
         report += f"as {'1 exercise declined' if len(declined) == 1 else f'{len(declined)} exercises declined'} "
         report += f"in the first set out of {total} total — {list_exercises(declined)} {'regressed' if len(declined) > 1 else 'regressed'}."
+        streaks = []
+
+        for exercise in declined:
+            streak = get_occurrences(user_data, selected, exercise, 1, -1)
+
+            if streak > 1:
+                streaks.append((exercise, streak))
+
+        streaks = []
+        for exercise in declined:
+            streak = get_occurrences(user_data, selected, exercise, 1, -1)
+            if streak > 1:
+                streaks.append((exercise, streak))
+
+        if len(streaks) == 1:
+            report += f" Worth noting, {streaks[0][0]} has now declined for {streaks[0][1]} straight sessions."
+        elif len(streaks) == 2:
+            report += (f" Both {streaks[0][0]} and {streaks[1][0]} have been recurring regressors, "
+                       f"declining for {streaks[0][1]} and {streaks[1][1]} sessions respectively.")
+        elif len(streaks) > 2:
+            streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
+            report += f" Several exercises have been on a declining streak: {list_exercises(streak_parts)}."
 
     # Stagnation
     if stagnant:
@@ -176,6 +227,21 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += f" {pick_adj(len(stagnant), total)} amount of stagnation compared to last session, "
         report += f"as {'1 exercise was' if len(stagnant) == 1 else f'{len(stagnant)} exercises were'} flat "
         report += f"in the first set out of {total} — {list_exercises(stagnant)} didn't move."
+
+        streaks = []
+        for exercise in stagnant:
+            streak = get_occurrences(user_data, selected, exercise, 1, 0)
+            if streak > 1:
+                streaks.append((exercise, streak))
+
+        if len(streaks) == 1:
+            report += f" Worth noting, {streaks[0][0]} has now been stagnant for {streaks[0][1]} straight sessions."
+        elif len(streaks) == 2:
+            report += (f" Both {streaks[0][0]} and {streaks[1][0]} have been stagnant, "
+                       f"being so for {streaks[0][1]} and {streaks[1][1]} sessions respectively.")
+        elif len(streaks) > 2:
+            streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
+            report += f" Several exercises have been on a stagnation streak: {list_exercises(streak_parts)}."
 
     # Improvement
     if improved:
@@ -188,6 +254,21 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += f" {pick_adj(len(improved), total)} amount of improvement compared to last session, "
         report += f"as {'1 exercise improved' if len(improved) == 1 else f'{len(improved)} exercises improved'} "
         report += f"in the first set out of {total} — {list_exercises(improved)} improved."
+
+        streaks = []
+        for exercise in improved:
+            streak = get_occurrences(user_data, selected, exercise, 1, 1)
+            if streak > 1:
+                streaks.append((exercise, streak))
+
+        if len(streaks) == 1:
+            report += f" Good work, {streaks[0][0]} has now been improving for {streaks[0][1]} straight sessions."
+        elif len(streaks) == 2:
+            report += (f" Both {streaks[0][0]} and {streaks[1][0]} have been improving, "
+                       f"being so for {streaks[0][1]} and {streaks[1][1]} sessions respectively.")
+        elif len(streaks) > 2:
+            streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
+            report += f" Several exercises have been on a improvement streak: {list_exercises(streak_parts)}."
 
     # Closing
     if prd:
