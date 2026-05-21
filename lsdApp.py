@@ -111,11 +111,11 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         delta = last["1rm"] - prev["1rm"]
         if delta > 0:
-            improved.append(ex)
+            improved.append(last)
         elif delta < 0:
-            declined.append(ex)
+            declined.append(last)
         else:
-            stagnant.append(ex)
+            stagnant.append(last)
 
     total = len(exercise_names)
     numQuality = 1.0 - (len(declined) / total) + (len(improved) / total)
