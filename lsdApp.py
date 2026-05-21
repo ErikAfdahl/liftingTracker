@@ -177,7 +177,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     overall = f"Overall today was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
     details = []
     if highlight_name:
-        details.append(f"{highlight_name} was the highlight today, improving by {highlight_per * 100}% at {highlight_weight} lbs for {highlight_reps} reps")
+        details.append(f"{highlight_name} was the highlight today, improving by {round(highlight_per * 100, 1)}% at {highlight_weight} lbs for {highlight_reps} reps")
     if heaviest_name and heaviest_weight:
         details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight} lbs for {heaviest_reps} reps")
 
