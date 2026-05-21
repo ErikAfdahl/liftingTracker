@@ -276,7 +276,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             last = last_entries.get(key)
-            if last and last["notes"] is not None:
+            if last and last["notes"] != "":
                 notes.append(last)
 
     if notes:
