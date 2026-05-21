@@ -130,15 +130,16 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Overall + highlight + heaviest
     highlight_name = highlight.split(" was")[0] if highlight else None
-    heaviest_name = heaviest.split(" was")[0] if heaviest else None
-    heaviest_weight = heaviest.split("using ")[-1] if heaviest else None
+    heaviest_name = heaviest["exerciseName"] if heaviest else None
+    heaviest_weight = heaviest["weight"] if heaviest else None
+    heaviest_reps = heaviest["reps"] if heaviest else None
 
     overall = f"Overall today was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
     details = []
     if highlight_name:
         details.append(f"{highlight_name} was the highlight")
     if heaviest_name and heaviest_weight:
-        details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight}")
+        details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight} for {heaviest_reps} reps")
 
     if details:
         overall += ", " + " and ".join(details) + "."
@@ -442,17 +443,23 @@ def run_results():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    selected = request.args.get("program")
-
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+
+    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+
+    # Fall back to most recent program if none provided
+    selected = request.args.get("program")
+    if not selected or selected not in my_programs:
+        selected = user_data[-1]["program"] if user_data else None
+    if not selected:
+        return redirect(url_for("run"))
 
     exercises = sorted(
         [row for row in user_prog if row["programName"] == selected],
         key=lambda x: int(x["order"])
     )
-
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -474,7 +481,10 @@ def run_results():
             last_entries[key] = last
             prev_entries[key] = prev
 
-            newImprov = 1.0 - (prev["1rm"] / last["1rm"]) # find the move improved exercise
+            if not last or not prev:
+                continue
+
+            newImprov = 1.0 - (prev["1rm"] / last["1rm"])
             newHvy = last["weight"]
             if newImprov > currentImprov:
                 currentImprov = newImprov
@@ -482,18 +492,18 @@ def run_results():
 
             if newHvy > currentHvy:
                 currentHvy = newHvy
-                heaviest = f"{ex['exerciseName']} was the heaviest of today's workout, using {last['weight']} pounds." # could make a setting to switch between this and kgs
+                heaviest = last
 
             if s == 1:
                 all_time_best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
 
-    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest,
-                             today)
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, today)
 
     return render_template("results.html",
                            selected=selected,
+                           my_programs=my_programs,
                            exercises=exercises,
                            last_entries=last_entries,
                            prev_entries=prev_entries,
