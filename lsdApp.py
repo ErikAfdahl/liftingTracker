@@ -167,7 +167,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += "Before anything else, good work on the new PRs!"
 
     # Overall + highlight + heaviest
-    highlight_name = highlight["exericseName"] if highlight else None
+    highlight_name = highlight["exerciseName"] if highlight else None
     highlight_weight = highlight["weight"] if highlight else None
     highlight_reps = highlight["reps"] if highlight else None
     heaviest_name = heaviest["exerciseName"] if heaviest else None
