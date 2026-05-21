@@ -91,7 +91,7 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     return acc
     return acc
 
-def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, today):
+def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, date_last):
     import random
 
     prd = newPRs
@@ -269,6 +269,24 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         elif len(streaks) > 2:
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
             report += f" Several exercises have been on a improvement streak: {list_exercises(streak_parts)}."
+
+    # Notes
+    notes = []
+    for ex in exercises:
+        for s in range(1, int(ex["numSets"]) + 1):
+            key = f"{ex['exerciseName']}_{s}"
+            last = last_entries.get(key)
+            if last and last["notes"] is not None:
+                notes.append(last)
+
+    if notes:
+        report += " Some notes were made this session —"
+        for i, entry in enumerate(notes):
+            note_text = f" on {entry['exerciseName']} where you lifted {entry['weight']} lbs for {entry['reps']} reps, you wrote \"{entry['notes']}\""
+            if i < len(notes) - 1:
+                report += note_text + ","
+            else:
+                report += note_text + "."
 
     # Closing
     if prd:
@@ -600,7 +618,7 @@ def run_results():
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
 
-    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, today)
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, date_last)
 
     return render_template("results.html",
                            selected=selected,
