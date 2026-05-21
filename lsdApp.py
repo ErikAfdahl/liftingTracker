@@ -155,7 +155,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
                     f"and {lst[1]['exerciseName']} for {lst[1]['weight']} lbs and {lst[1]['reps']} reps")
         else:
             parts = [f"{entry['exerciseName']} for {entry['weight']} lbs and {entry['reps']} reps" for entry in lst]
-            return ", ".join(parts[:-1]) + f", and {parts[-1]}"
+            return ", ".join(parts[:-1]) + f", and {parts[-1]}" # haha
 
     report = ""
 
