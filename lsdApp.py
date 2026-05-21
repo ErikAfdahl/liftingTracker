@@ -111,11 +111,11 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         delta = last["1rm"] - prev["1rm"]
         if delta > 0:
-            improved.append(ex["exerciseName"])
+            improved.append(ex)
         elif delta < 0:
-            declined.append(ex["exerciseName"])
+            declined.append(ex)
         else:
-            stagnant.append(ex["exerciseName"])
+            stagnant.append(ex)
 
     total = len(exercise_names)
     numQuality = 1.0 - (len(declined) / total) + (len(improved) / total)
@@ -149,11 +149,13 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     def list_exercises(lst):
         if len(lst) == 1:
-            return lst[0]
+            return f"{lst[0]['exerciseName']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps"
         elif len(lst) == 2:
-            return f"{lst[0]} and {lst[1]}"
+            return (f"{lst[0]['exerciseName']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps "
+                    f"and {lst[1]['exerciseName']} for {lst[1]['weight']} lbs and {lst[1]['reps']} reps")
         else:
-            return ", ".join(lst[:-1]) + f", and {lst[-1]}"
+            parts = [f"{entry['exerciseName']} for {entry['weight']} lbs and {entry['reps']} reps" for entry in lst]
+            return ", ".join(parts[:-1]) + f", and {parts[-1]}"
 
     report = ""
 
@@ -200,16 +202,10 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         streaks = []
 
         for exercise in declined:
-            streak = get_occurrences(user_data, selected, exercise, 1, -1)
+            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, -1)
 
             if streak > 1:
-                streaks.append((exercise, streak))
-
-        streaks = []
-        for exercise in declined:
-            streak = get_occurrences(user_data, selected, exercise, 1, -1)
-            if streak > 1:
-                streaks.append((exercise, streak))
+                streaks.append((exercise["exerciseName"], streak))
 
         if len(streaks) == 1:
             report += f" Worth noting, {streaks[0][0]} has now declined for {streaks[0][1]} straight sessions."
@@ -232,9 +228,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         streaks = []
         for exercise in stagnant:
-            streak = get_occurrences(user_data, selected, exercise, 1, 0)
+            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 0)
             if streak > 1:
-                streaks.append((exercise, streak))
+                streaks.append((exercise["exerciseName"], streak))
 
         if len(streaks) == 1:
             report += f" Worth noting, {streaks[0][0]} has now been stagnant for {streaks[0][1]} straight sessions."
@@ -259,9 +255,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         streaks = []
         for exercise in improved:
-            streak = get_occurrences(user_data, selected, exercise, 1, 1)
+            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 1)
             if streak > 1:
-                streaks.append((exercise, streak))
+                streaks.append((exercise["exerciseName"], streak))
 
         if len(streaks) == 1:
             report += f" Good work, {streaks[0][0]} has now been improving for {streaks[0][1]} straight sessions."
