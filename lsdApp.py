@@ -46,7 +46,7 @@ def get_date_entry(data, program, exercise, set_num, date):
     acc = 0
     for row in reversed(data):
         if (row["program"] == program and row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num) and int(row["date"]) == date):
+                int(row["setNum"]) == int(set_num) and row["date"] == date):
             return row
 
     return None
