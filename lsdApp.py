@@ -417,7 +417,7 @@ def run():
                 if ((int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25)) or
                         int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75)):
                     # if last reps are significantly more than max or significantly less than min
-                    rec_weight = round((last["1rm"] / (1 + (ex["maxReps"]))) / ex["increment"]) * ex["increment"]
+                    rec_weight = round((last["1rm"] / (1 + (ex["maxReps"] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
                 elif int(last["reps"]) >= int(ex["maxReps"]): # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
