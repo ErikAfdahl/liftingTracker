@@ -91,7 +91,7 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     return acc
     return acc
 
-def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, date_last):
+def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last):
     import random
 
     prd = newPRs
@@ -167,7 +167,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += "Before anything else, good work on the new PRs!"
 
     # Overall + highlight + heaviest
-    highlight_name = highlight.split(" was")[0] if highlight else None
+    highlight_name = highlight["exericseName"] if highlight else None
+    highlight_weight = highlight["weight"] if highlight else None
+    highlight_reps = highlight["reps"] if highlight else None
     heaviest_name = heaviest["exerciseName"] if heaviest else None
     heaviest_weight = heaviest["weight"] if heaviest else None
     heaviest_reps = heaviest["reps"] if heaviest else None
@@ -175,9 +177,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     overall = f"Overall today was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
     details = []
     if highlight_name:
-        details.append(f"{highlight_name} was the highlight")
+        details.append(f"{highlight_name} was the highlight today, improving by {highlight_per * 100}% at {highlight_weight} lbs for {highlight_reps} reps")
     if heaviest_name and heaviest_weight:
-        details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight} for {heaviest_reps} reps")
+        details.append(f"{heaviest_name} was the heaviest exercise at {heaviest_weight} lbs for {heaviest_reps} reps")
 
     if details:
         overall += ", " + " and ".join(details) + "."
@@ -607,7 +609,7 @@ def run_results():
             newHvy = last["weight"]
             if newImprov > currentImprov:
                 currentImprov = newImprov
-                highlight = f"{ex['exerciseName']} was the highlight, improving by {round(currentImprov * 100.0)}%."
+                highlight = last
 
             if newHvy > currentHvy:
                 currentHvy = newHvy
@@ -618,7 +620,7 @@ def run_results():
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
 
-    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, heaviest, date_last)
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, currentImprov, heaviest, date_last)
 
     return render_template("results.html",
                            selected=selected,
