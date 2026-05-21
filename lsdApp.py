@@ -42,6 +42,15 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
 
     return None
 
+def get_date_entry(data, program, exercise, set_num, date):
+    acc = 0
+    for row in reversed(data):
+        if (row["program"] == program and row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num) and int(row["date"]) == date):
+            return row
+
+    return None
+
 def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
@@ -449,7 +458,6 @@ def run_results():
 
     user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
 
-    # Fall back to most recent program if none provided
     selected = request.args.get("program")
     if not selected or selected not in my_programs:
         selected = user_data[-1]["program"] if user_data else None
@@ -461,9 +469,19 @@ def run_results():
         key=lambda x: int(x["order"])
     )
 
+    # Get all unique dates for this program, sorted newest first
+    program_dates = sorted(
+        list(set(row["date"] for row in user_data if row["program"] == selected)),
+        reverse=True
+    )
+
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
     today = now.strftime("%m/%d/%Y")
+
+    # Default: two most recent dates
+    date_last = request.args.get("date_last", program_dates[0] if len(program_dates) > 0 else None)
+    date_prev = request.args.get("date_prev", program_dates[1] if len(program_dates) > 1 else None)
 
     last_entries = {}
     prev_entries = {}
@@ -476,8 +494,10 @@ def run_results():
     for ex in exercises:
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
-            last = get_last_entry(user_data, selected, ex["exerciseName"], s, back=0)
-            prev = get_last_entry(user_data, selected, ex["exerciseName"], s, back=1)
+
+            last = get_date_entry(user_data, selected, ex["exerciseName"], s, date_last) if date_last else None
+            prev = get_date_entry(user_data, selected, ex["exerciseName"], s, date_prev) if date_prev else None
+
             last_entries[key] = last
             prev_entries[key] = prev
 
@@ -488,7 +508,7 @@ def run_results():
             newHvy = last["weight"]
             if newImprov > currentImprov:
                 currentImprov = newImprov
-                highlight = f"{ex['exerciseName']} was the highlight of today's workout, improving by {round(currentImprov * 100.0)}%."
+                highlight = f"{ex['exerciseName']} was the highlight, improving by {round(currentImprov * 100.0)}%."
 
             if newHvy > currentHvy:
                 currentHvy = newHvy
@@ -511,6 +531,9 @@ def run_results():
                            heaviest=heaviest,
                            newPRs=newPRs,
                            report=report,
+                           program_dates=program_dates,
+                           date_last=date_last,
+                           date_prev=date_prev,
                            narrator=session.get("settings", {}).get("narrator", "default"))
 
 @app.route("/manage", methods=["GET", "POST"])

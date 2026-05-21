@@ -5,7 +5,7 @@
     <h2 class="fw-bold mb-0">Workout Complete</h2>
     <div class="d-flex gap-2 align-items-center">
         <select class="form-select form-select-sm" style="width: auto;"
-                onchange="window.location.href='/run/results?program=' + this.value">
+                onchange="window.location.href='/run/results?program={{ selected }}&date_last=' + this.value + '&date_prev={{ date_prev }}'">
             {% for prog in my_programs %}
             <option value="{{ prog }}" {% if prog == selected %}selected{% endif %}>{{ prog }}</option>
             {% endfor %}
@@ -14,7 +14,28 @@
     </div>
 </div>
 
-<p class="text-secondary mb-4">Here's how <strong class="text-light">{{ selected }}</strong> went today compared to last time.</p>
+<div class="d-flex gap-3 align-items-center mb-4">
+    <div class="d-flex align-items-center gap-2">
+        <label class="text-secondary small mb-0">Comparing</label>
+        <select class="form-select form-select-sm" style="width: auto;"
+                onchange="window.location.href='/run/results?program={{ selected }}&date_last=' + this.value + '&date_prev={{ date_prev }}'">
+            {% for date in program_dates %}
+            <option value="{{ date }}" {% if date == date_last %}selected{% endif %}>{{ date }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <span class="text-secondary small">vs</span>
+    <div class="d-flex align-items-center gap-2">
+        <select class="form-select form-select-sm" style="width: auto;"
+                onchange="window.location.href='/run/results?program={{ selected }}&date_last={{ date_last }}&date_prev=' + this.value">
+            {% for date in program_dates %}
+            <option value="{{ date }}" {% if date == date_prev %}selected{% endif %}>{{ date }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<p class="text-secondary mb-4">Here's how <strong class="text-light">{{ selected }}</strong> went on <strong class="text-light">{{ date_last }}</strong> compared to <strong class="text-light">{{ date_prev }}</strong>.</p>
 
 {% for ex in exercises %}
     <div class="card mb-4">
