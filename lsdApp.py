@@ -368,7 +368,7 @@ def home():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
     user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
-
+    print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
     welcome_message = None
 
     narrator = session.get("settings", {}).get("narrator", "default")

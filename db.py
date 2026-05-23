@@ -23,7 +23,7 @@ def getNextUserId():
 
 # ── LOGS ──────────────────────────────────────────────────
 def getAllLogs():
-    return supabase.table("Logs").select("*").limit(10000).execute().data
+    return supabase.table("Logs").select("*").range(0, 9999).execute().data
 
 def appendLog(row: dict):
     supabase.table("Logs").insert(row).execute()
