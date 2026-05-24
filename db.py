@@ -22,6 +22,10 @@ def getNextUserId():
     return max(int(u["userId"]) for u in users) + 1
 
 # ── LOGS ──────────────────────────────────────────────────
+def getUserLogs(user_id):
+    data = supabase.table("Logs").select("*").eq("userId", user_id).order("id", desc=True).limit(1000).execute().data
+    return list(reversed(data))
+
 def getAllLogs():
     return supabase.table("Logs").select("*").limit(10000).execute().data
 

@@ -367,7 +367,7 @@ def home():
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+    user_data = getUserLogs(session["user_id"])
     print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
     welcome_message = None
 
@@ -401,7 +401,7 @@ def run():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
 
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+    user_data = getUserLogs(session["user_id"])
 
     if not my_programs:
         return render_template("run.html", my_programs=[], exercises=[], user_data=[],
@@ -483,7 +483,7 @@ def run():
         else:
             success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
-        user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+        user_data = getUserLogs(session["user_id"])
         exercises = sorted(
             [row for row in user_prog if row["programName"] == selected],
             key=lambda x: int(x["order"])
@@ -556,7 +556,7 @@ def run_results():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
 
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+    user_data = getUserLogs(session["user_id"])
 
     selected = request.args.get("program")
     if not selected or selected not in my_programs:
@@ -644,7 +644,7 @@ def manage():
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+    user_data = getUserLogs(session["user_id"])
 
     max_exercises = 25
     success_message = None
@@ -860,7 +860,7 @@ def logs():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
 
-    user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+    user_data = getUserLogs(session["user_id"])
 
     success_message = None
     error_message = None
@@ -905,7 +905,7 @@ def logs():
             for row in matching:
                 deleteLog(row["id"])
             success_message = "Log deleted!"
-            user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+            user_data = getUserLogs(session["user_id"])
 
         elif action == "save_log":
             orig_date = request.form.get("orig_date")
@@ -939,7 +939,7 @@ def logs():
                     "notes": upd_notes
                 })
             success_message = "Log updated!"
-            user_data = [row for row in getAllLogs() if str(row["userId"]) == str(session["user_id"])]
+            user_data = getUserLogs(session["user_id"])
 
     exercise_logs = [row for row in user_data if
                      row["program"] == selected_prog and
