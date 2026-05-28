@@ -161,12 +161,6 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Opening
     pr_ratio = len(prd) / total if total > 0 else 0
-    if pr_ratio >= .8:
-        report += f"Just want to say, today was an excellent day, with you setting new PRs in {len(prd)} exercises."
-    elif pr_ratio >= .6:
-        report += f"First of all, today was a great day, with you setting new PRs in {len(prd)} exercises."
-    elif pr_ratio > 0:
-        report += "Before anything else, good work on the new PRs!"
 
     # Overall + highlight + heaviest
     highlight_name = highlight["exerciseName"] if highlight else None
@@ -290,16 +284,6 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
                 report += note_text + "."
 
     # Closing
-    if prd:
-        report += " Setting a PR today makes this one worth remembering."
-    elif numQuality >= .75:
-        report += " Keep up the great work!"
-    elif numQuality >= .5:
-        report += " Good job today overall."
-    elif numQuality >= .25:
-        report += " As long as you gave it your all, that's what counts."
-    else:
-        report += " Get some rest and come back stronger next time."
 
     return report
 
@@ -368,6 +352,7 @@ def home():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
     user_data = getUserLogs(session["user_id"])
+    log_cap_warning = len(user_data) >= 1000
     print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
     welcome_message = None
 
@@ -389,6 +374,7 @@ def home():
                            user_prog=user_prog,
                            my_programs=my_programs,
                            user_data=user_data,
+                           log_cap_warning=log_cap_warning,
                            welcome_message=welcome_message
                            )
 
@@ -402,6 +388,7 @@ def run():
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
 
     user_data = getUserLogs(session["user_id"])
+    log_cap_warning = len(user_data) >= 1000
 
     if not my_programs:
         return render_template("run.html", my_programs=[], exercises=[], user_data=[],
@@ -483,7 +470,6 @@ def run():
         else:
             success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
 
-        user_data = getUserLogs(session["user_id"])
         exercises = sorted(
             [row for row in user_prog if row["programName"] == selected],
             key=lambda x: int(x["order"])
@@ -545,6 +531,7 @@ def run():
                            recommendations=recommendations,
                            success_message=success_message,
                            user_data=user_data,
+                           log_cap_warning=log_cap_warning,
                            quick_fill=session.get("settings", {}).get("quick_fill", 0))
 
 @app.route("/run/results")
@@ -582,6 +569,8 @@ def run_results():
     # Default: two most recent dates
     date_last = request.args.get("date_last", program_dates[0] if len(program_dates) > 0 else None)
     date_prev = request.args.get("date_prev", program_dates[1] if len(program_dates) > 1 else None)
+
+    user_data = getUserLogsByDates(session["user_id"], selected, date_last, date_prev)
 
     last_entries = {}
     prev_entries = {}
@@ -645,6 +634,7 @@ def manage():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
     user_data = getUserLogs(session["user_id"])
+    log_cap_warning = len(user_data) >= 1000
 
     max_exercises = 25
     success_message = None
@@ -848,6 +838,7 @@ def manage():
                            edit_exercises=edit_exercises,
                            next_order=next_order,
                            max_exercises=max_exercises,
+                           log_cap_warning=log_cap_warning,
                            success_message=success_message,
                            error_message=error_message)
 
@@ -859,8 +850,6 @@ def logs():
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog))
-
-    user_data = getUserLogs(session["user_id"])
 
     success_message = None
     error_message = None
@@ -883,6 +872,8 @@ def logs():
         selected_set = 1
     if selected_set > num_sets:
         selected_set = num_sets
+
+    user_data = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
 
     action = request.form.get("action")
 
@@ -966,6 +957,8 @@ def logs():
         }
         chart_data = df[["date", "weight", "reps", "1rm", "diff"]].sort_values("date").to_dict(orient="records")
 
+    log_cap_warning = len(user_data) >= 1000
+
     return render_template("logs.html",
                            my_programs=my_programs,
                            selected_prog=selected_prog,
@@ -978,6 +971,7 @@ def logs():
                            exercise_data=exercise_data,
                            stats=stats,
                            chart_data=chart_data,
+                           log_cap_warning=log_cap_warning,
                            success_message=success_message,
                            error_message=error_message)
 
@@ -1064,4 +1058,7 @@ if __name__ == "__main__":
 
 
 # to do list
-# fix ordering issues when deleting an exercise
+# make it so it only fetches logs for a certain program
+# make it so that a notification pops up if you are out of space
+# make it so that you can customize what data you pull
+# fix bug where it deletes both references if there is a duplicate

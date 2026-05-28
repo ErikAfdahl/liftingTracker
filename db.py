@@ -26,6 +26,24 @@ def getUserLogs(user_id):
     data = supabase.table("Logs").select("*").eq("userId", user_id).order("id", desc=True).limit(1000).execute().data
     return list(reversed(data))
 
+def getUserLogsByExercise(user_id, program, exercise, set_num):
+    return (supabase.table("Logs")
+            .select("*")
+            .eq("userId", user_id)
+            .eq("program", program)
+            .eq("exerciseName", exercise)
+            .eq("setNum", set_num)
+            .order("id", desc=False)
+            .execute().data)
+
+def getUserLogsByDates(user_id, program, date_last, date_prev):
+    return (supabase.table("Logs")
+            .select("*")
+            .eq("userId", user_id)
+            .eq("program", program)
+            .in_("date", [date_last, date_prev])
+            .execute().data)
+
 def getAllLogs():
     return supabase.table("Logs").select("*").limit(10000).execute().data
 
