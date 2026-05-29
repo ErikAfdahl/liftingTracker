@@ -91,7 +91,7 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     return acc
     return acc
 
-def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last):
+def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, narrator):
     import random
 
     prd = newPRs
@@ -170,7 +170,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     heaviest_weight = heaviest["weight"] if heaviest else None
     heaviest_reps = heaviest["reps"] if heaviest else None
 
-    overall = f"Overall today was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
+    overall = f"Overall {selected} on {date_last} was {'an' if quality == 'excellent' else 'a'} {quality} {selected} day"
     details = []
     if highlight_name:
         details.append(f"{highlight_name} was the highlight today, improving by {round(highlight_per * 100, 1)}% at {highlight_weight} lbs for {highlight_reps} reps")
@@ -607,8 +607,8 @@ def run_results():
                 all_time_best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
-
-    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, currentImprov, heaviest, date_last)
+    narrator = session.get("settings", {}).get("narrator", "default")
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, currentImprov, heaviest, date_last, narrator)
 
     return render_template("results.html",
                            selected=selected,
@@ -623,7 +623,7 @@ def run_results():
                            program_dates=program_dates,
                            date_last=date_last,
                            date_prev=date_prev,
-                           narrator=session.get("settings", {}).get("narrator", "default"))
+                           narrator=narrator)
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
