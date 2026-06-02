@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from tkinter.dnd import dnd_start
+
+from flask import Flask, render_template, request, redirect, url_for, session, make_response
 from datetime import *
 import pytz
 import bcrypt
@@ -23,12 +25,16 @@ def isOpen(exercises, order):
             return False
     return True
 
-def calculate_diff(data, program, exercise, set_num, current_1rm):
+def calculate_diff(data, program, exercise, set_num, current, max=0):
     for row in reversed(data):
         if (row["program"] == program and
                 row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num)):
-            return round(current_1rm - float(row["1rm"]), 3)
+                int(row["setNum"]) == int(set_num) and max == 0):
+            return round(current - float(row["1rm"]), 3)
+        elif (row["program"] == program and
+                row["exerciseName"] == exercise and
+                int(row["setNum"]) == int(set_num) and max == 1):
+            return round(current - float(row["weight"]), 3)
     return 0
 
 def get_last_entry(data, program, exercise, set_num, back = 0):
@@ -84,6 +90,16 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     acc += 1
                 else:
                     return acc
+            elif direction == -2:
+                if row["diff_weight"] < 0:
+                    acc += 1
+                else:
+                    return acc
+            elif direction == 2:
+                if row["diff_weight"] > 0:
+                    acc += 1
+                else:
+                    return acc
             else:
                 if row["diff"] > 0:
                     acc += 1
@@ -100,6 +116,8 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     declined = []
     improved = []
     stagnant = []
+    increased = []
+    decreased = []
 
     for ex in exercises:
         key = f"{ex['exerciseName']}_1"
@@ -109,13 +127,19 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         if not last or not prev:
             continue
 
-        delta = last["1rm"] - prev["1rm"]
+        delta = last["diff"]
+        weight_change = last["diff_weight"]
         if delta > 0:
             improved.append(last)
         elif delta < 0:
             declined.append(last)
         else:
             stagnant.append(last)
+
+        if weight_change > 0:
+            increased.append(last)
+        elif weight_change < 0:
+            decreased.append(last)
 
     total = len(exercise_names)
     numQuality = 1.0 - (len(declined) / total) + (len(improved) / total)
@@ -248,6 +272,54 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += f" {pick_adj(len(improved), total)} amount of improvement compared to last session, "
         report += f"as {'1 exercise improved' if len(improved) == 1 else f'{len(improved)} exercises improved'} "
         report += f"in the first set out of {total} — {list_exercises(improved)} improved."
+
+        streaks = []
+        for exercise in improved:
+            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 1)
+            if streak > 1:
+                streaks.append((exercise["exerciseName"], streak))
+
+        if len(streaks) == 1:
+            report += f" Good work, {streaks[0][0]} has now been improving for {streaks[0][1]} straight sessions."
+        elif len(streaks) == 2:
+            report += (f" Both {streaks[0][0]} and {streaks[1][0]} have been improving, "
+                       f"being so for {streaks[0][1]} and {streaks[1][1]} sessions respectively.")
+        elif len(streaks) > 2:
+            streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
+            joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
+            report += f" Several exercises have been on an improvement streak: {joined}."
+
+    if increased or decreased:
+        if declined and stagnant:
+            report += " However there was"
+        elif declined or stagnant:
+            report += " But there was also"
+        else:
+            report += " There was"
+        report += f" {pick_adj(len(improved), total)} instances of weight change compared to last session, "
+        report += f"as {'1 exercise changed' if len(increased) + len(decreased) == 1 else f'{len(increased) + len(decreased)} exercises changed'} "
+        report += f"in the first set out of {total} — {list_exercises(increased)} increased in weight and {list_exercises(decreased)} decreased in weight."
+
+        dni = []
+        ind = []
+
+        for exercise in increased:
+            if exercise in declined:
+                ind.append(exercise)
+
+        for exercise in decreased:
+            if exercise in improved:
+                dni.append(exercise)
+
+        if ind:
+            report = (f"Do note that out of the exercises that declined in 1RM values, {list_exercises(declined)}, "
+                      f"{len(ind)} of them also increased in weight — {list_exercises(ind)}. Which if clause to dismiss "
+                      f"their decline if you wish.")
+
+        if dni:
+            report = (f"Do note that out of the exercises that improved in 1RM values, {list_exercises(improved)}, "
+                      f"{len(dni)} of them also decreased in weight — {list_exercises(dni)}. Which if clause to dismiss "
+                      f"their improvement if you wish.")
 
         streaks = []
         for exercise in improved:
@@ -443,6 +515,7 @@ def run():
 
         one_rm = round(weight * (1 + float(reps) / 30), 3)
         diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
+        diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
         appendLog({
             "userId": int(session["user_id"]),
@@ -455,20 +528,21 @@ def run():
             "reps": reps,
             "1rm": one_rm,
             "diff": diff,
-            "notes": notes
+            "notes": notes,
+            "diff_weight": diff_weight
         })
 
         narrator = session.get("settings", {}).get("narrator", "default")
         if narrator == "mommy":
-            success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+            success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
         elif narrator == "hard":
-            success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+            success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
         elif narrator == "goth":
-            success_message = f"You like this, don't you baby? Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+            success_message = f"You like this, don't you baby? Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
         elif narrator == "mort":
-            success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff}"
+            success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
         else:
-            success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff}"
+            success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
 
         exercises = sorted(
             [row for row in user_prog if row["programName"] == selected],
@@ -520,19 +594,23 @@ def run():
             key = f"{ex['exerciseName']}_{set_num}"
             prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], set_num, back=1)
 
-    return render_template("run.html",
-                           my_programs=my_programs,
-                           selected=selected,
-                           exercises=exercises,
-                           ex_index=ex_index,
-                           today=today,
-                           last_entries=last_entries,
-                           prev_entries=prev_entries,
-                           recommendations=recommendations,
-                           success_message=success_message,
-                           user_data=user_data,
-                           log_cap_warning=log_cap_warning,
-                           quick_fill=session.get("settings", {}).get("quick_fill", 0))
+    response = make_response(render_template("run.html",
+                                             my_programs=my_programs,
+                                             selected=selected,
+                                             exercises=exercises,
+                                             ex_index=ex_index,
+                                             today=today,
+                                             last_entries=last_entries,
+                                             prev_entries=prev_entries,
+                                             recommendations=recommendations,
+                                             success_message=success_message,
+                                             user_data=user_data,
+                                             log_cap_warning=log_cap_warning,
+                                             quick_fill=session.get("settings", {}).get("quick_fill", 0)))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 @app.route("/run/results")
 def run_results():
@@ -946,16 +1024,17 @@ def logs():
         df["reps"] = pd.to_numeric(df["reps"])
         df["1rm"] = pd.to_numeric(df["1rm"])
         df["diff"] = pd.to_numeric(df["diff"])
+        df["diff_weight"] = pd.to_numeric(df["diff_weight"])
         stats = {
             "best_1rm": round(df["1rm"].max(), 1),
             "avg_1rm": round(df["1rm"].mean(), 1),
             "best_weight": round(df["weight"].max(), 1),
             "avg_reps": round(df["reps"].mean(), 1),
             "count": len(df),
-            "table": df[["weight", "reps", "1rm", "diff"]].agg(
+            "table": df[["weight", "reps", "1rm", "diff", "diff_weight"]].agg(
                 ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
-        chart_data = df[["date", "weight", "reps", "1rm", "diff"]].sort_values("date").to_dict(orient="records")
+        chart_data = df[["date", "weight", "reps", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
 
     log_cap_warning = len(user_data) >= 1000
 
