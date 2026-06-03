@@ -1,5 +1,3 @@
-from tkinter.dnd import dnd_start
-
 from flask import Flask, render_template, request, redirect, url_for, session, make_response
 from datetime import *
 import pytz
