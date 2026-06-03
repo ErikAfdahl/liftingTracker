@@ -1003,6 +1003,7 @@ def logs():
                     "reps": upd_reps,
                     "1rm": new_1rm,
                     "diff": 0,
+                    "diff_weight": 0,
                     "notes": upd_notes
                 })
             success_message = "Log updated!"
@@ -1074,8 +1075,8 @@ def deleted_logs():
                         and row["program"] == program
                         and row["exerciseName"] == exercise
                         and str(row["setNum"]) == str(set_num)]
-            for row in matching:
-                deleteLog(row["id"])
+            if matching:
+                deleteLog(matching[0]["id"])
 
         elif action == "clear_all":
             matching = [row for row in all_logs
