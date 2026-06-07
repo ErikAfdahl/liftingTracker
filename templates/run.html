@@ -74,77 +74,83 @@
     </div>
 
     <!-- Current exercise -->
-    {% set ex = exercises[ex_index] %}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span>{{ ex.exerciseName }}</span>
-            {% if ex.notes %}
-                <small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
-            {% endif %}
-        </div>
-        <div class="card-body">
-            {% for s in range(1, ex.numSets | int + 1) %}
-                {% set key = ex.exerciseName ~ "_" ~ s %}
-                {% set last = last_entries.get(key) %}
-                {% set rec = recommendations.get(key) %}
+{% set ex = exercises[ex_index] %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>{{ ex.exerciseName }}</span>
+        {% if ex.notes %}
+            <small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% for s in range(1, ex.numSets | int + 1) %}
+            {% set key = ex.exerciseName ~ "_" ~ s %}
+            {% set last = last_entries.get(key) %}
+            {% set rec = recommendations.get(key) %}
 
-                <div class="mb-4">
-                    <h6 class="fw-bold">Set {{ s }}</h6>
-
-                    {% if last %}
-                        <small class="text-secondary">
-                            Last time: {{ last.weight }} lbs for {{ last.reps }} reps
-                            {% if last.notes %} — "{{ last.notes }}"{% endif %}
-                            ({{ last.date }})
-                        </small><br>
-                        {% if rec %}
-                            <small class="text-secondary fst-italic">{{ rec }}</small>
-                        {% endif %}
-                    {% else %}
-                        <small class="text-secondary">No previous entry found.</small>
+            <div class="mb-4">
+                <div class="d-flex align-items-baseline gap-3 mb-1">
+                    <h6 class="fw-bold mb-0">Set {{ s }}</h6>
+                    {% set rr = rep_ranges.get(key) %}
+                    {% if rr %}
+                        <small class="text-secondary fst-italic">{{ rr }}</small>
                     {% endif %}
-
-                    <form method="POST" action="/run" class="mt-2">
-                        <input type="hidden" name="action" value="log_set">
-                        <input type="hidden" name="selected_program" value="{{ selected }}">
-                        <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
-                        <input type="hidden" name="set_num" value="{{ s }}">
-                        <input type="hidden" name="ex_index" value="{{ ex_index }}">
-
-                        <div class="row g-2 align-items-end">
-                            <div class="col-md-2">
-                                <label class="form-label text-secondary small">Date</label>
-                                <input type="text" name="workout_date" class="form-control form-control-sm"
-                                       value="{{ today }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label text-secondary small">Weight (lbs)</label>
-                                <input type="number" name="weight" class="form-control form-control-sm"
-                                       min="0" step="0.5"
-                                       value="{{ last.weight if last else 0 }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label text-secondary small">Reps</label>
-                                <input type="number" name="reps" class="form-control form-control-sm"
-                                       step="1" min="0"
-                                       value="{{ last.reps if last else ex.minReps }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-secondary small">Notes (optional)</label>
-                                <input type="text" name="notes" class="form-control form-control-sm"
-                                       placeholder="Any notes...">
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
 
-                {% if not loop.last %}<hr class="my-2">{% endif %}
-            {% endfor %}
-        </div>
+                {% if last %}
+                    <small class="text-secondary">
+                        Last time: {{ last.weight }} lbs for {{ last.reps }} reps
+                        {% if last.notes %} — "{{ last.notes }}"{% endif %}
+                        ({{ last.date }})
+                    </small><br>
+                    {% if rec %}
+                        <small class="text-secondary fst-italic">{{ rec }}</small>
+                    {% endif %}
+                {% else %}
+                    <small class="text-secondary">No previous entry found.</small>
+                {% endif %}
+
+                <form method="POST" action="/run" class="mt-2">
+                    <input type="hidden" name="action" value="log_set">
+                    <input type="hidden" name="selected_program" value="{{ selected }}">
+                    <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                    <input type="hidden" name="set_num" value="{{ s }}">
+                    <input type="hidden" name="ex_index" value="{{ ex_index }}">
+
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label text-secondary small">Date</label>
+                            <input type="text" name="workout_date" class="form-control form-control-sm"
+                                   value="{{ today }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-secondary small">Weight (lbs)</label>
+                            <input type="number" name="weight" class="form-control form-control-sm"
+                                   min="0" step="0.5"
+                                   value="{{ last.weight if last else 0 }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-secondary small">Reps</label>
+                            <input type="number" name="reps" class="form-control form-control-sm"
+                                   step="1" min="0"
+                                   value="{{ last.reps if last else ex.minReps }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">Notes (optional)</label>
+                            <input type="text" name="notes" class="form-control form-control-sm"
+                                   placeholder="Any notes...">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if not loop.last %}<hr class="my-2">{% endif %}
+        {% endfor %}
     </div>
+</div>
 
     <!-- Back / Next navigation -->
     <div class="d-flex justify-content-between">

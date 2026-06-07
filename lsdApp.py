@@ -571,6 +571,7 @@ def run():
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
 
+    rep_ranges = {}
     last_entries = {}
     recommendations = {}
     for ex in exercises:
@@ -578,6 +579,7 @@ def run():
             key = f"{ex['exerciseName']}_{s}"
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
+            rep_ranges[key] = f"Rep Range for {ex['exerciseName']} is {ex['minReps']}-{ex['maxReps']} reps."
             if last:
                 if ((int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25)) or
                         int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75)):
@@ -608,6 +610,7 @@ def run():
                                              last_entries=last_entries,
                                              prev_entries=prev_entries,
                                              recommendations=recommendations,
+                                             rep_ranges=rep_ranges,
                                              success_message=success_message,
                                              user_data=user_data,
                                              log_cap_warning=log_cap_warning,
