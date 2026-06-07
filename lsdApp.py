@@ -294,9 +294,18 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             report += " But there was also"
         else:
             report += " There was"
-        report += f" {pick_adj(len(improved), total)} instances of weight change compared to last session, "
-        report += f"as {'1 exercise changed' if len(increased) + len(decreased) == 1 else f'{len(increased) + len(decreased)} exercises changed'} "
-        report += f"in the first set out of {total} — {list_exercises(increased)} increased in weight and {list_exercises(decreased)} decreased in weight."
+
+        total_changed = len(increased) + len(decreased)
+        report += f" {pick_adj(total_changed, total)} instances of weight change compared to last session, "
+        report += f"as {'1 exercise changed' if total_changed == 1 else f'{total_changed} exercises changed'} "
+        report += f"in the first set out of {total}"
+
+        if increased and decreased:
+            report += f" — {list_exercises(increased)} increased in weight and {list_exercises(decreased)} decreased in weight."
+        elif increased:
+            report += f" — {list_exercises(increased)} increased in weight."
+        else:
+            report += f" — {list_exercises(decreased)} decreased in weight."
 
         dni = []
         ind = []
@@ -310,14 +319,12 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
                 dni.append(exercise)
 
         if ind:
-            report = (f"Do note that out of the exercises that declined in 1RM values, {list_exercises(declined)}, "
-                      f"{len(ind)} of them also increased in weight — {list_exercises(ind)}. Which if clause to dismiss "
-                      f"their decline if you wish.")
+            report += (f" Do note that out of the exercises that declined in 1RM values, {list_exercises(declined)}, "
+                       f"{len(ind)} of them also increased in weight — {list_exercises(ind)}, which you may wish to dismiss.")
 
         if dni:
-            report = (f"Do note that out of the exercises that improved in 1RM values, {list_exercises(improved)}, "
-                      f"{len(dni)} of them also decreased in weight — {list_exercises(dni)}. Which if clause to dismiss "
-                      f"their improvement if you wish.")
+            report += (f" Do note that out of the exercises that improved in 1RM values, {list_exercises(improved)}, "
+                       f"{len(dni)} of them also decreased in weight — {list_exercises(dni)}, which you may wish to dismiss.")
 
         streaks = []
         for exercise in improved:
