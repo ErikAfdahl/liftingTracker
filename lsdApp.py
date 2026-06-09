@@ -364,6 +364,17 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     return report
 
+def parseRepRange(repRange, numSets):
+    try:
+        parts = [int(x.strip()) for x in str(repRange).split(",")]
+
+        if len(parts) >= numSets:
+            return parts[:numSets]
+        else:
+            return parts + [parts[-1]] * (numSets - len(parts))
+    except ValueError:
+        return []
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
@@ -575,23 +586,35 @@ def run():
     last_entries = {}
     recommendations = {}
     for ex in exercises:
+        minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
+        maxRepRange = [int(x.strip()) for x in str(ex["maxReps"]).split(",")]
+
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
-            rep_ranges[key] = f"Rep Range for {ex['exerciseName']} is {ex['minReps']}-{ex['maxReps']} reps."
+
+
+
+            if minRepRange[s-1] == maxRepRange[s-1]:
+                rep_ranges[key] = f"Rep Goal for set {s} is {minRepRange[s-1]} reps."
+            else:
+                rep_ranges[key] = f"Rep Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} reps."
+
             if last:
-                if ((int(last["reps"]) >= int(int(ex["maxReps"]) * 1.25)) or
-                        int(last["reps"]) < int((int(ex["minReps"]) - 1) * .75)):
+                if int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
                     # if last reps are significantly more than max or significantly less than min
-                    rec_weight = round((last["1rm"] / (1 + (ex["maxReps"] / 30))) / ex["increment"]) * ex["increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
-                elif int(last["reps"]) >= int(ex["maxReps"]): # if last reps are more than max
+                    rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} reps"
+                elif int(last["reps"]) < int((minRepRange[s-1] - 1) * .75):
+                    rec_weight = round((last["1rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} reps"
+                elif int(last["reps"]) >= maxRepRange[s-1]: # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['minReps']} reps"
-                elif int(last["reps"]) < int(ex["minReps"]) - 1: # if last reps are less than min
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} reps"
+                elif int(last["reps"]) < minRepRange[s-1] - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {ex['maxReps']} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} reps"
                 else: # if last reps are between max and min
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
 
@@ -746,8 +769,8 @@ def manage():
                     "exerciseName": "",
                     "numSets": 0,
                     "increment": 0,
-                    "minReps": 0,
-                    "maxReps": 0,
+                    "minReps": "0",
+                    "maxReps": "0",
                     "order": 0,
                     "notes": ""
                 })
@@ -779,15 +802,28 @@ def manage():
             new_exercise = request.form.get("new_exercise", "").strip()
             new_sets = int(request.form.get("new_sets", 1))
             new_inc = float(request.form.get("new_inc", 5.0))
-            new_min = int(request.form.get("new_min", 6))
-            new_max = int(request.form.get("new_max", 8))
+            new_min = request.form.get("new_min", "6")
+            new_max = request.form.get("new_max", "8")
             new_notes = request.form.get("new_notes", "")
             new_order = int(request.form.get("new_order", 1))
             edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
 
+            new_min = parseRepRange(new_min, new_sets)
+            new_max = parseRepRange(new_max, new_sets)
+            rangeError = False
+
+
+            if len(new_min) != 0 and len(new_max) != 0:
+                for i in range(len(new_min)):
+                    if new_min[i] > new_max[i]:
+                        rangeError = True
+                        break
+
             if not new_exercise:
                 error_message = "Please enter an exercise name."
-            elif new_max < new_min:
+            elif len(new_min) == 0 or len(new_max) == 0:
+                error_message = "Please enter a valid range."
+            elif rangeError:
                 error_message = "Minimum reps must be less than or equal to maximum reps."
             else:
                 # Handle order conflict
@@ -809,8 +845,8 @@ def manage():
                     "exerciseName": new_exercise,
                     "numSets": new_sets,
                     "increment": new_inc,
-                    "minReps": new_min,
-                    "maxReps": new_max,
+                    "minReps": ",".join(str(x) for x in new_min),
+                    "maxReps": ",".join(str(x) for x in new_max),
                     "order": new_order,
                     "notes": new_notes
                 })
@@ -861,55 +897,72 @@ def manage():
             upd_name = request.form.get("upd_name", exercise_name).strip()
             upd_sets = int(request.form.get("upd_sets"))
             upd_inc = float(request.form.get("upd_inc"))
-            upd_min = int(request.form.get("upd_min"))
-            upd_max = int(request.form.get("upd_max"))
+            upd_min = request.form.get("upd_min")
+            upd_max = request.form.get("upd_max")
             upd_notes = request.form.get("upd_notes", "")
             upd_order = int(request.form.get("upd_order"))
             edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
 
-            # Handle order conflict
-            swapped_name = None
-            for ex in edit_exercises:
-                if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
-                    swapped_name = ex["exerciseName"]
-                    orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                    updateProgram(ex["id"], {"order": int(orig_order)})
-                    break
+            upd_min = parseRepRange(upd_min, upd_sets)
+            upd_max = parseRepRange(upd_max, upd_sets)
+            rangeError = False
 
-            # Update the exercise
-            target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
-            if target:
-                updateProgram(target["id"], {
-                    "exerciseName": upd_name,
-                    "numSets": upd_sets,
-                    "increment": upd_inc,
-                    "minReps": upd_min,
-                    "maxReps": upd_max,
-                    "order": upd_order,
-                    "notes": upd_notes
-                })
+            if len(upd_min) != 0 and len(upd_max) != 0:
+                for i in range(len(upd_min)):
+                    if upd_min[i] > upd_max[i]:
+                        rangeError = True
+                        break
 
-            # Rename in logs if name changed
-            if upd_name != exercise_name:
-                logs_to_update = [row for row in user_data
-                                  if row["program"] == selected_edit
-                                  and row["exerciseName"] == exercise_name]
-                for row in logs_to_update:
-                    updateLog(row["id"], {"exerciseName": upd_name})
+            if not exercise_name:
+                error_message = "Please enter an exercise name."
+            elif len(upd_min) == 0 or len(upd_max) == 0:
+                error_message = "Please enter a valid range."
+            elif rangeError:
+                error_message = "Minimum reps must be less than or equal to maximum reps."
+            else:
+                # Handle order conflict
+                swapped_name = None
+                for ex in edit_exercises:
+                    if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
+                        swapped_name = ex["exerciseName"]
+                        orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                        updateProgram(ex["id"], {"order": int(orig_order)})
+                        break
 
-                # check for deleted logs, if any exist, set their status to alive again
-                logs_to_update = [row for row in user_data
-                                  if row["program"] == selected_edit
-                                  and row["exerciseName"] == upd_name  # use upd_name, not exercise_name
-                                  and int(row["status"]) == 0]
-                for row in logs_to_update:
-                    updateLog(row["id"], {"status": 1})
+                # Update the exercise
+                target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
+                if target:
+                    updateProgram(target["id"], {
+                        "exerciseName": upd_name,
+                        "numSets": upd_sets,
+                        "increment": upd_inc,
+                        "minReps": ",".join(str(x) for x in upd_min),
+                        "maxReps": ",".join(str(x) for x in upd_max),
+                        "order": upd_order,
+                        "notes": upd_notes
+                    })
 
-            success_message = f"Saved changes to {upd_name}!"
-            if swapped_name:
-                success_message += f" Swapped order with '{swapped_name}'."
-            prog_data = getAllProgram()
-            user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+                # Rename in logs if name changed
+                if upd_name != exercise_name:
+                    logs_to_update = [row for row in user_data
+                                      if row["program"] == selected_edit
+                                      and row["exerciseName"] == exercise_name]
+                    for row in logs_to_update:
+                        updateLog(row["id"], {"exerciseName": upd_name})
+
+                    # check for deleted logs, if any exist, set their status to alive again
+                    logs_to_update = [row for row in user_data
+                                      if row["program"] == selected_edit
+                                      and row["exerciseName"] == upd_name  # use upd_name, not exercise_name
+                                      and int(row["status"]) == 0]
+                    for row in logs_to_update:
+                        updateLog(row["id"], {"status": 1})
+
+                success_message = f"Saved changes to {upd_name}!"
+                if swapped_name:
+                    success_message += f" Swapped order with '{swapped_name}'."
+                prog_data = getAllProgram()
+                user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
         [row for row in user_prog if row["programName"] == selected_edit and row["exerciseName"] != ""],
