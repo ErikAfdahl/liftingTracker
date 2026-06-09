@@ -600,9 +600,9 @@ def run():
             if minRepRange[s-1] == 0:
                 rep_ranges[key] = None
             elif minRepRange[s-1] == maxRepRange[s-1]:
-                rep_ranges[key] = f"Rep Goal for set {s} is {minRepRange[s-1]} reps."
+                rep_ranges[key] = f"Target for set {s} is {minRepRange[s-1]} reps."
             else:
-                rep_ranges[key] = f"Rep Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} reps."
+                rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} reps." # here
 
             if last:
                 if minRepRange[s - 1] == 0:
@@ -793,7 +793,8 @@ def manage():
                     "minReps": "0",
                     "maxReps": "0",
                     "order": 0,
-                    "notes": ""
+                    "notes": "",
+                    "unit": "rep"
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
@@ -827,6 +828,7 @@ def manage():
             new_max = request.form.get("new_max", "8,4")
             new_notes = request.form.get("new_notes", "")
             new_order = int(request.form.get("new_order", 1))
+            new_unit = request.form.get("new_unit", "rep")
             edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
 
             new_min = parseRepRange(new_min, new_sets)
@@ -869,7 +871,8 @@ def manage():
                     "minReps": ",".join(str(x) for x in new_min),
                     "maxReps": ",".join(str(x) for x in new_max),
                     "order": new_order,
-                    "notes": new_notes
+                    "notes": new_notes,
+                    "unit": new_unit
                 })
 
                 # check for deleted logs, if any exist, set their status to alive again
@@ -922,6 +925,7 @@ def manage():
             upd_max = request.form.get("upd_max")
             upd_notes = request.form.get("upd_notes", "")
             upd_order = int(request.form.get("upd_order"))
+            upd_unit = request.form.get("upd_unit")
             edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
 
             upd_min = parseRepRange(upd_min, upd_sets)
@@ -960,7 +964,8 @@ def manage():
                         "minReps": ",".join(str(x) for x in upd_min),
                         "maxReps": ",".join(str(x) for x in upd_max),
                         "order": upd_order,
-                        "notes": upd_notes
+                        "notes": upd_notes,
+                        "unit": upd_unit
                     })
 
                 # Rename in logs if name changed
