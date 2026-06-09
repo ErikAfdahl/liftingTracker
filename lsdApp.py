@@ -802,8 +802,8 @@ def manage():
             new_exercise = request.form.get("new_exercise", "").strip()
             new_sets = int(request.form.get("new_sets", 1))
             new_inc = float(request.form.get("new_inc", 5.0))
-            new_min = request.form.get("new_min", "6")
-            new_max = request.form.get("new_max", "8")
+            new_min = request.form.get("new_min", "6,2")
+            new_max = request.form.get("new_max", "8,4")
             new_notes = request.form.get("new_notes", "")
             new_order = int(request.form.get("new_order", 1))
             edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
