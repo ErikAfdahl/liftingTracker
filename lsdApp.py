@@ -1002,6 +1002,50 @@ def manage():
                            success_message=success_message,
                            error_message=error_message)
 
+@app.route("/templates", methods=["GET", "POST"])
+def templates():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    prog_data = getAllProgram()
+    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+
+    template_prog = [row for row in prog_data if str(row["userId"]) == str(TEMPLATE_USER_ID) and row["exerciseName"] != ""]
+    template_programs = list(set(row["programName"] for row in template_prog))
+
+    success_message = None
+    error_message = None
+
+    if request.method == "POST" and request.form.get("action") == "copy_program":
+        prog_name = request.form.get("program_name")
+
+        if prog_name in my_programs:
+            error_message = f"You already have a program called '{prog_name}'."
+        else:
+            rows_to_copy = [row for row in template_prog if row["programName"] == prog_name]
+            for row in rows_to_copy:
+                appendProgram({
+                    "userId": int(session["user_id"]),
+                    "programName": row["programName"],
+                    "exerciseName": row["exerciseName"],
+                    "numSets": row["numSets"],
+                    "increment": row["increment"],
+                    "minReps": row["minReps"],
+                    "maxReps": row["maxReps"],
+                    "order": row["order"],
+                    "notes": row["notes"]
+                })
+            success_message = f"'{prog_name}' added to your programs!"
+            my_programs.append(prog_name)
+
+    return render_template("templates.html",
+                           template_prog=template_prog,
+                           template_programs=sorted(template_programs),
+                           my_programs=my_programs,
+                           success_message=success_message,
+                           error_message=error_message)
+
 @app.route("/logs", methods=["GET", "POST"])
 def logs():
     if "user_id" not in session:

@@ -4,6 +4,7 @@ from supabase import create_client
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+TEMPLATE_USER_ID = 19
 
 # ── ACCOUNTS ──────────────────────────────────────────────
 def getAllUsers():
@@ -22,6 +23,11 @@ def getNextUserId():
     return max(int(u["userId"]) for u in users) + 1
 
 # ── LOGS ──────────────────────────────────────────────────
+
+def getTemplateProgramData():
+    prog_data = getAllProgram()
+    return [row for row in prog_data if str(row["userId"]) == str(TEMPLATE_USER_ID)]
+
 def getUserLogs(user_id):
     data = supabase.table("Logs").select("*").eq("userId", user_id).order("id", desc=True).limit(1000).execute().data
     return list(reversed(data))
