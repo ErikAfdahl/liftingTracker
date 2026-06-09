@@ -587,6 +587,7 @@ def run():
     rep_ranges = {}
     last_entries = {}
     recommendations = {}
+    # units = {}
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
         maxRepRange = [int(x.strip()) for x in str(ex["maxReps"]).split(",")]
@@ -595,14 +596,14 @@ def run():
             key = f"{ex['exerciseName']}_{s}"
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
-
+            # units[key] = ex["unit"]
 
             if minRepRange[s-1] == 0:
                 rep_ranges[key] = None
             elif minRepRange[s-1] == maxRepRange[s-1]:
-                rep_ranges[key] = f"Target for set {s} is {minRepRange[s-1]} reps."
+                rep_ranges[key] = f"Target for set {s} is {minRepRange[s-1]} {ex['unit']}s."
             else:
-                rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} reps." # here
+                rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
             if last:
                 if minRepRange[s - 1] == 0:
@@ -610,18 +611,18 @@ def run():
                 elif int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
                     # if last reps are significantly more than max or significantly less than min
                     rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
                 elif int(last["reps"]) < int((minRepRange[s-1] - 1) * .75):
                     rec_weight = round((last["1rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
                 elif int(last["reps"]) >= maxRepRange[s-1]: # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
                 elif int(last["reps"]) < minRepRange[s-1] - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} reps"
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
                 else: # if last reps are between max and min
-                    recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} reps"
+                    recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
 
     prev_entries = {}
     for ex in exercises:
@@ -638,6 +639,7 @@ def run():
                                              last_entries=last_entries,
                                              prev_entries=prev_entries,
                                              recommendations=recommendations,
+                                             # units=units,
                                              rep_ranges=rep_ranges,
                                              success_message=success_message,
                                              user_data=user_data,
@@ -847,7 +849,7 @@ def manage():
             elif len(new_min) == 0 or len(new_max) == 0:
                 error_message = "Please enter a valid range."
             elif rangeError:
-                error_message = "Minimum reps must be less than or equal to maximum reps."
+                error_message = "Minimum units must be less than or equal to maximum units."
             else:
                 # Handle order conflict
                 for ex in edit_exercises:
@@ -943,7 +945,7 @@ def manage():
             elif len(upd_min) == 0 or len(upd_max) == 0:
                 error_message = "Please enter a valid range."
             elif rangeError:
-                error_message = "Minimum reps must be less than or equal to maximum reps."
+                error_message = "Minimum units must be less than or equal to maximum units."
             else:
                 # Handle order conflict
                 swapped_name = None
@@ -1085,6 +1087,7 @@ def logs():
     user_data = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
 
     action = request.form.get("action")
+    unit = exercises[selected_ex]["unit"]
 
     if request.method == "POST":
         if action == "delete_log":
@@ -1153,7 +1156,7 @@ def logs():
         import pandas as pd
         df = pd.DataFrame(exercise_logs)
         df["weight"] = pd.to_numeric(df["weight"])
-        df["reps"] = pd.to_numeric(df["reps"])
+        df["units"] = pd.to_numeric(df["units"])
         df["1rm"] = pd.to_numeric(df["1rm"])
         df["diff"] = pd.to_numeric(df["diff"])
         df["diff_weight"] = pd.to_numeric(df["diff_weight"])
@@ -1161,12 +1164,12 @@ def logs():
             "best_1rm": round(df["1rm"].max(), 1),
             "avg_1rm": round(df["1rm"].mean(), 1),
             "best_weight": round(df["weight"].max(), 1),
-            "avg_reps": round(df["reps"].mean(), 1),
+            "avg_units": round(df["units"].mean(), 1),
             "count": len(df),
-            "table": df[["weight", "reps", "1rm", "diff", "diff_weight"]].agg(
+            "table": df[["weight", "units", "1rm", "diff", "diff_weight"]].agg(
                 ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
-        chart_data = df[["date", "weight", "reps", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
+        chart_data = df[["date", "weight", "units", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
 
     log_cap_warning = len(user_data) >= 1000
 

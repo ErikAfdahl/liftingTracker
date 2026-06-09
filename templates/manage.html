@@ -111,12 +111,26 @@
                             <input type="number" name="new_inc" class="form-control form-control-sm" value="5.0" min="0.5" step="0.5">
                         </div>
                         <div class="col-md-1">
-                            <label class="form-label text-secondary small">Min Reps</label>
+                            <label class="form-label text-secondary small">Min</label>
                             <input type="text" name="new_min" class="form-control form-control-sm" value="6" min="0">
                         </div>
                         <div class="col-md-1">
-                            <label class="form-label text-secondary small">Max Reps</label>
+                            <label class="form-label text-secondary small">Max</label>
                             <input type="text" name="new_max" class="form-control form-control-sm" value="8" min="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-secondary small">Unit</label>
+                            <select name="new_unit" class="form-select form-select-sm">
+                                <option value="rep">Rep</option>
+                                <option value="second">Second</option>
+                                <option value="minute">Minute</option>
+                                <option value="hour">Hour</option>
+                                <option value="foot">Foot</option>
+                                <option value="yard">Yard</option>
+                                <option value="mile">Mile</option>
+                                <option value="meter">Meter</option>
+                                <option value="kilometer">Kilometer</option>
+                            </select>
                         </div>
                         <div class="col-md-1">
                             <label class="form-label text-secondary small">Order</label>
@@ -196,6 +210,20 @@
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Max Reps</label>
                                 <input type="text" name="upd_max" class="form-control form-control-sm" value="{{ ex.maxReps }}" min="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Unit</label>
+                                <select name="upd_unit" class="form-select form-select-sm">
+                                    <option value="rep" {% if ex.unit == "rep" %}selected{% endif %}>Rep</option>
+                                    <option value="second" {% if ex.unit == "second" %}selected{% endif %}>Second</option>
+                                    <option value="minute" {% if ex.unit == "minute" %}selected{% endif %}>Minute</option>
+                                    <option value="hour" {% if ex.unit == "hour" %}selected{% endif %}>Hour</option>
+                                    <option value="foot" {% if ex.unit == "foot" %}selected{% endif %}>Foot</option>
+                                    <option value="yard" {% if ex.unit == "yard" %}selected{% endif %}>Yard</option>
+                                    <option value="mile" {% if ex.unit == "mile" %}selected{% endif %}>Mile</option>
+                                    <option value="meter" {% if ex.unit == "meter" %}selected{% endif %}>Meter</option>
+                                    <option value="kilometer" {% if ex.unit == "kilometer" %}selected{% endif %}>Kilometer</option>
+                                </select>
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Order</label>
