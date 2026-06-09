@@ -68,21 +68,23 @@
         </form>
     </div>
 
-    <!-- Legend -->
-    <div class="mb-3">
-        <a class="text-secondary small" data-bs-toggle="collapse" href="#legend">Legend ▾</a>
-        <div class="collapse mt-2" id="legend">
-            <div class="card card-body text-secondary small">
-                <p><strong>Exercise Name</strong> — What you want this exercise to be called.</p>
-                <p><strong>Number of Sets</strong> — How many sets for this exercise.</p>
-                <p><strong>Increment</strong> — How much the weight goes up or down (e.g. 5 for one dumbbell, 10 for two).</p>
-                <p><strong>Min Reps</strong> — Minimum reps to aim for.</p>
-                <p><strong>Max Reps</strong> — Maximum reps to aim for.</p>
-                <p><strong>Notes</strong> — Any extra info for this exercise (optional).</p>
-                <p><strong>Order</strong> — Where this exercise appears in your program.</p>
-            </div>
+<!-- Legend -->
+<div class="mb-3">
+    <a class="text-secondary small" data-bs-toggle="collapse" href="#legend">Legend ▾</a>
+    <div class="collapse mt-2" id="legend">
+        <div class="card card-body text-secondary small">
+            <p><strong>Exercise Name</strong> — What you want this exercise to be called.</p>
+            <p><strong>Number of Sets</strong> — How many sets for this exercise.</p>
+            <p><strong>Increment</strong> — How much weight goes up or down per adjustment (e.g. 5 for one dumbbell, 10 for a pair).</p>
+            <p><strong>Min / Max Reps</strong> — The rep range to aim for each set. To set different ranges per set,
+                separate values with a comma — e.g. Min: <code>6,4</code> and Max: <code>8,6</code> means set 1 is 6–8
+                reps and set 2 is 4–6 reps. If you enter a single value it applies to all sets. Set both to the same
+                number to target a specific rep count, or both to 0 to disable rep recommendations.</p>
+            <p><strong>Notes</strong> — Any extra info for this exercise (optional).</p>
+            <p><strong>Order</strong> — Where this exercise appears in your program.</p>
         </div>
     </div>
+</div>
 
     <!-- Add Exercise -->
     <div class="card mb-4">

@@ -548,6 +548,8 @@ def run():
             "diff_weight": diff_weight
         })
 
+        user_data = getUserLogs(session["user_id"])
+
         narrator = session.get("settings", {}).get("narrator", "default")
         if narrator == "mommy":
             success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
@@ -673,6 +675,22 @@ def run_results():
         list(set(row["date"] for row in user_data if row["program"] == selected)),
         reverse=True
     )
+
+    if not program_dates:
+        return render_template("results.html",
+                               selected=selected,
+                               my_programs=my_programs,
+                               exercises=exercises,
+                               last_entries={},
+                               prev_entries={},
+                               highlight=None,
+                               heaviest=None,
+                               newPRs=[],
+                               report=None,
+                               program_dates=[],
+                               date_last=None,
+                               date_prev=None,
+                               narrator=session.get("settings", {}).get("narrator", "default"))
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -1204,4 +1222,3 @@ if __name__ == "__main__":
 # to do list
 # add another column to programs that tracks what unit of measurement something is
 # finish templates
-# fix not updating stuff
