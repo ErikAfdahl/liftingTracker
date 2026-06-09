@@ -2,7 +2,6 @@
 {% block content %}
 
 <h2 class="fw-bold mb-4">Manage Programs</h2>
-<a href="/templates" class="btn btn-secondary btn-sm">Browse Templates</a>
 {% if success_message %}
     <div class="alert alert-success alert-dismissible fade show">
         {{ success_message }}
@@ -15,6 +14,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 {% endif %}
+
+<a href="/templates" class="btn btn-secondary btn-sm">Browse Templates</a>
 
 <!-- Create New Program -->
 <div class="card mb-4">
