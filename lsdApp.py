@@ -676,7 +676,7 @@ def run_results():
         reverse=True
     )
 
-    if not program_dates:
+    if not program_dates or not exercises:
         return render_template("results.html",
                                selected=selected,
                                my_programs=my_programs,
@@ -738,8 +738,8 @@ def run_results():
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
     narrator = session.get("settings", {}).get("narrator", "default")
-    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, currentImprov, heaviest, date_last, narrator)
-
+    report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
+                             currentImprov, heaviest, date_last, narrator)
     return render_template("results.html",
                            selected=selected,
                            my_programs=my_programs,
