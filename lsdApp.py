@@ -595,14 +595,17 @@ def run():
             last = last_entries[key]
 
 
-
-            if minRepRange[s-1] == maxRepRange[s-1]:
+            if minRepRange[s-1] == 0:
+                rep_ranges[key] = None
+            elif minRepRange[s-1] == maxRepRange[s-1]:
                 rep_ranges[key] = f"Rep Goal for set {s} is {minRepRange[s-1]} reps."
             else:
                 rep_ranges[key] = f"Rep Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} reps."
 
             if last:
-                if int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
+                if minRepRange[s - 1] == 0:
+                    recommendations[key] = None
+                elif int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
                     # if last reps are significantly more than max or significantly less than min
                     rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} reps"
@@ -1199,7 +1202,6 @@ if __name__ == "__main__":
 
 
 # to do list
-# make it so it only fetches logs for a certain program
-# make it so that a notification pops up if you are out of space
-# make it so that you can customize what data you pull
-# fix bug where it deletes both references if there is a duplicate
+# add another column to programs that tracks what unit of measurement something is
+# finish templates
+# fix not updating stuff
