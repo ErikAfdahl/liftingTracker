@@ -628,7 +628,8 @@ def run():
     rep_ranges = {}
     last_entries = {}
     recommendations = {}
-    # units = {}
+    rec_weights = {}
+    rec_reps = {}
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
         maxRepRange = [int(x.strip()) for x in str(ex["maxReps"]).split(",")]
@@ -653,17 +654,27 @@ def run():
                     # if last reps are significantly more than max or significantly less than min
                     rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
+                    rec_weights[key] = rec_weight
+                    rec_reps[key] = minRepRange[s-1]
                 elif int(last["reps"]) < int((minRepRange[s-1] - 1) * .75):
                     rec_weight = round((last["1rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
+                    rec_weights[key] = rec_weight
+                    rec_reps[key] = maxRepRange[s-1]
                 elif int(last["reps"]) >= maxRepRange[s-1]: # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
+                    rec_weights[key] = rec_weight
+                    rec_reps[key] = minRepRange[s-1]
                 elif int(last["reps"]) < minRepRange[s-1] - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
+                    rec_weights[key] = rec_weight
+                    rec_reps[key] = maxRepRange[s-1]
                 else: # if last reps are between max and min
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
+                    rec_weights[key] = last['weight']
+                    rec_reps[key] = int(last['reps']) + 1
 
     prev_entries = {}
     for ex in exercises:
@@ -680,8 +691,11 @@ def run():
                                              last_entries=last_entries,
                                              prev_entries=prev_entries,
                                              recommendations=recommendations,
-                                             # units=units,
                                              rep_ranges=rep_ranges,
+                                             rec_weights=rec_weights,
+                                             rec_reps=rec_reps,
+                                             weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
+                                             reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
                                              success_message=success_message,
                                              user_data=user_data,
                                              log_cap_warning=log_cap_warning))
