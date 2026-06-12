@@ -99,7 +99,7 @@
 
                 {% if last %}
                     <small class="text-secondary">
-                        Last time: {{ last.weight }} lbs for {{ last.reps }} reps
+                        Last time: {{ last.weight }} lbs for {{ last.reps }} {{ ex.unit }}s
                         {% if last.notes %} — "{{ last.notes }}"{% endif %}
                         ({{ last.date }})
                     </small><br>
