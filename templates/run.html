@@ -125,18 +125,11 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">Weight (lbs)</label>
-                            <input type="number" name="weight" class="form-control form-control-sm" min="0" step="0.5"
-                                   value="{% if weight_autofill == 2 and rec_weights.get(key) %}{{ rec_weights.get(key) }}
-                                   {% elif weight_autofill == 2 and last %}{{ last.weight }}
-                                   {% elif weight_autofill == 1 and last %}{{ last.weight }}{% elif weight_autofill == 0 %}{% else %}{% endif %}">
+                            <input type="number" name="weight" class="form-control form-control-sm" min="0" step="0.5" value="{% if weight_autofill == 2 and rec_weights.get(key) %}{{ rec_weights.get(key) }}{% elif weight_autofill == 2 and last %}{{ last.weight }}{% elif weight_autofill == 1 and last %}{{ last.weight }}{% elif weight_autofill == 0 %}{% else %}{% endif %}">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
-                            <input type="number" name="reps" class="form-control form-control-sm" step="1" min="0"
-                                   value="{% if reps_autofill == 2 and rec_reps.get(key) %}{{ rec_reps.get(key) }}
-                                   {% elif reps_autofill == 2 and last %}{{ last.reps }}
-                                   {% elif reps_autofill == 1 and last %}{{ last.reps }}{% elif reps_autofill == 0 %}
-                                   {% else %}{{ ex.minReps }}{% endif %}">
+                            <input type="number" name="reps" class="form-control form-control-sm" step="1" min="0" value="{% if reps_autofill == 2 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 2 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% elif reps_autofill == 0 %}{% else %}{{ ex.minReps }}{% endif %}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-secondary small">Notes (optional)</label>
