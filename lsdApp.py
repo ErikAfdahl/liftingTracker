@@ -419,7 +419,8 @@ def login():
                     "userId": new_id,
                     "narrator": "default",
                     "quick_indexing": 1,
-                    "quick_fill": 0
+                    "weight_autofill": 1,
+                    "reps_autofill": 1
                 })
                 error = "Account created! You can now log in."
 
@@ -430,6 +431,46 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST" and request.form.get("action") == "save_settings":
+        narrator = request.form.get("narrator", "default")
+        quick_indexing = 1 if request.form.get("quick_indexing") else 0
+        weight_autofill = request.form.get("weight_autofill", 1)
+        reps_autofill = request.form.get("reps_autofill", 1)
+
+        updateUser(session["user_id"], {
+            "narrator": narrator,
+            "quick_indexing": quick_indexing,
+            "weight_autofill": int(weight_autofill),
+            "reps_autofill": int(reps_autofill)
+        })
+
+        session["settings"] = {
+            "narrator": narrator,
+            "quick_indexing": int(quick_indexing),
+            "weight_autofill": int(weight_autofill),
+            "reps_autofill": int(reps_autofill)
+        }
+
+        return redirect(url_for("settings", success=1))
+
+    success_message = "Settings saved!" if request.args.get("success") else None
+
+    users = getAllUsers()
+    user = next((u for u in users if str(u["userId"]) == str(session["user_id"])), None)
+
+    settings = {
+        "narrator": user.get("narrator", "default") if user else "default",
+        "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
+        "weight_autofill": user.get("weight_autofill", 1) if user else 1,
+        "reps_autofill": user.get("reps_autofill", 1) if user else 1
+    }
+
+    return render_template("settings.html", settings=settings, success_message=success_message)
 
 @app.route("/home")
 def home():
@@ -643,8 +684,7 @@ def run():
                                              rep_ranges=rep_ranges,
                                              success_message=success_message,
                                              user_data=user_data,
-                                             log_cap_warning=log_cap_warning,
-                                             quick_fill=session.get("settings", {}).get("quick_fill", 0)))
+                                             log_cap_warning=log_cap_warning))
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -1229,39 +1269,6 @@ def deleted_logs():
                and int(row["status"]) == 0]
 
     return render_template("deleted_logs.html", deleted=deleted)
-
-@app.route("/settings", methods=["GET", "POST"])
-def settings():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    if request.method == "POST" and request.form.get("action") == "save_settings":
-        narrator = request.form.get("narrator", "default")
-        quick_indexing = 1 if request.form.get("quick_indexing") else 0
-
-        updateUser(session["user_id"], {
-            "narrator": narrator,
-            "quick_indexing": quick_indexing
-        })
-
-        session["settings"] = {
-            "narrator": narrator,
-            "quick_indexing": bool(quick_indexing),
-        }
-
-        return redirect(url_for("settings", success=1))
-
-    success_message = "Settings saved!" if request.args.get("success") else None
-
-    users = getAllUsers()
-    user = next((u for u in users if str(u["userId"]) == str(session["user_id"])), None)
-
-    settings = {
-        "narrator": user.get("narrator", "default") if user else "default",
-        "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
-    }
-
-    return render_template("settings.html", settings=settings, success_message=success_message)
 
 @app.route("/about")
 def about():
