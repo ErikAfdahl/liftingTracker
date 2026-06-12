@@ -1087,7 +1087,7 @@ def logs():
     user_data = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
 
     action = request.form.get("action")
-    unit = exercises[selected_ex]["unit"]
+    # unit = exercises[selected_ex]["unit"]
 
     if request.method == "POST":
         if action == "delete_log":
