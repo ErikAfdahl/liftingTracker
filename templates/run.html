@@ -123,6 +123,7 @@
                             <input type="text" name="workout_date" class="form-control form-control-sm"
                                    value="{{ today }}">
                         </div>
+                        {{ key }} | {{ weight_autofill }} | {{ rec_weights.get(key) }}
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">Weight (lbs)</label>
                             <input type="number" name="weight" class="form-control form-control-sm"
