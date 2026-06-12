@@ -1156,7 +1156,7 @@ def logs():
         import pandas as pd
         df = pd.DataFrame(exercise_logs)
         df["weight"] = pd.to_numeric(df["weight"])
-        df["units"] = pd.to_numeric(df["units"])
+        df["reps"] = pd.to_numeric(df["reps"])
         df["1rm"] = pd.to_numeric(df["1rm"])
         df["diff"] = pd.to_numeric(df["diff"])
         df["diff_weight"] = pd.to_numeric(df["diff_weight"])
@@ -1164,12 +1164,12 @@ def logs():
             "best_1rm": round(df["1rm"].max(), 1),
             "avg_1rm": round(df["1rm"].mean(), 1),
             "best_weight": round(df["weight"].max(), 1),
-            "avg_units": round(df["units"].mean(), 1),
+            "avg_reps": round(df["reps"].mean(), 1),
             "count": len(df),
-            "table": df[["weight", "units", "1rm", "diff", "diff_weight"]].agg(
+            "table": df[["weight", "reps", "1rm", "diff", "diff_weight"]].agg(
                 ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
-        chart_data = df[["date", "weight", "units", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
+        chart_data = df[["date", "weight", "reps", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
 
     log_cap_warning = len(user_data) >= 1000
 
