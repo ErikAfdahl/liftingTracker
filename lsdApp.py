@@ -654,26 +654,26 @@ def run():
                     # if last reps are significantly more than max or significantly less than min
                     rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = rec_weight
-                    rec_reps[key] = minRepRange[s-1]
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(minRepRange[s-1])
                 elif int(last["reps"]) < int((minRepRange[s-1] - 1) * .75):
                     rec_weight = round((last["1rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = rec_weight
-                    rec_reps[key] = maxRepRange[s-1]
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(maxRepRange[s-1])
                 elif int(last["reps"]) >= maxRepRange[s-1]: # if last reps are more than max
                     rec_weight = float(last["weight"]) + float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = rec_weight
-                    rec_reps[key] = minRepRange[s-1]
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(minRepRange[s-1])
                 elif int(last["reps"]) < minRepRange[s-1] - 1: # if last reps are less than min
                     rec_weight = float(last["weight"]) - float(ex["increment"])
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = rec_weight
-                    rec_reps[key] = maxRepRange[s-1]
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(maxRepRange[s-1])
                 else: # if last reps are between max and min
                     recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
-                    rec_weights[key] = last['weight']
+                    rec_weights[key] = float(last['weight'])
                     rec_reps[key] = int(last['reps']) + 1
 
     prev_entries = {}

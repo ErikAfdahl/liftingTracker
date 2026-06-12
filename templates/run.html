@@ -129,7 +129,7 @@
                                    min="0" step="0.5"
                                    value="{% if weight_autofill == 2 and rec_weights.get(key) %}{{ rec_weights.get(key) }}
                                    {% elif weight_autofill == 1 and last %}{{ last.weight }}{% elif weight_autofill == 0 %}
-                                   {% else %}0{% endif %}">
+                                   {% else %}{% endif %}">
 
                         </div>
                         <div class="col-md-2">
