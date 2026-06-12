@@ -682,8 +682,8 @@ def run():
             key = f"{ex['exerciseName']}_{set_num}"
             prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], set_num, back=1)
 
-    print(f"rec_weights: {rec_weights}")
-    print(f"rec_reps: {rec_reps}")
+    # print(f"rec_weights: {rec_weights}")
+    # print(f"rec_reps: {rec_reps}")
 
     response = make_response(render_template("run.html",
                                              my_programs=my_programs,
