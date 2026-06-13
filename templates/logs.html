@@ -236,13 +236,11 @@
                                 {{ selected_unit | capitalize }}
                                 <div class="col-md-2">
                                     <label class="form-label text-secondary small">{{ selected_unit | capitalize }}s</label>
-                                    <input type="number" name="upd_reps" class="form-control form-control-sm"
-                                           value="{{ log.reps }}" min="0">
+                                    <input type="number" name="upd_reps" class="form-control form-control-sm" value="{{ log.reps }}" min="0">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-secondary small">Notes</label>
-                                    <input type="text" name="upd_notes" class="form-control form-control-sm"
-                                           value="{{ log.notes }}">
+                                    <input type="text" name="upd_notes" class="form-control form-control-sm" value="{{ log.notes }}">
                                 </div>
                                 <div class="col-md-3 d-flex gap-2">
                                     <button type="submit" class="btn btn-primary btn-sm">Save</button>
