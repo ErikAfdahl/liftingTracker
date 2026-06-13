@@ -1115,14 +1115,14 @@ def logs():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog))
+    prog_data = getAllProgram() # all the programs
+    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])] # only the users programs
+    my_programs = list(set(row["programName"] for row in user_prog)) # list of the names of the users programs
 
     success_message = None
     error_message = None
 
-    selected_prog = request.args.get("program") or request.form.get("selected_prog")
+    selected_prog = request.args.get("program") or request.form.get("selected_prog") # selected prog
     if not selected_prog or selected_prog not in my_programs:
         selected_prog = my_programs[0] if my_programs else None
 
@@ -1134,6 +1134,7 @@ def logs():
 
     exercise_data = next((row for row in exercises if row["exerciseName"] == selected_ex), None)
     num_sets = int(exercise_data["numSets"]) if exercise_data else 1
+    selected_unit = user_prog[selected_prog]["unit"] if user_prog else "rep"
 
     selected_set = int(request.args.get("set_num") or request.form.get("selected_set") or 1)
     if selected_set < 1:
@@ -1142,7 +1143,7 @@ def logs():
         selected_set = num_sets
 
     user_data = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
-
+    
     action = request.form.get("action")
     # unit = exercises[selected_ex]["unit"]
 
@@ -1237,6 +1238,7 @@ def logs():
                            exercise_names=exercise_names,
                            selected_ex=selected_ex,
                            num_sets=num_sets,
+                           selected_unit=selected_unit,
                            selected_set=selected_set,
                            exercise_logs=exercise_logs,
                            exercise_data=exercise_data,
