@@ -1135,6 +1135,7 @@ def logs():
     exercise_data = next((row for row in exercises if row["exerciseName"] == selected_ex), None)
     num_sets = int(exercise_data["numSets"]) if exercise_data else 1
     selected_unit  = exercise_data["unit"] if exercise_data else "rep"
+    print(selected_unit)
 
     selected_set = int(request.args.get("set_num") or request.form.get("selected_set") or 1)
     if selected_set < 1:
