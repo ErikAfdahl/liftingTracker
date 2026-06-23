@@ -88,6 +88,9 @@
             <small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
         {% endif %}
     </div>
+    <pre class="bg-light p-3 text-dark small">
+        {{ ex | tojson(indent=2) }}
+    </pre>
     <div class="card-body">
         {% for s in range(1, ex.numSets | int + 1) %}
             {% set key = ex.exerciseName ~ "_" ~ s %}
