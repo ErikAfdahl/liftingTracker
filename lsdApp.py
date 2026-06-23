@@ -55,6 +55,15 @@ def get_date_entry(data, program, exercise, set_num, date):
 
     return None
 
+def check_date(date_string):
+    if not date_string or len(date_string) != 10:
+        return False
+    try:
+        datetime.datetime.strptime(date_string, '%m/%d/%Y')
+        return True
+    except ValueError:
+        return False
+
 def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
@@ -546,6 +555,7 @@ def run():
     now = datetime.now(timezone)
     today = now.strftime("%m/%d/%Y")
     success_message = None
+    error_message = ""
 
     ex_index = request.args.get("ex_index", type=int)
 
@@ -571,66 +581,70 @@ def run():
             ex_index = 0
 
     if request.method == "POST" and request.form.get("action") == "log_set":
-        exercise_name = request.form.get("exercise_name")
-        set_num = int(request.form.get("set_num"))
-        weight = float(request.form.get("weight"))
-        reps = int(request.form.get("reps"))
-        notes = request.form.get("notes", "")
         workout_date = request.form.get("workout_date")
-        selected = request.form.get("selected_program")
 
-        one_rm = round(weight * (1 + float(reps) / 30), 3)
-        diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
-        diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
-
-        appendLog({
-            "userId": int(session["user_id"]),
-            "program": selected,
-            "status": 1,
-            "date": workout_date,
-            "exerciseName": exercise_name,
-            "setNum": set_num,
-            "weight": weight,
-            "reps": reps,
-            "1rm": one_rm,
-            "diff": diff,
-            "notes": notes,
-            "diff_weight": diff_weight
-        })
-
-        user_data = getUserLogs(session["user_id"])
-
-        narrator = session.get("settings", {}).get("narrator", "default")
-        if narrator == "mommy":
-            success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
-        elif narrator == "hard":
-            success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
-        elif narrator == "goth":
-            success_message = f"You like this, don't you baby? Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
-        elif narrator == "mort":
-            success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+        if not check_date(workout_date):
+            error_message = f"Invalid date format! Please use MM/DD/YYYY (e.g., {today})."
         else:
-            success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+            exercise_name = request.form.get("exercise_name")
+            set_num = int(request.form.get("set_num"))
+            weight = float(request.form.get("weight"))
+            reps = int(request.form.get("reps"))
+            notes = request.form.get("notes", "")
+            selected = request.form.get("selected_program")
 
-        exercises = sorted(
-            [row for row in user_prog if row["programName"] == selected],
-            key=lambda x: int(x["order"])
-        )
+            one_rm = round(weight * (1 + float(reps) / 30), 3)
+            diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
+            diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
-        quick_index = session.get("settings", {}).get("quick_indexing", 1)
-        match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
-        if quick_index == 1:
-            if match:
-                current_index = int(match["order"]) - 1
-                if set_num >= int(match["numSets"]):
-                    if int(match["order"]) == int(exercises[-1]["order"]):
-                        ex_index = current_index
-                    else:
-                        ex_index = current_index + 1
-                else:
-                    ex_index = current_index
+            appendLog({
+                "userId": int(session["user_id"]),
+                "program": selected,
+                "status": 1,
+                "date": workout_date,
+                "exerciseName": exercise_name,
+                "setNum": set_num,
+                "weight": weight,
+                "reps": reps,
+                "1rm": one_rm,
+                "diff": diff,
+                "notes": notes,
+                "diff_weight": diff_weight
+            })
+
+            user_data = getUserLogs(session["user_id"])
+
+            narrator = session.get("settings", {}).get("narrator", "default")
+            if narrator == "mommy":
+                success_message = f"Good job sweetie! Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+            elif narrator == "hard":
+                success_message = f"Alright I wrote that down, but don't get your hopes up. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+            elif narrator == "goth":
+                success_message = f"You like this, don't you baby? Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+            elif narrator == "mort":
+                success_message = f"Yay! I love you King King Julien. Set {set_num} logged — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
             else:
-                ex_index = 0
+                success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
+
+            exercises = sorted(
+                [row for row in user_prog if row["programName"] == selected],
+                key=lambda x: int(x["order"])
+            )
+
+            quick_index = session.get("settings", {}).get("quick_indexing", 1)
+            match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
+            if quick_index == 1:
+                if match:
+                    current_index = int(match["order"]) - 1
+                    if set_num >= int(match["numSets"]):
+                        if int(match["order"]) == int(exercises[-1]["order"]):
+                            ex_index = current_index
+                        else:
+                            ex_index = current_index + 1
+                    else:
+                        ex_index = current_index
+                else:
+                    ex_index = 0
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
 
@@ -731,7 +745,8 @@ def run():
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
                                              success_message=success_message,
                                              user_data=user_data,
-                                             log_cap_warning=log_cap_warning))
+                                             log_cap_warning=log_cap_warning,
+                                             error_message=error_message))
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -1333,7 +1348,6 @@ if __name__ == "__main__":
 # let the user chart multiple things (maybe max of 5)
 # maybe add another option to autofill, most recent which is different from default because this would fetch the most recent weight/reps regardless of set number
 # add a timer potentially
-# display any streaks
 # fix editing logs resetting diff stuff
 # fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
 # make sure users arent allowed to input non date like things into the date column
