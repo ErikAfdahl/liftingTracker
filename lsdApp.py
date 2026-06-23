@@ -38,11 +38,11 @@ def calculate_diff(data, program, exercise, set_num, current, max=0):
 def get_last_entry(data, program, exercise, set_num, back = 0):
     acc = 0
     for row in reversed(data):
-        if (row["program"] == program and row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num)):
-            if acc == back:
-                return row
-            acc += 1
+        if row["program"] == program and row["exerciseName"] == exercise:
+            if set_num == -1 or int(row["setNum"]) == set_num:
+                if acc == back:
+                    return row
+                acc += 1
 
     return None
 
@@ -437,7 +437,9 @@ def login():
                     "narrator": "default",
                     "quick_indexing": 1,
                     "weight_autofill": 1,
-                    "reps_autofill": 1
+                    "reps_autofill": 1,
+                    "weight_autofill_absent": 1,
+                    "reps_autofill_absent": 1
                 })
                 error = "Account created! You can now log in."
 
@@ -458,19 +460,25 @@ def settings():
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         weight_autofill = request.form.get("weight_autofill", 1)
         reps_autofill = request.form.get("reps_autofill", 1)
+        weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
+        reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
 
         updateUser(session["user_id"], {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
             "weight_autofill": int(weight_autofill),
-            "reps_autofill": int(reps_autofill)
+            "reps_autofill": int(reps_autofill),
+            "weight_autofill_absent": int(weight_autofill_absent),
+            "reps_autofill_absent": int(reps_autofill_absent)
         })
 
         session["settings"] = {
             "narrator": narrator,
             "quick_indexing": int(quick_indexing),
             "weight_autofill": int(weight_autofill),
-            "reps_autofill": int(reps_autofill)
+            "reps_autofill": int(reps_autofill),
+            "weight_autofill_absent": int(weight_autofill_absent),
+            "reps_autofill_absent": int(reps_autofill_absent)
         }
 
         return redirect(url_for("settings", success=1))
@@ -484,7 +492,9 @@ def settings():
         "narrator": user.get("narrator", "default") if user else "default",
         "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
-        "reps_autofill": user.get("reps_autofill", 1) if user else 1
+        "reps_autofill": user.get("reps_autofill", 1) if user else 1,
+        "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
+        "reps_autofill_absent": user.get("reps_autofill_absent", 1) if user else 1
     }
 
     return render_template("settings.html", settings=settings, success_message=success_message)
@@ -720,9 +730,8 @@ def run():
 
     prev_entries = {}
     for ex in exercises:
-        for set_num in range(1, int(ex["numSets"]) + 1):
-            key = f"{ex['exerciseName']}_{set_num}"
-            prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], set_num, back=1)
+        key = f"{ex['exerciseName']}"
+        prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
 
     # print(f"rec_weights: {rec_weights}")
     # print(f"rec_reps: {rec_reps}")
@@ -742,6 +751,8 @@ def run():
                                              rec_reps=rec_reps,
                                              weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
+                                             weight_autofill_absent=session.get("settings", {}).get("weight_autofill_absent", 1),
+                                             reps_autofill_absent=session.get("settings", {}).get("reps_autofill_absent", 1),
                                              success_message=success_message,
                                              user_data=user_data,
                                              log_cap_warning=log_cap_warning,
@@ -1339,7 +1350,6 @@ def deleted_logs():
 
     return render_template("deleted_logs.html", deleted=deleted)
 
-
 @app.route("/api/program_manifest")
 def program_manifest():
     if "user_id" not in session:
@@ -1359,7 +1369,6 @@ def program_manifest():
             manifest[p_name][e_name] = int(row["numSets"])
 
     return jsonify(manifest)
-
 
 @app.route("/api/get_comparison_data")
 def get_comparison_data():
@@ -1406,7 +1415,9 @@ if __name__ == "__main__":
 
 
 # to do list
+# let the user customize what exactly they see, and make the user able to turn more things on/off in run program
+# show last, show streak, show recommended
+# make the ordering system work more efficiently
 # maybe add another option to autofill, most recent which is different from default because this would fetch the most recent weight/reps regardless of set number
 # add a timer potentially
-# fix editing logs resetting diff stuff
 # fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
