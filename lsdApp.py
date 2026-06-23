@@ -212,7 +212,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Regression
     if declined:
-        report += f"There was {pick_adj(len(declined), total)} amount of regression compared to last session, "
+        report += f"\n\nRegression\nThere was {pick_adj(len(declined), total)} amount of regression compared to last session, "
         report += f"as {'1 exercise declined' if len(declined) == 1 else f'{len(declined)} exercises declined'} "
         report += f"in the first set out of {total} total — {list_exercises(declined)} {'regressed' if len(declined) > 1 else 'regressed'}."
         streaks = []
@@ -236,9 +236,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     # Stagnation
     if stagnant:
         if declined:
-            report += " There was also"
+            report += "\n\nStagnation\nThere was also"
         else:
-            report += " There was"
+            report += "\n\nStagnation\nThere was"
         report += f" {pick_adj(len(stagnant), total)} amount of stagnation compared to last session, "
         report += f"as {'1 exercise was' if len(stagnant) == 1 else f'{len(stagnant)} exercises were'} flat "
         report += f"in the first set out of {total} — {list_exercises(stagnant)} didn't move."
@@ -262,11 +262,11 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     # Improvement
     if improved:
         if declined and stagnant:
-            report += " However there was"
+            report += "\n\nImprovement\nHowever there was"
         elif declined or stagnant:
-            report += " But there was also"
+            report += "\n\nImprovement\nBut there was also"
         else:
-            report += " There was"
+            report += "\n\nImprovement\nThere was"
         report += f" {pick_adj(len(improved), total)} amount of improvement compared to last session, "
         report += f"as {'1 exercise improved' if len(improved) == 1 else f'{len(improved)} exercises improved'} "
         report += f"in the first set out of {total} — {list_exercises(improved)} improved."
@@ -289,11 +289,11 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     if increased or decreased:
         if declined and stagnant:
-            report += " However there was"
+            report += "\n\nWeight Changes\nHowever there was"
         elif declined or stagnant:
-            report += " But there was also"
+            report += "\n\nWeight Changes\nBut there was also"
         else:
-            report += " There was"
+            report += "\n\nWeight Changes\nThere was"
 
         total_changed = len(increased) + len(decreased)
         report += f" {pick_adj(total_changed, total)} instances of weight change compared to last session, "
@@ -1299,4 +1299,12 @@ if __name__ == "__main__":
 
 
 # to do list
-# add another column to programs that tracks what unit of measurement something is
+# fix creating programs being finicky
+# let the user chart multiple things (maybe max of 5)
+# maybe add another option to autofill, most recent which is different from default because this would fetch the most recent weight/reps regardless of set number
+# add a timer potentially
+# display any streaks
+# fix editing logs resetting diff stuff
+# fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
+# make sure users arent allowed to input non date like things into the date column
+# make report easier to read, by splitting it up
