@@ -700,7 +700,7 @@ def run():
                         streak_message += f"improvement streak."
                     streaks[key] = streak_message
 
-                if minRepRange[s - 1] == 0:
+                if maxRepRange[s - 1] == 0:
                     recommendations[key] = None
                 elif int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
                     # if last reps are significantly more than max or significantly less than min
@@ -733,8 +733,8 @@ def run():
         key = f"{ex['exerciseName']}"
         prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
 
-    # print(f"rec_weights: {rec_weights}")
-    # print(f"rec_reps: {rec_reps}")
+    print(f"rec_weights: {rec_weights}")
+    print(f"rec_reps: {rec_reps}")
 
     response = make_response(render_template("run.html",
                                              my_programs=my_programs,
