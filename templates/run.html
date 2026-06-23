@@ -136,12 +136,12 @@
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">Weight (lbs)</label>
                             <input type="number" name="weight" class="form-control form-control-sm" min="0" step="0.5"
-                                   value="{% if ex.maxReps|int == 0 %}{% if weight_autofill_absent|int == 1 and last %}{{ last.weight }}{% elif weight_autofill_absent|int == 2 and absolute_last %}{{ absolute_last.weight }}{% endif %}{% else %}{% if weight_autofill|int == 3 and key in rec_weights %}{{ rec_weights[key] }}{% elif weight_autofill|int == 3 and last %}{{ last.weight }}{% elif weight_autofill|int == 1 and last %}{{ last.weight }}{% endif %}{% endif %}">
+                                   value="{% if ex.maxReps|int == 0 %}{% if weight_autofill_absent|int == 1 and last %}{{ last.weight }}{% elif weight_autofill_absent|int == 2 and absolute_last %}{{ absolute_last.weight }}{% endif %}{% else %}{% if weight_autofill|int == 3 and rec_weights.get(key) %}{{ rec_weights.get(key) }}{% elif weight_autofill|int == 3 and last %}{{ last.weight }}{% elif weight_autofill|int == 1 and last %}{{ last.weight }}{% endif %}{% endif %}">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
                             <input type="number" name="reps" class="form-control form-control-sm" step="1" min="0"
-                                   value="{% if ex.maxReps|int == 0 %}{% if reps_autofill_absent|int == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent|int == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill|int == 3 and key in rec_reps %}{{ rec_reps[key] }}{% elif reps_autofill|int == 3 and last %}{{ last.reps }}{% elif reps_autofill|int == 1 and last %}{{ last.reps }}{% else %}{{ ex.minReps }}{% endif %}{% endif %}">
+                                   value="{% if ex.maxReps|int == 0 %}{% if reps_autofill_absent|int == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent|int == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill|int == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill|int == 3 and last %}{{ last.reps }}{% elif reps_autofill|int == 1 and last %}{{ last.reps }}{% else %}{{ ex.minReps }}{% endif %}{% endif %}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-secondary small">Notes (optional)</label>
