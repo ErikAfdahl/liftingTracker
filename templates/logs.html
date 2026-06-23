@@ -181,18 +181,32 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const rawData = {{ chart_data | tojson }};
-            const colors = ["#198754", "#dc3545", "#ffc107", "#0dcaf0", "#6f42c1"]; // Line Color palette for up to 5 overlays
-            let activeOverlays = []; // Holds metadata of plotted lines
+
+            // 1. Expanded Color Palette for up to 10 comparison overlays
+            const colors = [
+                "#198754", // Green
+                "#dc3545", // Red
+                "#ffc107", // Yellow
+                "#0dcaf0", // Cyan
+                "#6f42c1", // Purple
+                "#fd7e14", // Orange
+                "#e83e8c", // Pink
+                "#20c997", // Teal
+                "#38bdf8", // Sky Blue
+                "#a3e635"  // Lime
+            ];
+
+            let activeOverlays = [];
             let programManifest = {};
 
-            // 1. Initialize Main Base Dataset
+            // 2. Initialize Main Base Dataset
             let currentMetric = "1rm";
             const ctx = document.getElementById("oneRmChart").getContext("2d");
 
             const chart = new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: Array.from(new Set(rawData.map(r => r.date))), // Unique base dates
+                    labels: Array.from(new Set(rawData.map(r => r.date))),
                     datasets: [{
                         label: "Base Line: Estimated 1RM",
                         data: rawData.map(r => ({ x: r.date, y: r["1rm"] })),
@@ -215,7 +229,7 @@
                 }
             });
 
-            // 2. Global Metric Handler for Base Line
+            // Global Metric Handler for Base Line
             document.getElementById("chartMetric").addEventListener("change", function() {
                 currentMetric = this.value;
                 const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)", "diff_weight": "Diff Weight" };
@@ -224,62 +238,80 @@
                 chart.update();
             });
 
-            // 3. Load Program Manifest and Build Dynamic Selectors
-            fetch("/api/program_manifest")
-                .then(res => res.json())
-                .then(data => {
-                    programManifest = data;
-                    const compProgSelect = document.getElementById("compProgram");
-
-                    compProgSelect.innerHTML = '<option value="">-- Select Program --</option>';
-                    Object.keys(programManifest).forEach(prog => {
-                        compProgSelect.innerHTML += `<option value="${prog}">${prog}</option>`;
-                    });
-                });
-
-            // Handle Program Dropdown Change
-            document.getElementById("compProgram").addEventListener("change", function() {
-                const prog = this.value;
+            // 3. Cascading Dropdown Auto-Population Logic
+            function updateExerciseDropdown(prog) {
                 const exSelect = document.getElementById("compExercise");
-                const setSelect = document.getElementById("compSet");
-                const btn = document.getElementById("btnAddComparison");
-
-                exSelect.innerHTML = '<option value="">-- Select Exercise --</option>';
-                setSelect.innerHTML = '';
-                exSelect.disabled = !prog;
-                setSelect.disabled = true;
-                btn.disabled = true;
+                exSelect.innerHTML = '';
 
                 if (prog && programManifest[prog]) {
-                    Object.keys(programManifest[prog]).forEach(ex => {
+                    const exercises = Object.keys(programManifest[prog]);
+                    exercises.forEach(ex => {
                         exSelect.innerHTML += `<option value="${ex}">${ex}</option>`;
                     });
-                }
-            });
 
-            // Handle Exercise Dropdown Change
-            document.getElementById("compExercise").addEventListener("change", function() {
-                const prog = document.getElementById("compProgram").value;
-                const ex = this.value;
+                    exSelect.disabled = false;
+                    if (exercises.length > 0) {
+                        exSelect.value = exercises[0];
+                        updateSetDropdown(prog, exercises[0]);
+                    }
+                } else {
+                    exSelect.disabled = true;
+                }
+            }
+
+            function updateSetDropdown(prog, ex) {
                 const setSelect = document.getElementById("compSet");
                 const btn = document.getElementById("btnAddComparison");
-
                 setSelect.innerHTML = '';
-                setSelect.disabled = !ex;
-                btn.disabled = !ex;
 
                 if (ex && programManifest[prog] && programManifest[prog][ex]) {
                     const totalSets = programManifest[prog][ex];
                     for (let s = 1; s <= totalSets; s++) {
                         setSelect.innerHTML += `<option value="${s}">Set ${s}</option>`;
                     }
+                    setSelect.disabled = false;
+                    btn.disabled = false;
+                    setSelect.value = "1"; // Default always to Set 1
+                } else {
+                    setSelect.disabled = true;
+                    btn.disabled = true;
                 }
+            }
+
+            // 4. Load Manifest on Page Initialization
+            fetch("/api/program_manifest")
+                .then(res => res.json())
+                .then(data => {
+                    programManifest = data;
+                    const compProgSelect = document.getElementById("compProgram");
+                    compProgSelect.innerHTML = '';
+
+                    const programs = Object.keys(programManifest);
+                    if (programs.length === 0) return;
+
+                    programs.forEach(prog => {
+                        compProgSelect.innerHTML += `<option value="${prog}">${prog}</option>`;
+                    });
+
+                    // Auto-select first program and cascade updates down
+                    compProgSelect.value = programs[0];
+                    updateExerciseDropdown(programs[0]);
+                });
+
+            // Event Listeners for Selector Changes
+            document.getElementById("compProgram").addEventListener("change", function() {
+                updateExerciseDropdown(this.value);
             });
 
-            // 4. Add Comparison Line Overlay Logic
+            document.getElementById("compExercise").addEventListener("change", function() {
+                const prog = document.getElementById("compProgram").value;
+                updateSetDropdown(prog, this.value);
+            });
+
+            // 5. Add Comparison Line Overlay Logic (Max 10)
             document.getElementById("btnAddComparison").addEventListener("click", function() {
-                if (activeOverlays.length >= 5) {
-                    alert("Max capacity reached! You can overlay up to 5 comparison lines at once.");
+                if (activeOverlays.length >= 10) {
+                    alert("Max capacity reached! You can overlay up to 10 comparison lines at once.");
                     return;
                 }
 
@@ -290,13 +322,11 @@
 
                 const overlayId = `${prog}_${ex}_${setNum}_${metric}`;
 
-                // Guard clause against duplicates
                 if (activeOverlays.some(o => o.id === overlayId)) {
                     alert("This exact data sequence is already plotted on your chart!");
                     return;
                 }
 
-                // Dynamic Fetch directly targeting the dataset match
                 fetch(`/api/get_comparison_data?program=${encodeURIComponent(prog)}&exercise=${encodeURIComponent(ex)}&set_num=${setNum}`)
                     .then(res => res.json())
                     .then(logs => {
@@ -305,20 +335,17 @@
                             return;
                         }
 
-                        // Combine and expand global x-axis calendar timelines safely
                         const currentLabels = chart.data.labels;
                         logs.forEach(l => {
                             if (!currentLabels.includes(l.date)) {
                                 currentLabels.push(l.date);
                             }
                         });
-                        // Keep date list sorted chronologically
                         chart.data.labels = currentLabels.sort((a, b) => new Date(a) - new Date(b));
 
-                        // Assign line color based on slots open
+                        // Safely assign corresponding index color
                         const chosenColor = colors[activeOverlays.length];
 
-                        // Build new dataset payload mapping coordinates via Object format
                         const newDataset = {
                             label: `${ex} (S${setNum}) - ${metric.toUpperCase()}`,
                             data: logs.map(l => ({ x: l.date, y: l[metric] })),
@@ -329,17 +356,15 @@
                             id: overlayId
                         };
 
-                        // Push trace into chart array instance
                         chart.data.datasets.push(newDataset);
                         chart.update();
 
-                        // Track active traces via metadata collection array
                         activeOverlays.push({ id: overlayId, label: `${ex} [S${setNum}]: ${metric}` });
                         renderPills();
                     });
             });
 
-            // 5. Render Dynamic Interactive Removal Badges
+            // 6. Render Dynamic Interactive Removal Badges
             function renderPills() {
                 const container = document.getElementById("comparisonPills");
                 container.innerHTML = "";
@@ -355,15 +380,12 @@
                 });
             }
 
-            // 6. Delete Overlay Trace Triggers
+            // 7. Delete Overlay Trace Triggers
             window.removeOverlay = function(id) {
-                // Drop dataset from native chart data array structure
                 chart.data.datasets = chart.data.datasets.filter(ds => ds.id !== id);
-
-                // Recalculate tracking structure index alignments
                 activeOverlays = activeOverlays.filter(o => o.id !== id);
 
-                // Re-adjust colors for remaining active overlays to maintain palette index sequence
+                // Readjust remaining colors so they don't break order
                 activeOverlays.forEach((overlay, idx) => {
                     const dataset = chart.data.datasets.find(ds => ds.id === overlay.id);
                     if (dataset) {
