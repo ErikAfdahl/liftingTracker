@@ -874,7 +874,12 @@ def manage():
     success_message = None
     error_message = None
 
-    selected_edit = request.args.get("program") or request.form.get("selected_program")
+    if request.method == "POST":
+        selected_edit = request.form.get("selected_program") or request.args.get("program")
+    else:
+        selected_edit = request.args.get("program")
+
+    # Keep your fallback logic right below it
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
@@ -1350,4 +1355,3 @@ if __name__ == "__main__":
 # add a timer potentially
 # fix editing logs resetting diff stuff
 # fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
-# make sure users arent allowed to input non date like things into the date column
