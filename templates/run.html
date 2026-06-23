@@ -106,7 +106,8 @@
 
                 {% if last %}
                     <small class="text-secondary">
-                        Last time: {{ last.weight }} lbs for {{ last.reps }} {{ ex.unit }}s
+                        {% set last_w = last.weight | float %}
+                        Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
                         {% if last.notes %} — "{{ last.notes }}"{% endif %}
                         ({{ last.date }})
                     </small><br>
@@ -137,8 +138,21 @@
                             <label class="form-label text-secondary small">Weight (lbs)</label>
                             {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
 
+                            {% set raw_weight = '' %}
+                            {% if current_max_reps|int == 0 %}
+                                {% if weight_autofill_absent == 1 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill_absent == 2 and absolute_last %}{% set raw_weight = absolute_last.weight %}{% endif %}
+                            {% else %}
+                                {% if weight_autofill == 3 and rec_weights.get(key) %}{% set raw_weight = rec_weights.get(key) %}{% elif weight_autofill == 3 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill == 1 and last %}{% set raw_weight = last.weight %}{% endif %}
+                            {% endif %}
+
+                            {% set formatted_weight = '' %}
+                            {% if raw_weight != '' and raw_weight is not none %}
+                                {% set w_float = raw_weight | float %}
+                                {% set formatted_weight = w_float | int if w_float == w_float | int else w_float %}
+                            {% endif %}
+
                             <input type="number" name="weight" class="form-control form-control-sm" min="0" step="0.5"
-                                   value="{% if current_max_reps|int == 0 %}{% if weight_autofill_absent == 1 and last %}{{ last.weight }}{% elif weight_autofill_absent == 2 and absolute_last %}{{ absolute_last.weight }}{% endif %}{% else %}{% if weight_autofill == 3 and rec_weights.get(key) %}{{ rec_weights.get(key) }}{% elif weight_autofill == 3 and last %}{{ last.weight }}{% elif weight_autofill == 1 and last %}{{ last.weight }}{% endif %}{% endif %}">
+                                   value="{{ formatted_weight }}">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
