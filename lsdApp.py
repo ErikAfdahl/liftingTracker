@@ -1246,8 +1246,8 @@ def logs():
                     "weight": upd_weight,
                     "reps": upd_reps,
                     "1rm": new_1rm,
-                    "diff": 0,
-                    "diff_weight": 0,
+                    "diff": matching["diff"],
+                    "diff_weight": matching["diff_weight"],
                     "notes": upd_notes
                 })
             success_message = "Log updated!"
@@ -1406,8 +1406,6 @@ if __name__ == "__main__":
 
 
 # to do list
-# fix creating programs being finicky
-# let the user chart multiple things (maybe max of 5)
 # maybe add another option to autofill, most recent which is different from default because this would fetch the most recent weight/reps regardless of set number
 # add a timer potentially
 # fix editing logs resetting diff stuff
