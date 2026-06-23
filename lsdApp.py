@@ -362,6 +362,8 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Closing
 
+    print(report)
+
     return report
 
 def parseRepRange(repRange, numSets):
