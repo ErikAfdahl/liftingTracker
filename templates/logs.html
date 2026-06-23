@@ -127,15 +127,51 @@
 
         <!-- Chart -->
         <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Progress Over Time</span>
-                <select id="chartMetric" class="form-select form-select-sm w-auto">
-                    <option value="1rm">Estimated 1RM</option>
-                    <option value="weight">Weight</option>
-                    <option value="reps">Reps</option>
-                    <option value="diff">Diff in 1RM (vs Last)</option>
-                    <option value="diff_weight">Diff in weight (vs Last)</option>
-                </select>
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <span class="fw-bold">Progress Over Time</span>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small text-secondary text-nowrap mb-0">Base Metric:</label>
+                        <select id="chartMetric" class="form-select form-select-sm w-auto">
+                            <option value="1rm">Estimated 1RM</option>
+                            <option value="weight">Weight</option>
+                            <option value="reps">Reps</option>
+                            <option value="diff">Diff in 1RM</option>
+                            <option value="diff_weight">Diff in Weight</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-2 border-secondary">
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-sm-3">
+                        <label class="text-secondary small d-block mb-1">Compare Program</label>
+                        <select id="compProgram" class="form-select form-select-sm"></select>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="text-secondary small d-block mb-1">Compare Exercise</label>
+                        <select id="compExercise" class="form-select form-select-sm" disabled></select>
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="text-secondary small d-block mb-1">Set</label>
+                        <select id="compSet" class="form-select form-select-sm" disabled></select>
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="text-secondary small d-block mb-1">Metric</label>
+                        <select id="compMetric" class="form-select form-select-sm">
+                            <option value="1rm">1RM</option>
+                            <option value="weight">Weight</option>
+                            <option value="reps">Reps</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" id="btnAddComparison" class="btn btn-outline-primary btn-sm w-100" disabled>+ Overlay</button>
+                    </div>
+                </div>
+
+                <div id="comparisonPills" class="d-flex flex-wrap gap-2 mt-2"></div>
             </div>
             <div class="card-body">
                 <canvas id="oneRmChart"></canvas>
@@ -145,26 +181,33 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const rawData = {{ chart_data | tojson }};
-            const labels = rawData.map(r => r.date);
+            const colors = ["#198754", "#dc3545", "#ffc107", "#0dcaf0", "#6f42c1"]; // Line Color palette for up to 5 overlays
+            let activeOverlays = []; // Holds metadata of plotted lines
+            let programManifest = {};
 
+            // 1. Initialize Main Base Dataset
             let currentMetric = "1rm";
-
             const ctx = document.getElementById("oneRmChart").getContext("2d");
+
             const chart = new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: labels,
+                    labels: Array.from(new Set(rawData.map(r => r.date))), // Unique base dates
                     datasets: [{
-                        label: "Estimated 1RM",
-                        data: rawData.map(r => r["1rm"]),
+                        label: "Base Line: Estimated 1RM",
+                        data: rawData.map(r => ({ x: r.date, y: r["1rm"] })),
                         borderColor: "#0d6efd",
+                        backgroundColor: "#0d6efd",
                         tension: 0.3,
-                        fill: false
+                        fill: false,
+                        id: "base"
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#fff' } }
+                    },
                     scales: {
                         x: { ticks: { color: "#aaa" } },
                         y: { ticks: { color: "#aaa" } }
@@ -172,13 +215,166 @@
                 }
             });
 
+            // 2. Global Metric Handler for Base Line
             document.getElementById("chartMetric").addEventListener("change", function() {
-                const metric = this.value;
-                const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)" };
-                chart.data.datasets[0].label = labels[metric];
-                chart.data.datasets[0].data = rawData.map(r => r[metric]);
+                currentMetric = this.value;
+                const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)", "diff_weight": "Diff Weight" };
+                chart.data.datasets[0].label = `Base Line: ${labels[currentMetric]}`;
+                chart.data.datasets[0].data = rawData.map(r => ({ x: r.date, y: r[currentMetric] }));
                 chart.update();
             });
+
+            // 3. Load Program Manifest and Build Dynamic Selectors
+            fetch("/api/program_manifest")
+                .then(res => res.json())
+                .then(data => {
+                    programManifest = data;
+                    const compProgSelect = document.getElementById("compProgram");
+
+                    compProgSelect.innerHTML = '<option value="">-- Select Program --</option>';
+                    Object.keys(programManifest).forEach(prog => {
+                        compProgSelect.innerHTML += `<option value="${prog}">${prog}</option>`;
+                    });
+                });
+
+            // Handle Program Dropdown Change
+            document.getElementById("compProgram").addEventListener("change", function() {
+                const prog = this.value;
+                const exSelect = document.getElementById("compExercise");
+                const setSelect = document.getElementById("compSet");
+                const btn = document.getElementById("btnAddComparison");
+
+                exSelect.innerHTML = '<option value="">-- Select Exercise --</option>';
+                setSelect.innerHTML = '';
+                exSelect.disabled = !prog;
+                setSelect.disabled = true;
+                btn.disabled = true;
+
+                if (prog && programManifest[prog]) {
+                    Object.keys(programManifest[prog]).forEach(ex => {
+                        exSelect.innerHTML += `<option value="${ex}">${ex}</option>`;
+                    });
+                }
+            });
+
+            // Handle Exercise Dropdown Change
+            document.getElementById("compExercise").addEventListener("change", function() {
+                const prog = document.getElementById("compProgram").value;
+                const ex = this.value;
+                const setSelect = document.getElementById("compSet");
+                const btn = document.getElementById("btnAddComparison");
+
+                setSelect.innerHTML = '';
+                setSelect.disabled = !ex;
+                btn.disabled = !ex;
+
+                if (ex && programManifest[prog] && programManifest[prog][ex]) {
+                    const totalSets = programManifest[prog][ex];
+                    for (let s = 1; s <= totalSets; s++) {
+                        setSelect.innerHTML += `<option value="${s}">Set ${s}</option>`;
+                    }
+                }
+            });
+
+            // 4. Add Comparison Line Overlay Logic
+            document.getElementById("btnAddComparison").addEventListener("click", function() {
+                if (activeOverlays.length >= 5) {
+                    alert("Max capacity reached! You can overlay up to 5 comparison lines at once.");
+                    return;
+                }
+
+                const prog = document.getElementById("compProgram").value;
+                const ex = document.getElementById("compExercise").value;
+                const setNum = document.getElementById("compSet").value;
+                const metric = document.getElementById("compMetric").value;
+
+                const overlayId = `${prog}_${ex}_${setNum}_${metric}`;
+
+                // Guard clause against duplicates
+                if (activeOverlays.some(o => o.id === overlayId)) {
+                    alert("This exact data sequence is already plotted on your chart!");
+                    return;
+                }
+
+                // Dynamic Fetch directly targeting the dataset match
+                fetch(`/api/get_comparison_data?program=${encodeURIComponent(prog)}&exercise=${encodeURIComponent(ex)}&set_num=${setNum}`)
+                    .then(res => res.json())
+                    .then(logs => {
+                        if (logs.length === 0) {
+                            alert("No logged workout sessions found matching this specification.");
+                            return;
+                        }
+
+                        // Combine and expand global x-axis calendar timelines safely
+                        const currentLabels = chart.data.labels;
+                        logs.forEach(l => {
+                            if (!currentLabels.includes(l.date)) {
+                                currentLabels.push(l.date);
+                            }
+                        });
+                        // Keep date list sorted chronologically
+                        chart.data.labels = currentLabels.sort((a, b) => new Date(a) - new Date(b));
+
+                        // Assign line color based on slots open
+                        const chosenColor = colors[activeOverlays.length];
+
+                        // Build new dataset payload mapping coordinates via Object format
+                        const newDataset = {
+                            label: `${ex} (S${setNum}) - ${metric.toUpperCase()}`,
+                            data: logs.map(l => ({ x: l.date, y: l[metric] })),
+                            borderColor: chosenColor,
+                            backgroundColor: chosenColor,
+                            tension: 0.3,
+                            fill: false,
+                            id: overlayId
+                        };
+
+                        // Push trace into chart array instance
+                        chart.data.datasets.push(newDataset);
+                        chart.update();
+
+                        // Track active traces via metadata collection array
+                        activeOverlays.push({ id: overlayId, label: `${ex} [S${setNum}]: ${metric}` });
+                        renderPills();
+                    });
+            });
+
+            // 5. Render Dynamic Interactive Removal Badges
+            function renderPills() {
+                const container = document.getElementById("comparisonPills");
+                container.innerHTML = "";
+
+                activeOverlays.forEach((overlay, idx) => {
+                    const color = colors[idx] || "#6c757d";
+                    container.innerHTML += `
+                        <span class="badge d-flex align-items-center gap-2 p-2" style="background-color: ${color}; font-size: 0.85rem;">
+                            ${overlay.label}
+                            <button type="button" class="btn-close btn-close-white" style="font-size: 0.65rem;" onclick="removeOverlay('${overlay.id}')"></button>
+                        </span>
+                    `;
+                });
+            }
+
+            // 6. Delete Overlay Trace Triggers
+            window.removeOverlay = function(id) {
+                // Drop dataset from native chart data array structure
+                chart.data.datasets = chart.data.datasets.filter(ds => ds.id !== id);
+
+                // Recalculate tracking structure index alignments
+                activeOverlays = activeOverlays.filter(o => o.id !== id);
+
+                // Re-adjust colors for remaining active overlays to maintain palette index sequence
+                activeOverlays.forEach((overlay, idx) => {
+                    const dataset = chart.data.datasets.find(ds => ds.id === overlay.id);
+                    if (dataset) {
+                        dataset.borderColor = colors[idx];
+                        dataset.backgroundColor = colors[idx];
+                    }
+                });
+
+                chart.update();
+                renderPills();
+            };
         </script>
         <!-- All logs -->
         <div class="card">

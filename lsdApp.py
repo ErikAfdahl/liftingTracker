@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, make_response, jsonify
 from datetime import *
 import pytz
 import bcrypt
@@ -47,7 +47,6 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
     return None
 
 def get_date_entry(data, program, exercise, set_num, date):
-    acc = 0
     for row in reversed(data):
         if (row["program"] == program and row["exerciseName"] == exercise and
                 int(row["setNum"]) == int(set_num) and row["date"] == date):
@@ -1339,6 +1338,64 @@ def deleted_logs():
                and int(row["status"]) == 0]
 
     return render_template("deleted_logs.html", deleted=deleted)
+
+
+@app.route("/api/program_manifest")
+def program_manifest():
+    if "user_id" not in session:
+        return jsonify({}), 401
+
+    prog_data = getAllProgram()
+    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+
+    # Structure: { "Push": { "Bench Press": 3, "Incline DB": 4 }, "Pull": { ... } }
+    manifest = {}
+    for row in user_prog:
+        p_name = row["programName"]
+        e_name = row["exerciseName"]
+        if e_name.strip():  # Skip empty placeholder strings
+            if p_name not in manifest:
+                manifest[p_name] = {}
+            manifest[p_name][e_name] = int(row["numSets"])
+
+    return jsonify(manifest)
+
+
+@app.route("/api/get_comparison_data")
+def get_comparison_data():
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    prog = request.args.get("program")
+    ex = request.args.get("exercise")
+    set_num = request.args.get("set_num")
+
+    user_data = getUserLogs(session["user_id"])
+
+    # Filter active logs matching selection
+    logs = [
+        {
+            "date": row["date"],
+            "weight": float(row["weight"]),
+            "reps": int(row["reps"]),
+            "1rm": float(row["1rm"]),
+            "diff": float(row["diff"]),
+            "diff_weight": float(row["diff_weight"])
+        }
+        for row in user_data
+        if row["program"] == prog
+           and row["exerciseName"] == ex
+           and int(row["setNum"]) == int(set_num)
+           and int(row.get("status", 1)) == 1
+    ]
+
+    # Chronological sort using your custom date style
+    try:
+        logs.sort(key=lambda x: datetime.strptime(x["date"], "%m/%d/%Y"))
+    except Exception:
+        pass
+
+    return jsonify(logs)
 
 @app.route("/about")
 def about():
