@@ -59,7 +59,7 @@ def check_date(date_string):
     if not date_string or len(date_string) != 10:
         return False
     try:
-        datetime.datetime.strptime(date_string, '%m/%d/%Y')
+        datetime.strptime(date_string, '%m/%d/%Y')
         return True
     except ValueError:
         return False
