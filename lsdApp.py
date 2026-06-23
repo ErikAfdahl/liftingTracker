@@ -78,28 +78,28 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
         if (row["program"] == program and row["exerciseName"] == exercise and
                 int(row["setNum"]) == int(set_num)):
 
-            if direction == -1:
+            if direction == -1: # if 1rm is regressing
                 if row["diff"] < 0:
                     acc += 1
                 else:
                     return acc
-            elif direction == 0:
+            elif direction == 0: # if 1rm is stagnating
                 if row["diff"] == 0:
                     acc += 1
                 else:
                     return acc
-            elif direction == -2:
+            elif direction == 1: # if 1rm is improving
+                if row["diff"] > 0:
+                    acc += 1
+                else:
+                    return acc
+            elif direction == -2: # if weight is regressing
                 if row["diff_weight"] < 0:
                     acc += 1
                 else:
                     return acc
-            elif direction == 2:
+            elif direction == 2: # if weight is improving
                 if row["diff_weight"] > 0:
-                    acc += 1
-                else:
-                    return acc
-            else:
-                if row["diff"] > 0:
                     acc += 1
                 else:
                     return acc
@@ -369,7 +369,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Closing
 
-    print(reports)
+
 
     return reports
 
@@ -491,7 +491,7 @@ def home():
     my_programs = list(set(row["programName"] for row in user_prog))
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
-    print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
+    #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
     welcome_message = None
 
     narrator = session.get("settings", {}).get("narrator", "default")
@@ -637,6 +637,7 @@ def run():
     rep_ranges = {}
     last_entries = {}
     recommendations = {}
+    streaks = {}
     rec_weights = {}
     rec_reps = {}
     for ex in exercises:
@@ -657,6 +658,25 @@ def run():
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
             if last:
+                if last["diff"] > 0:
+                    streak = 1
+                elif last["diff"] < 0:
+                    streak = -1
+                else:
+                    streak = 0
+
+                occur = get_occurrences(user_data, selected, ex["exerciseName"], s, streak)
+
+                if occur:
+                    streak_message = f"Streak: {occur} session "
+                    if streak == -1:
+                        streak_message += f"regression streak."
+                    elif streak == 0:
+                        streak_message += f"stagnation streak."
+                    elif streak == 1:
+                        streak_message += f"improvement streak."
+                    streaks[key] = streak_message
+
                 if minRepRange[s - 1] == 0:
                     recommendations[key] = None
                 elif int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
@@ -703,6 +723,7 @@ def run():
                                              last_entries=last_entries,
                                              prev_entries=prev_entries,
                                              recommendations=recommendations,
+                                             streaks=streaks,
                                              rep_ranges=rep_ranges,
                                              rec_weights=rec_weights,
                                              rec_reps=rec_reps,
@@ -1144,7 +1165,7 @@ def logs():
     exercise_data = next((row for row in exercises if row["exerciseName"] == selected_ex), None)
     num_sets = int(exercise_data["numSets"]) if exercise_data else 1
     selected_unit  = exercise_data["unit"] if exercise_data else "rep"
-    print(selected_unit)
+    #print(selected_unit)
 
     selected_set = int(request.args.get("set_num") or request.form.get("selected_set") or 1)
     if selected_set < 1:
@@ -1316,4 +1337,3 @@ if __name__ == "__main__":
 # fix editing logs resetting diff stuff
 # fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
 # make sure users arent allowed to input non date like things into the date column
-# make report easier to read, by splitting it up

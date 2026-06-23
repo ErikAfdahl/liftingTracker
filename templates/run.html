@@ -103,6 +103,9 @@
                         {% if last.notes %} — "{{ last.notes }}"{% endif %}
                         ({{ last.date }})
                     </small><br>
+                    {% if streaks.get(key) %}
+                        <small class="text-secondary fst-italic">{{ streaks.get(key) }}</small><br>
+                    {% endif %}
                     {% if rec %}
                         <small class="text-secondary fst-italic">{{ rec }}</small>
                     {% endif %}
