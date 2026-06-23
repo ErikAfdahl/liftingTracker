@@ -179,6 +179,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             parts = [f"{entry['exerciseName']} for {entry['weight']} lbs and {entry['reps']} reps" for entry in lst]
             return ", ".join(parts[:-1]) + f", and {parts[-1]}" # haha
 
+    reports = []
     report = ""
 
     # Opening
@@ -209,10 +210,11 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         report += f"{connector} {overall} "
     else:
         report += f"{overall} "
+    reports.append(report)
 
     # Regression
     if declined:
-        report += f"\n\nThere was {pick_adj(len(declined), total)} amount of regression compared to last session, "
+        report = f"There was {pick_adj(len(declined), total)} amount of regression compared to last session, "
         report += f"as {'1 exercise declined' if len(declined) == 1 else f'{len(declined)} exercises declined'} "
         report += f"in the first set out of {total} total — {list_exercises(declined)} {'regressed' if len(declined) > 1 else 'regressed'}."
         streaks = []
@@ -232,13 +234,14 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
             joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
             report += f" Several exercises have been on a declining streak: {joined}."
+        reports.append(report)
 
     # Stagnation
     if stagnant:
         if declined:
-            report += "\n\nThere was also"
+            report = "There was also"
         else:
-            report += "\n\nThere was"
+            report = "There was"
         report += f" {pick_adj(len(stagnant), total)} amount of stagnation compared to last session, "
         report += f"as {'1 exercise was' if len(stagnant) == 1 else f'{len(stagnant)} exercises were'} flat "
         report += f"in the first set out of {total} — {list_exercises(stagnant)} didn't move."
@@ -258,15 +261,16 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
             joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
             report += f" Several exercises have been on a stagnation streak: {joined}."
+        reports.append(report)
 
     # Improvement
     if improved:
         if declined and stagnant:
-            report += "\n\nHowever there was"
+            report = "However there was"
         elif declined or stagnant:
-            report += "\n\nBut there was also"
+            report = "But there was also"
         else:
-            report += "\n\nThere was"
+            report = "There was"
         report += f" {pick_adj(len(improved), total)} amount of improvement compared to last session, "
         report += f"as {'1 exercise improved' if len(improved) == 1 else f'{len(improved)} exercises improved'} "
         report += f"in the first set out of {total} — {list_exercises(improved)} improved."
@@ -286,14 +290,15 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
             joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
             report += f" Several exercises have been on an improvement streak: {joined}."
+        reports.append(report)
 
     if increased or decreased:
         if declined and stagnant:
-            report += "\n\nHowever there was"
+            report = "However there was"
         elif declined or stagnant:
-            report += "\n\nBut there was also"
+            report = "But there was also"
         else:
-            report += "\n\nThere was"
+            report = "There was"
 
         total_changed = len(increased) + len(decreased)
         report += f" {pick_adj(total_changed, total)} instances of weight change compared to last session, "
@@ -341,6 +346,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
             streak_parts = [f"{ex} ({n} sessions)" for ex, n in streaks]
             joined = ", ".join(streak_parts[:-1]) + f", and {streak_parts[-1]}"
             report += f" Several exercises have been on an improvement streak: {joined}."
+        reports.append(report)
 
     # Notes
     notes = []
@@ -352,13 +358,14 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
                 notes.append(last)
 
     if notes:
-        report += " Some notes were made this session —"
+        report = " Some notes were made this session —"
         for i, entry in enumerate(notes):
             note_text = f" on {entry['exerciseName']} where you lifted {entry['weight']} lbs for {entry['reps']} reps, you wrote \"{entry['notes']}\""
             if i < len(notes) - 1:
                 report += note_text + ","
             else:
                 report += note_text + "."
+        reports.append(report)
 
     # Closing
 
