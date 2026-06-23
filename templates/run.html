@@ -93,7 +93,7 @@
             {% set key = ex.exerciseName ~ "_" ~ s %}
             {% set last = last_entries.get(key) %}
             {% set rec = recommendations.get(key) %}
-            {% set absolute_last = prev_entries.get(key) %}
+            {% set absolute_last = prev_entries.get(ex.exerciseName) %}
 
             <div class="mb-4">
                 <div class="d-flex align-items-baseline gap-3 mb-1">
