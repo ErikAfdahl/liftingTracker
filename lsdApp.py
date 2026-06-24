@@ -436,6 +436,9 @@ def login():
                     "userId": new_id,
                     "narrator": "default",
                     "quick_indexing": 1,
+                    "show_last": 1,
+                    "show_streak": 1,
+                    "show_rec": 1,
                     "weight_autofill": 1,
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
@@ -457,6 +460,9 @@ def settings():
 
     if request.method == "POST" and request.form.get("action") == "save_settings":
         narrator = request.form.get("narrator", "default")
+        show_last = 1 if request.form.get("show_last") else 0
+        show_streak = 1 if request.form.get("show_streak") else 0
+        show_rec = 1 if request.form.get("show_rec") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         weight_autofill = request.form.get("weight_autofill", 1)
         reps_autofill = request.form.get("reps_autofill", 1)
@@ -466,6 +472,9 @@ def settings():
         updateUser(session["user_id"], {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
+            "show_last": show_last,
+            "show_streak": show_streak,
+            "show_rec": show_rec,
             "weight_autofill": int(weight_autofill),
             "reps_autofill": int(reps_autofill),
             "weight_autofill_absent": int(weight_autofill_absent),
@@ -474,7 +483,10 @@ def settings():
 
         session["settings"] = {
             "narrator": narrator,
-            "quick_indexing": int(quick_indexing),
+            "quick_indexing": quick_indexing,
+            "show_last": show_last,
+            "show_streak": show_streak,
+            "show_rec": show_rec,
             "weight_autofill": int(weight_autofill),
             "reps_autofill": int(reps_autofill),
             "weight_autofill_absent": int(weight_autofill_absent),
@@ -491,6 +503,9 @@ def settings():
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
         "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
+        "show_last": bool(int(user.get("show_last", 1))) if user else True,
+        "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
+        "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
