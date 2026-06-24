@@ -162,7 +162,7 @@
                             {% set current_min_reps = ex.minReps.split(',')[s - 1] if ex.minReps else '' %}
 
                             <input type="number" name="reps" class="form-control form-control-sm" step="1" min="0"
-                                   value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{{ current_min_reps }}{% endif %}{% endif %}">
+                                   value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-secondary small">Notes (optional)</label>
