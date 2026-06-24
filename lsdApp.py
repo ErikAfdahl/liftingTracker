@@ -436,6 +436,7 @@ def login():
                     "userId": new_id,
                     "narrator": "default",
                     "quick_indexing": 1,
+                    "show_rep": 1,
                     "show_last": 1,
                     "show_streak": 1,
                     "show_rec": 1,
@@ -460,6 +461,7 @@ def settings():
 
     if request.method == "POST" and request.form.get("action") == "save_settings":
         narrator = request.form.get("narrator", "default")
+        show_rep = 1 if request.form.get("show_rep") else 0
         show_last = 1 if request.form.get("show_last") else 0
         show_streak = 1 if request.form.get("show_streak") else 0
         show_rec = 1 if request.form.get("show_rec") else 0
@@ -472,6 +474,7 @@ def settings():
         updateUser(session["user_id"], {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
+            "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
             "show_rec": show_rec,
@@ -484,6 +487,7 @@ def settings():
         session["settings"] = {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
+            "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
             "show_rec": show_rec,
@@ -503,6 +507,7 @@ def settings():
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
         "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
+        "show_rep": bool(int(user.get("show_rep", 1))) if user else True,
         "show_last": bool(int(user.get("show_last", 1))) if user else True,
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
         "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
@@ -688,7 +693,7 @@ def run():
             last = last_entries[key]
             # units[key] = ex["unit"]
 
-            if minRepRange[s-1] == 0:
+            if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
                 rep_ranges[key] = None
             elif minRepRange[s-1] == maxRepRange[s-1]:
                 rep_ranges[key] = f"Target for set {s} is {minRepRange[s-1]} {ex['unit']}s."
@@ -705,7 +710,7 @@ def run():
 
                 occur = get_occurrences(user_data, selected, ex["exerciseName"], s, streak)
 
-                if occur:
+                if occur and (session.get("settings", {}).get("show_streak", 1) == 1):
                     streak_message = f"Streak: {occur} session "
                     if streak == -1:
                         streak_message += f"regression streak."
@@ -715,7 +720,7 @@ def run():
                         streak_message += f"improvement streak."
                     streaks[key] = streak_message
 
-                if maxRepRange[s - 1] == 0:
+                if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
                     recommendations[key] = None
                 elif int(last["reps"]) >= int(maxRepRange[s-1] * 1.25):
                     # if last reps are significantly more than max or significantly less than min
@@ -752,26 +757,29 @@ def run():
     print(f"rec_reps: {rec_reps}")
 
     response = make_response(render_template("run.html",
-                                             my_programs=my_programs,
-                                             selected=selected,
-                                             exercises=exercises,
-                                             ex_index=ex_index,
-                                             today=today,
-                                             last_entries=last_entries,
-                                             prev_entries=prev_entries,
-                                             recommendations=recommendations,
-                                             streaks=streaks,
-                                             rep_ranges=rep_ranges,
-                                             rec_weights=rec_weights,
-                                             rec_reps=rec_reps,
+                                             my_programs=my_programs, # program data (data)
+                                             selected=selected, # selected exercise (string)
+                                             exercises=exercises,# list of exercises (data)
+                                             ex_index=ex_index, # what exercise the user is on
+                                             today=today, # date
+                                             last_entries=last_entries, # data from previous session
+                                             prev_entries=prev_entries, # for last log only
+                                             recommendations=recommendations, # recommendations (dict of strings)
+                                             streaks=streaks, # streaks (dict of strings)
+                                             rep_ranges=rep_ranges, # rep ranges for the sets (dict of strings)
+                                             rec_weights=rec_weights, # recommended weight (dict of floats)
+                                             rec_reps=rec_reps, # recommended rep amounts (dict of ints)
+                                             user_data=user_data, # user logs (data)
+                                             log_cap_warning=log_cap_warning,
+                                             error_message=error_message,
+                                             success_message=success_message,
                                              weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
-                                             weight_autofill_absent=session.get("settings", {}).get("weight_autofill_absent", 1),
-                                             reps_autofill_absent=session.get("settings", {}).get("reps_autofill_absent", 1),
-                                             success_message=success_message,
-                                             user_data=user_data,
-                                             log_cap_warning=log_cap_warning,
-                                             error_message=error_message))
+                                             weight_autofill_absent=session.get("settings", {}).get(
+                                                 "weight_autofill_absent", 1),
+                                             reps_autofill_absent=session.get("settings", {}).get(
+                                                 "reps_autofill_absent", 1)
+                                             ))
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -1431,8 +1439,6 @@ if __name__ == "__main__":
 
 # to do list
 # let the user customize what exactly they see, and make the user able to turn more things on/off in run program
-# show last, show streak, show recommended
 # make the ordering system work more efficiently
-# maybe add another option to autofill, most recent which is different from default because this would fetch the most recent weight/reps regardless of set number
 # add a timer potentially
 # fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
