@@ -105,12 +105,14 @@
                 </div>
 
                 {% if last %}
-                    <small class="text-secondary">
-                        {% set last_w = last.weight | float %}
-                        Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
-                        {% if last.notes %} — "{{ last.notes }}"{% endif %}
-                        ({{ last.date }})
-                    </small><br>
+                    {% if show_last == 1 %}
+                        <small class="text-secondary">
+                            {% set last_w = last.weight | float %}
+                            Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
+                            {% if last.notes %} — "{{ last.notes }}"{% endif %}
+                            ({{ last.date }})
+                        </small><br>
+                    {% endif %}
                     {% if streaks.get(key) %}
                         <small class="text-secondary fst-italic">{{ streaks.get(key) }}</small><br>
                     {% endif %}

@@ -773,6 +773,7 @@ def run():
                                              log_cap_warning=log_cap_warning,
                                              error_message=error_message,
                                              success_message=success_message,
+                                             show_last=session.get("settings", {}).get("show_last", 1),
                                              weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
                                              weight_autofill_absent=session.get("settings", {}).get(
