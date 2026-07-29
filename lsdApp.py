@@ -436,6 +436,7 @@ def login():
                     "userId": new_id,
                     "narrator": "default",
                     "quick_indexing": 1,
+                    "quick_resume": 1,
                     "show_rep": 1,
                     "show_last": 1,
                     "show_streak": 1,
@@ -466,6 +467,7 @@ def settings():
         show_streak = 1 if request.form.get("show_streak") else 0
         show_rec = 1 if request.form.get("show_rec") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
+        quick_resume = 1 if request.form.get("quick_resume") else 0
         weight_autofill = request.form.get("weight_autofill", 1)
         reps_autofill = request.form.get("reps_autofill", 1)
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
@@ -474,6 +476,7 @@ def settings():
         updateUser(session["user_id"], {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
+            "quick_resume": quick_resume,
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
@@ -487,6 +490,7 @@ def settings():
         session["settings"] = {
             "narrator": narrator,
             "quick_indexing": quick_indexing,
+            "quick_resume": quick_resume,
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
@@ -507,6 +511,7 @@ def settings():
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
         "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
+        "quick_resume": bool(int(user.get("quick_resume", 1))) if user else True,
         "show_rep": bool(int(user.get("show_rep", 1))) if user else True,
         "show_last": bool(int(user.get("show_last", 1))) if user else True,
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
@@ -555,8 +560,9 @@ def home():
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
             (last["setNum"] != last_exercise_in_program["numSets"])
     )
+    quick_resume = session.get("settings", {}).get("quick_resume", 1)
 
-    if workout_incomplete and not forced_home:
+    if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
 
     return render_template("home.html",
@@ -1452,8 +1458,3 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-# to do list
-# let the user customize what exactly they see, and make the user able to turn more things on/off in run program
-# make the ordering system work more efficiently
-# add a timer potentially
-# fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
