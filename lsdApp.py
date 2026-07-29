@@ -547,7 +547,7 @@ def home():
 
     last = user_data[-1] if user_data else None
     last_exercise_in_program = sorted(
-        [row for row in user_prog if row["programName"] == last["programName"]],
+        [row for row in user_prog if row["programName"] == last["program"]],
         key=lambda x: int(x["order"])
     )[-1] if last else None
 
