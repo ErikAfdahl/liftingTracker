@@ -531,6 +531,7 @@ def home():
     log_cap_warning = len(user_data) >= 1000
     #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
     welcome_message = None
+    forced_home = request.args.get("home") == "1"
 
     narrator = session.get("settings", {}).get("narrator", "default")
     if narrator == "mommy":
@@ -544,6 +545,19 @@ def home():
     else:
         welcome_message = f"Welcome back {session['username']}"
 
+    last = user_data[-1] if user_data else None
+    last_exercise_in_program = sorted(
+        [row for row in user_prog if row["programName"] == last["programName"]],
+        key=lambda x: int(x["order"])
+    )[-1] if last else None
+
+    workout_incomplete = last and (
+            (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
+            (last["setNum"] != last_exercise_in_program["numSets"])
+    )
+
+    if workout_incomplete and not forced_home:
+        return redirect(url_for("run"))
 
     return render_template("home.html",
                            username=session["username"],
