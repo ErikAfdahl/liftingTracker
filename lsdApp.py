@@ -584,8 +584,8 @@ def home():
 
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
-    
-    date = iso_to_display(last["date"], 0) if last else None
+
+    date = iso_to_display(last["date"], 1) if last else None
 
     return render_template("home.html",
                            username=session["username"],
