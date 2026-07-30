@@ -673,7 +673,7 @@ def run():
                 "userId": int(session["user_id"]),
                 "program": selected,
                 "status": 1,
-                "date": display_to_iso(workout_date, 0),
+                "date": display_to_iso(workout_date, 1),
                 "exerciseName": exercise_name,
                 "setNum": set_num,
                 "weight": weight,
