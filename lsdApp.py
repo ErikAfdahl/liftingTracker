@@ -68,11 +68,11 @@ def get_date_entry(data, program, exercise, set_num, date):
 
     return None
 
-def check_date(date_string):
-    if not date_string or len(date_string) != 10:
+def check_date(date_string, fmt=DATE_FORMATS[1]):
+    if not date_string:
         return False
     try:
-        datetime.strptime(date_string, '%Y-%m-%d')
+        datetime.strptime(date_string, fmt)
         return True
     except ValueError:
         return False
@@ -656,7 +656,7 @@ def run():
         workout_date = request.form.get("workout_date")
 
         if not check_date(workout_date):
-            error_message = f"Invalid date format! Please use MM/DD/YYYY (e.g., {today})."
+            error_message = f"Invalid date format! Please use MM-DD-YYYY (e.g., {iso_to_display(today, 1)})."
         else:
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
