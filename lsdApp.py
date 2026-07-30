@@ -11,6 +11,20 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 app.permanent_session_lifetime = timedelta(days=30)
 
+DATE_FORMATS = {
+    0: "%Y-%m-%d",  # Year-Month-Day   -> 2026-07-29 (same as ISO)
+    1: "%m-%d-%Y",  # Month-Day-Year   -> 07-29-2026
+    2: "%d-%m-%Y",  # Day-Month-Year   -> 29-07-2026
+}
+
+def iso_to_display(iso_str: str, fmt: int) -> str:
+    d = datetime.strptime(iso_str, "%Y-%m-%d")
+    return d.strftime(DATE_FORMATS[fmt])
+
+def display_to_iso(display_str: str, fmt: int) -> str:
+    d = datetime.strptime(display_str, DATE_FORMATS[fmt])
+    return d.strftime("%Y-%m-%d")
+
 def hashPassword(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
@@ -392,6 +406,7 @@ def parseRepRange(repRange, numSets):
     except ValueError:
         return []
 
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
@@ -437,6 +452,7 @@ def login():
                     "narrator": "default",
                     "quick_indexing": 1,
                     "quick_resume": 1,
+                    "date_format": 1,
                     "show_rep": 1,
                     "show_last": 1,
                     "show_streak": 1,
@@ -468,6 +484,7 @@ def settings():
         show_rec = 1 if request.form.get("show_rec") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         quick_resume = 1 if request.form.get("quick_resume") else 0
+        date_format = request.form.get("date_format", 1)
         weight_autofill = request.form.get("weight_autofill", 1)
         reps_autofill = request.form.get("reps_autofill", 1)
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
@@ -477,6 +494,7 @@ def settings():
             "narrator": narrator,
             "quick_indexing": quick_indexing,
             "quick_resume": quick_resume,
+            "date_format": date_format,
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
@@ -491,6 +509,7 @@ def settings():
             "narrator": narrator,
             "quick_indexing": quick_indexing,
             "quick_resume": quick_resume,
+            "date_format": date_format,
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
@@ -512,6 +531,7 @@ def settings():
         "narrator": user.get("narrator", "default") if user else "default",
         "quick_indexing": bool(int(user.get("quick_indexing", 1))) if user else True,
         "quick_resume": bool(int(user.get("quick_resume", 1))) if user else True,
+        "date_format": user.get("date_format", 1) if user else 1,
         "show_rep": bool(int(user.get("show_rep", 1))) if user else True,
         "show_last": bool(int(user.get("show_last", 1))) if user else True,
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
@@ -564,6 +584,8 @@ def home():
 
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
+    
+    date = iso_to_display(last["date"], 0) if last else None
 
     return render_template("home.html",
                            username=session["username"],
@@ -571,7 +593,8 @@ def home():
                            my_programs=my_programs,
                            user_data=user_data,
                            log_cap_warning=log_cap_warning,
-                           welcome_message=welcome_message
+                           welcome_message=welcome_message,
+                           date=date
                            )
 
 @app.route("/run", methods=["GET", "POST"])
@@ -650,7 +673,7 @@ def run():
                 "userId": int(session["user_id"]),
                 "program": selected,
                 "status": 1,
-                "date": workout_date,
+                "date": display_to_iso(workout_date, 0),
                 "exerciseName": exercise_name,
                 "setNum": set_num,
                 "weight": weight,
@@ -781,7 +804,7 @@ def run():
                                              selected=selected, # selected exercise (string)
                                              exercises=exercises,# list of exercises (data)
                                              ex_index=ex_index, # what exercise the user is on
-                                             today=today, # date
+                                             today=iso_to_display(today, 1), # date
                                              last_entries=last_entries, # data from previous session
                                              prev_entries=prev_entries, # for last log only
                                              recommendations=recommendations, # recommendations (dict of strings)

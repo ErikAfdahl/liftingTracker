@@ -6,7 +6,7 @@
         <h2 class="fw-bold mb-0">{{ welcome_message }}</h2>
         <p class="text-secondary fst-italic mb-0">For lifters who want to see everything.</p>
         {% if user_data %}
-            <p class="text-secondary small mb-0">Last session: <span class="text-light">{{ user_data[-1]["program"] }}</span> on {{ user_data[-1]["date"] }}</p>
+            <p class="text-secondary small mb-0">Last session: <span class="text-light">{{ user_data[-1]["program"] }}</span> on {{ date }}</p>
         {% endif %}
     </div>
 <!--    <div class="d-flex gap-2">-->
