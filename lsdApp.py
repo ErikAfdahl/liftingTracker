@@ -58,7 +58,7 @@ def check_date(date_string):
     if not date_string or len(date_string) != 10:
         return False
     try:
-        datetime.strptime(date_string, '%m/%d/%Y')
+        datetime.strptime(date_string, '%Y-%m-%d')
         return True
     except ValueError:
         return False
@@ -602,7 +602,7 @@ def run():
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
-    today = now.strftime("%m/%d/%Y")
+    today = now.strftime("%Y-%m-%d")
     success_message = None
     error_message = ""
 
@@ -852,7 +852,7 @@ def run_results():
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
-    today = now.strftime("%m/%d/%Y")
+    today = now.strftime("%Y-%m-%d")
 
     # Default: two most recent dates
     date_last = request.args.get("date_last", program_dates[0] if len(program_dates) > 0 else None)
@@ -1444,7 +1444,7 @@ def get_comparison_data():
 
     # Chronological sort using your custom date style
     try:
-        logs.sort(key=lambda x: datetime.strptime(x["date"], "%m/%d/%Y"))
+        logs.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d"))
     except Exception:
         pass
 
