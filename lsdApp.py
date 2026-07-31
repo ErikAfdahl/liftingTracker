@@ -807,7 +807,7 @@ def run():
                                              selected=selected, # selected exercise (string)
                                              exercises=exercises,# list of exercises (data)
                                              ex_index=ex_index, # what exercise the user is on
-                                             today=iso_to_display(today, session.get('settings', {}).get('date_format', 1)), # date
+                                             today=f"{iso_to_display(today, session.get('settings', {}).get('date_format', 1))}).", # date
                                              last_entries=last_entries, # data from previous session
                                              prev_entries=prev_entries, # for last log only
                                              recommendations=recommendations, # recommendations (dict of strings)
