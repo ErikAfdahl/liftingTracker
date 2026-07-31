@@ -905,8 +905,12 @@ def run_results():
             last = get_date_entry(user_data, selected, ex["exerciseName"], s, date_last) if date_last else None
             prev = get_date_entry(user_data, selected, ex["exerciseName"], s, date_prev) if date_prev else None
 
+            date_format = session.get("settings", {}).get("date_format", 1)
+
             last_entries[key] = last
+            last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             prev_entries[key] = prev
+            prev_entries[key]["date"] = iso_to_display(prev_entries[key]["date"], date_format)
 
             if not last or not prev:
                 continue
