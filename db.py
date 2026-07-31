@@ -29,7 +29,8 @@ def getTemplateProgramData():
     return [row for row in prog_data if str(row["userId"]) == str(TEMPLATE_USER_ID)]
 
 def getUserLogs(user_id):
-    data = supabase.table("Logs").select("*").eq("userId", user_id).order("id", desc=True).limit(1000).execute().data
+    data = supabase.table("Logs").select("*").eq("userId", user_id) \
+        .order("date", desc=True).order("id", desc=True).limit(1000).execute().data
     return list(reversed(data))
 
 def getUserLogsByExercise(user_id, program, exercise, set_num):
@@ -39,6 +40,7 @@ def getUserLogsByExercise(user_id, program, exercise, set_num):
             .eq("program", program)
             .eq("exerciseName", exercise)
             .eq("setNum", set_num)
+            .order("date", desc=False)
             .order("id", desc=False)
             .execute().data)
 
