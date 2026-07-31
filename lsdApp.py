@@ -1432,8 +1432,12 @@ def deleted_logs():
 
         return redirect(url_for("deleted_logs"))
 
+    date_format = session.get("settings", {}).get("date_format", 1)
+
     all_logs = getAllLogs()
-    deleted = [row for row in all_logs
+    deleted = [
+                {**row, "date": iso_to_display(row["date"], date_format)}
+               for row in all_logs
                if str(row["userId"]) == str(session["user_id"])
                and int(row["status"]) == 0]
 
