@@ -130,8 +130,9 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     return acc
     return acc
 
-def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, narrator):
+def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
+    date_last = iso_to_display(date_last, date_format)
 
     prd = newPRs
     exercise_names = [ex["exerciseName"] for ex in exercises]
@@ -930,7 +931,7 @@ def run_results():
                     newPRs.append(ex['exerciseName'])
     narrator = session.get("settings", {}).get("narrator", "default")
     report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
-                             currentImprov, heaviest, date_last, narrator)
+                             currentImprov, heaviest, date_last, session.get("settings", {}).get("date_format", 1), narrator)
     return render_template("results.html",
                            selected=selected,
                            my_programs=my_programs,
