@@ -182,31 +182,25 @@
         <script>
             const rawData = {{ chart_data | tojson }};
 
-            // 1. Expanded Color Palette for up to 10 comparison overlays
             const colors = [
-                "#198754", // Green
-                "#dc3545", // Red
-                "#ffc107", // Yellow
-                "#0dcaf0", // Cyan
-                "#6f42c1", // Purple
-                "#fd7e14", // Orange
-                "#e83e8c", // Pink
-                "#20c997", // Teal
-                "#38bdf8", // Sky Blue
-                "#a3e635"  // Lime
+                "#198754", "#dc3545", "#ffc107", "#0dcaf0", "#6f42c1",
+                "#fd7e14", "#e83e8c", "#20c997", "#38bdf8", "#a3e635"
             ];
 
             let activeOverlays = [];
             let programManifest = {};
 
-            // 2. Initialize Main Base Dataset
+            // iso -> display lookup, grows as new data (base + overlays) comes in
+            const dateDisplayMap = {};
+            rawData.forEach(r => { dateDisplayMap[r.date] = r.date_display; });
+
             let currentMetric = "1rm";
             const ctx = document.getElementById("oneRmChart").getContext("2d");
 
             const chart = new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: Array.from(new Set(rawData.map(r => r.date))),
+                    labels: Array.from(new Set(rawData.map(r => r.date))).sort(), // ISO sorts correctly as plain strings
                     datasets: [{
                         label: "Base Line: Estimated 1RM",
                         data: rawData.map(r => ({ x: r.date, y: r["1rm"] })),
@@ -220,16 +214,28 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { display: true, labels: { color: '#fff' } }
+                        legend: { display: true, labels: { color: '#fff' } },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => dateDisplayMap[items[0].label] || items[0].label
+                            }
+                        }
                     },
                     scales: {
-                        x: { ticks: { color: "#aaa" } },
+                        x: {
+                            ticks: {
+                                color: "#aaa",
+                                callback: function (value) {
+                                    const isoLabel = this.getLabelForValue(value);
+                                    return dateDisplayMap[isoLabel] || isoLabel;
+                                }
+                            }
+                        },
                         y: { ticks: { color: "#aaa" } }
                     }
                 }
             });
 
-            // Global Metric Handler for Base Line
             document.getElementById("chartMetric").addEventListener("change", function() {
                 currentMetric = this.value;
                 const labels = { "1rm": "Estimated 1RM", "weight": "Weight", "reps": "Reps", "diff": "Diff (vs Last)", "diff_weight": "Diff Weight" };
@@ -238,7 +244,6 @@
                 chart.update();
             });
 
-            // 3. Cascading Dropdown Auto-Population Logic
             function updateExerciseDropdown(prog) {
                 const exSelect = document.getElementById("compExercise");
                 exSelect.innerHTML = '';
@@ -271,14 +276,13 @@
                     }
                     setSelect.disabled = false;
                     btn.disabled = false;
-                    setSelect.value = "1"; // Default always to Set 1
+                    setSelect.value = "1";
                 } else {
                     setSelect.disabled = true;
                     btn.disabled = true;
                 }
             }
 
-            // 4. Load Manifest on Page Initialization
             fetch("/api/program_manifest")
                 .then(res => res.json())
                 .then(data => {
@@ -293,12 +297,10 @@
                         compProgSelect.innerHTML += `<option value="${prog}">${prog}</option>`;
                     });
 
-                    // Auto-select first program and cascade updates down
                     compProgSelect.value = programs[0];
                     updateExerciseDropdown(programs[0]);
                 });
 
-            // Event Listeners for Selector Changes
             document.getElementById("compProgram").addEventListener("change", function() {
                 updateExerciseDropdown(this.value);
             });
@@ -308,7 +310,6 @@
                 updateSetDropdown(prog, this.value);
             });
 
-            // 5. Add Comparison Line Overlay Logic (Max 10)
             document.getElementById("btnAddComparison").addEventListener("click", function() {
                 if (activeOverlays.length >= 10) {
                     alert("Max capacity reached! You can overlay up to 10 comparison lines at once.");
@@ -335,15 +336,16 @@
                             return;
                         }
 
+                        logs.forEach(l => { dateDisplayMap[l.date] = l.date_display; });
+
                         const currentLabels = chart.data.labels;
                         logs.forEach(l => {
                             if (!currentLabels.includes(l.date)) {
                                 currentLabels.push(l.date);
                             }
                         });
-                        chart.data.labels = currentLabels.sort((a, b) => new Date(a) - new Date(b));
+                        chart.data.labels = currentLabels.sort(); // plain sort — ISO strings only
 
-                        // Safely assign corresponding index color
                         const chosenColor = colors[activeOverlays.length];
 
                         const newDataset = {
@@ -364,7 +366,6 @@
                     });
             });
 
-            // 6. Render Dynamic Interactive Removal Badges
             function renderPills() {
                 const container = document.getElementById("comparisonPills");
                 container.innerHTML = "";
@@ -380,12 +381,10 @@
                 });
             }
 
-            // 7. Delete Overlay Trace Triggers
             window.removeOverlay = function(id) {
                 chart.data.datasets = chart.data.datasets.filter(ds => ds.id !== id);
                 activeOverlays = activeOverlays.filter(o => o.id !== id);
 
-                // Readjust remaining colors so they don't break order
                 activeOverlays.forEach((overlay, idx) => {
                     const dataset = chart.data.datasets.find(ds => ds.id === overlay.id);
                     if (dataset) {
