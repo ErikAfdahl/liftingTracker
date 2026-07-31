@@ -844,6 +844,7 @@ def run_results():
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+    date_format = session.get("settings", {}).get("date_format", 1)
 
     user_data = getUserLogs(session["user_id"])
 
@@ -860,7 +861,7 @@ def run_results():
 
     # Get all unique dates for this program, sorted newest first
     program_dates = sorted(
-        list(set(row["date"] for row in user_data if row["program"] == selected)),
+        list(set(iso_to_display(row["date"], date_format) for row in user_data if row["program"] == selected)),
         reverse=True
     )
 
@@ -882,7 +883,7 @@ def run_results():
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
-    today = now.strftime("%Y-%m-%d")
+    today = now.strftime(date_format)
 
     # Default: two most recent dates
     date_last = request.args.get("date_last", program_dates[0] if len(program_dates) > 0 else None)
@@ -905,12 +906,10 @@ def run_results():
             last = get_date_entry(user_data, selected, ex["exerciseName"], s, date_last) if date_last else None
             prev = get_date_entry(user_data, selected, ex["exerciseName"], s, date_prev) if date_prev else None
 
-            date_format = session.get("settings", {}).get("date_format", 1)
-
             last_entries[key] = last
-            last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
+            # last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             prev_entries[key] = prev
-            prev_entries[key]["date"] = iso_to_display(prev_entries[key]["date"], date_format)
+            # prev_entries[key]["date"] = iso_to_display(prev_entries[key]["date"], date_format)
 
             if not last or not prev:
                 continue
