@@ -738,6 +738,8 @@ def run():
             key = f"{ex['exerciseName']}_{s}"
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             last = last_entries[key]
+            date_format = session.get("settings", {}).get("date_format", 1)
+            last["date"] = iso_to_display(last["date"], date_format)
             # units[key] = ex["unit"]
 
             if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
