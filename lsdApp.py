@@ -1373,6 +1373,7 @@ def logs():
 
                 if after:
                     print("I love you king julian")
+                    print(after)
                     updateLog(after["id"], {
                         "diff": round(after["1rm"] - new_1rm, 3),
                         "diff_weight": round(after["weight"] - upd_weight, 3)
