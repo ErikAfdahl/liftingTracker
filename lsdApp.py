@@ -861,7 +861,7 @@ def run_results():
 
     # Get all unique dates for this program, sorted newest first
     program_dates = sorted(
-        list(set(iso_to_display(row["date"], date_format) for row in user_data if row["program"] == selected)),
+        list(set(row["date"] for row in user_data if row["program"] == selected)),
         reverse=True
     )
 
