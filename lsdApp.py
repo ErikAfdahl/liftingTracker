@@ -12,9 +12,12 @@ app.secret_key = os.environ.get("SECRET_KEY")
 app.permanent_session_lifetime = timedelta(days=30)
 
 DATE_FORMATS = {
-    0: "%Y-%m-%d",  # Year-Month-Day   -> 2026-07-29 (same as ISO)
-    1: "%m-%d-%Y",  # Month-Day-Year   -> 07-29-2026
-    2: "%d-%m-%Y",  # Day-Month-Year   -> 29-07-2026
+    0: "%m-%d-%Y", # Month-Day-Year   -> 07-29-2026
+    1: "%m/%d/%Y",
+    2: "%d-%m-%Y", # Day-Month-Year   -> 29-07-2026
+    3: "%d/%m/%Y",
+    4: "%Y-%m-%d", # Year-Month-Day   -> 2026-07-29 (same as ISO)
+    5: "%Y/%m/%d",
 }
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
@@ -584,8 +587,7 @@ def home():
 
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
-
-    date = iso_to_display(last["date"], 1) if last else None
+    date = iso_to_display(last["date"], session.get("settings", {}).get("date_format", 1)) if last else None
 
     return render_template("home.html",
                            username=session["username"],
@@ -656,7 +658,8 @@ def run():
         workout_date = request.form.get("workout_date")
 
         if not check_date(workout_date):
-            error_message = f"Invalid date format! Please use MM-DD-YYYY (e.g., {iso_to_display(today, 1)})."
+            error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
+                             f"{iso_to_display(today, session.get("settings", {}).get("date_format", 1))}).")
         else:
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
@@ -804,7 +807,7 @@ def run():
                                              selected=selected, # selected exercise (string)
                                              exercises=exercises,# list of exercises (data)
                                              ex_index=ex_index, # what exercise the user is on
-                                             today=iso_to_display(today, 1), # date
+                                             today=iso_to_display(today, session.get("settings", {}).get("date_format", 1)), # date
                                              last_entries=last_entries, # data from previous session
                                              prev_entries=prev_entries, # for last log only
                                              recommendations=recommendations, # recommendations (dict of strings)
