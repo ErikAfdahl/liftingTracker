@@ -930,8 +930,13 @@ def run_results():
                 if last["1rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
     narrator = session.get("settings", {}).get("narrator", "default")
+    date_format = session.get("settings", {}).get("date_format", 1)
     report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
-                             currentImprov, heaviest, date_last, session.get("settings", {}).get("date_format", 1), narrator)
+                             currentImprov, heaviest, date_last, date_format, narrator)
+
+    visual_program_dates = [iso_to_display(prog_date, date_format) for prog_date in program_dates]
+
+
     return render_template("results.html",
                            selected=selected,
                            my_programs=my_programs,
@@ -943,6 +948,7 @@ def run_results():
                            newPRs=newPRs,
                            report=report,
                            program_dates=program_dates,
+                           visual_program_dates=visual_program_dates,
                            date_last=iso_to_display(date_last, date_format),
                            date_prev=iso_to_display(date_prev, date_format),
                            narrator=narrator)
