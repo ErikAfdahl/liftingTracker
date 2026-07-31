@@ -736,10 +736,11 @@ def run():
 
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
-            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
-            last = last_entries[key]
             date_format = session.get("settings", {}).get("date_format", 1)
-            last["date"] = iso_to_display(last["date"], date_format)
+            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
+            last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
+            last = last_entries[key]
+
             # units[key] = ex["unit"]
 
             if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
