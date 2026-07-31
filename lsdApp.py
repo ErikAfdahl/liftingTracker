@@ -801,13 +801,13 @@ def run():
 
     print(f"rec_weights: {rec_weights}")
     print(f"rec_reps: {rec_reps}")
-    date_format = session.get('settings', {}).get('date_format', 1)
+    formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
                                              my_programs=my_programs, # program data (data)
                                              selected=selected, # selected exercise (string)
                                              exercises=exercises,# list of exercises (data)
                                              ex_index=ex_index, # what exercise the user is on
-                                             today=iso_to_display(today, date_format), # date
+                                             today=formated_date, # date
                                              last_entries=last_entries, # data from previous session
                                              prev_entries=prev_entries, # for last log only
                                              recommendations=recommendations, # recommendations (dict of strings)
