@@ -942,8 +942,8 @@ def run_results():
                            newPRs=newPRs,
                            report=report,
                            program_dates=program_dates,
-                           date_last=date_last,
-                           date_prev=date_prev,
+                           date_last=iso_to_display(date_last, date_format),
+                           date_prev=iso_to_display(date_prev, date_format),
                            narrator=narrator)
 
 @app.route("/manage", methods=["GET", "POST"])
