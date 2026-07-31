@@ -882,8 +882,8 @@ def run_results():
                                narrator=session.get("settings", {}).get("narrator", "default"))
 
     timezone = pytz.timezone("America/Chicago")
-    now = datetime.now(timezone)
-    today = now.strftime(date_format)
+    # now = datetime.now(timezone)
+    # today = now.strftime(date_format)
 
     # Default: two most recent dates
     date_last = request.args.get("date_last", program_dates[0] if len(program_dates) > 0 else None)
