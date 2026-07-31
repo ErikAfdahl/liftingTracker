@@ -1354,8 +1354,8 @@ def logs():
                              str(row["notes"]) == str(orig_notes)), None)
 
             if matching:
-                before = find_date(user_data, matching["id"], direction=1)  # chronologically earlier
-                after = find_date(user_data, matching["id"], direction=-1)  # chronologically later
+                before = find_date(user_data, matching["id"], direction=-1)  # chronologically earlier
+                after = find_date(user_data, matching["id"], direction=1)  # chronologically later
                 new_diff = round(before["1rm"] - new_1rm, 3) if before else 0
                 new_diff_weight = round(before["weight"] - upd_weight, 3) if before else 0
 
@@ -1370,6 +1370,8 @@ def logs():
                     "diff_weight": new_diff_weight,
                     "notes": upd_notes
                 })
+                
+                print(before)
 
                 if after:
                     print("I love you king julian")
