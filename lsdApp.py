@@ -1380,7 +1380,9 @@ def logs():
             "table": df[["weight", "reps", "1rm", "diff", "diff_weight"]].agg(
                 ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
-        chart_data = df[["date", "weight", "reps", "1rm", "diff", "diff_weight"]].sort_values("date").to_dict(orient="records")
+        df["date_display"] = df["date"].apply(lambda d: iso_to_display(d, date_format))
+        chart_data = df[["date", "date_display", "weight", "reps", "1rm", "diff", "diff_weight"]] \
+            .sort_values("date").to_dict(orient="records")
 
     log_cap_warning = len(user_data) >= 1000
 
