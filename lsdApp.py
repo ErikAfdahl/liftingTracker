@@ -799,8 +799,8 @@ def run():
         key = f"{ex['exerciseName']}"
         prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
 
-    print(f"rec_weights: {rec_weights}")
-    print(f"rec_reps: {rec_reps}")
+    # print(f"rec_weights: {rec_weights}")
+    # print(f"rec_reps: {rec_reps}")
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
                                              my_programs=my_programs, # program data (data)
