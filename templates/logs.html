@@ -406,7 +406,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <span class="fw-bold">{{ log.date }}</span>
-                            <span class="text-secondary ms-2">{{ log.weight }} lbs · {{ log.reps }} {{ selected_unit | capitalize }}s · 1RM: {{ log["1rm"] }}</span>
+                            <span class="text-secondary ms-2">{{ log.weight }} lbs · {{ log.reps }} {{ selected_unit | capitalize }}s · 1RM: {{ log["1rm"] }} · 1RM Diff: {{ log["diff"] }} · Weight Diff: {{ log["diff_weight"] }}</span>
                             {% if log.notes %}
                                 <br><small class="text-secondary fst-italic">"{{ log.notes }}"</small>
                             {% endif %}
