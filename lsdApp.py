@@ -1279,6 +1279,7 @@ def logs():
     prog_data = getAllProgram() # all the programs
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])] # only the users programs
     my_programs = list(set(row["programName"] for row in user_prog)) # list of the names of the users programs
+    date_format = session.get("settings", {}).get("date_format", 1)
 
     success_message = None
     error_message = None
@@ -1311,7 +1312,7 @@ def logs():
 
     if request.method == "POST":
         if action == "delete_log":
-            log_date = request.form.get("log_date")
+            log_date = display_to_iso(request.form.get("log_date"), date_format)
             log_weight = request.form.get("log_weight")
             log_reps = request.form.get("log_reps")
             log_notes = request.form.get("log_notes")
@@ -1332,7 +1333,6 @@ def logs():
 
 
         elif action == "save_log":
-            date_format = session.get("settings", {}).get("date_format", 1)
             orig_date = display_to_iso(request.form.get("orig_date"), date_format)
             orig_weight = request.form.get("orig_weight")
             orig_reps = request.form.get("orig_reps")
@@ -1379,8 +1379,6 @@ def logs():
 
             success_message = "Log updated!"
             user_data = getUserLogs(session["user_id"])
-
-    date_format = session.get("settings", {}).get("date_format", 1)
 
     exercise_logs = [
         row for row in user_data
