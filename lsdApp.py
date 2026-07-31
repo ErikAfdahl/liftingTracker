@@ -1348,10 +1348,15 @@ def logs():
             success_message = "Log updated!"
             user_data = getUserLogs(session["user_id"])
 
-    exercise_logs = [row for row in user_data if
-                     row["program"] == selected_prog and
-                     row["exerciseName"] == selected_ex and
-                     int(row["setNum"]) == selected_set]
+    date_format = session.get("settings", {}).get("date_format", 1)
+
+    exercise_logs = [
+        {**row, "date": iso_to_display(row["date"], date_format)}
+        for row in user_data
+        if row["program"] == selected_prog
+           and row["exerciseName"] == selected_ex
+           and int(row["setNum"]) == selected_set
+    ]
 
     stats = None
     chart_data = None
