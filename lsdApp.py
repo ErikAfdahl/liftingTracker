@@ -658,8 +658,9 @@ def run():
         workout_date = request.form.get("workout_date")
 
         if not check_date(workout_date):
+            date_format = session.get('settings', {}).get('date_format', 1)
             error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
-                             f"{iso_to_display(today, session.get("settings", {}).get("date_format", 1))}).")
+                             f"{iso_to_display(today, date_format)}).")
         else:
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
