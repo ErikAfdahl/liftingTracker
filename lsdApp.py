@@ -22,10 +22,10 @@ DATE_FORMATS = {
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
     d = datetime.strptime(iso_str, "%Y-%m-%d")
-    return d.strftime(DATE_FORMATS[fmt])
+    return d.strftime(DATE_FORMATS[int(fmt)])
 
 def display_to_iso(display_str: str, fmt: int) -> str:
-    d = datetime.strptime(display_str, DATE_FORMATS[fmt])
+    d = datetime.strptime(display_str, DATE_FORMATS[int(fmt)])
     return d.strftime("%Y-%m-%d")
 
 def hashPassword(password: str) -> str:
