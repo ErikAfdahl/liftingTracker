@@ -130,6 +130,23 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
                     return acc
     return acc
 
+def find_date(data, updated_id, direction=1):
+    if direction == 1: # gets the row made after id call
+        prev = None
+        for row in reversed(data):
+            if row["id"] == updated_id:
+                return prev
+            prev = row
+        return None
+    else: # gets the row made before id call
+        acc = 0
+        for row in reversed(data):
+            if acc == 1:
+                return row
+            if row["id"] == updated_id:
+                acc += 1
+        return None
+
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
     date_last = iso_to_display(date_last, date_format)
@@ -1313,12 +1330,14 @@ def logs():
             success_message = "Log deleted!"
             user_data = getUserLogs(session["user_id"])
 
+
         elif action == "save_log":
-            orig_date = request.form.get("orig_date")
+            date_format = session.get("settings", {}).get("date_format", 1)
+            orig_date = display_to_iso(request.form.get("orig_date"), date_format)
             orig_weight = request.form.get("orig_weight")
             orig_reps = request.form.get("orig_reps")
             orig_notes = request.form.get("orig_notes")
-            upd_date = request.form.get("upd_date")
+            upd_date = display_to_iso(request.form.get("upd_date"), date_format)
             upd_weight = float(request.form.get("upd_weight"))
             upd_reps = int(request.form.get("upd_reps"))
             upd_notes = request.form.get("upd_notes", "")
@@ -1333,7 +1352,13 @@ def logs():
                              float(row["weight"]) == float(orig_weight) and
                              int(row["reps"]) == int(orig_reps) and
                              str(row["notes"]) == str(orig_notes)), None)
+
             if matching:
+                before = find_date(user_data, matching["id"], direction=1)  # chronologically earlier
+                after = find_date(user_data, matching["id"], direction=-1)  # chronologically later
+                new_diff = round(before["1rm"] - new_1rm, 3) if before else 0
+                new_diff_weight = round(before["weight"] - upd_weight, 3) if before else 0
+
                 updateLog(matching["id"], {
                     "date": upd_date,
                     "exerciseName": selected_ex,
@@ -1341,10 +1366,17 @@ def logs():
                     "weight": upd_weight,
                     "reps": upd_reps,
                     "1rm": new_1rm,
-                    "diff": matching["diff"],
-                    "diff_weight": matching["diff_weight"],
+                    "diff": new_diff,
+                    "diff_weight": new_diff_weight,
                     "notes": upd_notes
                 })
+
+                if after:
+                    updateLog(after["id"], {
+                        "diff": round(after["1rm"] - new_1rm, 3),
+                        "diff_weight": round(after["weight"] - upd_weight, 3)
+                    })
+
             success_message = "Log updated!"
             user_data = getUserLogs(session["user_id"])
 
