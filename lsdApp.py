@@ -1351,11 +1351,14 @@ def logs():
     date_format = session.get("settings", {}).get("date_format", 1)
 
     exercise_logs = [
-        {**row, "date": iso_to_display(row["date"], date_format)}
-        for row in user_data
+        row for row in user_data
         if row["program"] == selected_prog
            and row["exerciseName"] == selected_ex
            and int(row["setNum"]) == selected_set
+    ]
+    visual_exercise_logs = [
+        {**row, "date": iso_to_display(row["date"], date_format)}
+        for row in exercise_logs
     ]
 
     stats = None
@@ -1390,7 +1393,8 @@ def logs():
                            num_sets=num_sets,
                            selected_unit=selected_unit,
                            selected_set=selected_set,
-                           exercise_logs=exercise_logs,
+                           # exercise_logs=exercise_logs,
+                           visual_exercise_logs=visual_exercise_logs,
                            exercise_data=exercise_data,
                            stats=stats,
                            chart_data=chart_data,

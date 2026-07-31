@@ -4,3 +4,4 @@ make the ordering system work more efficiently
 add a timer potentially
 fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
 add a weight streak to run program
+fix things not going to deleted logs
