@@ -6,3 +6,4 @@ fix diff stuff so that it doesnt look for the most recent in terms of logs, but 
 add a weight streak to run program
 fix things not going to deleted logs
 make logs go to the last program run
+allow user to quick jump to the logs of the exercise theyre on from run program
