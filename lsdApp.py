@@ -588,6 +588,8 @@ def home():
         if len(my_programs) == num_prog:
             break
 
+    my_programs.reverse()
+
     # print(my_programs)
     # my_programs = my_programs.reverse()
 
