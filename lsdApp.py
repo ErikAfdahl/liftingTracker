@@ -427,6 +427,12 @@ def parseRepRange(repRange, numSets):
     except ValueError:
         return []
 
+def getLastEnteredLog(user_id, program=None):
+    query = supabase.table("Logs").select("*").eq("userId", user_id)
+    if program:
+        query = query.eq("program", program)
+    data = query.order("id", desc=True).limit(1).execute().data
+    return data[0] if data else None
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -1280,19 +1286,27 @@ def logs():
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])] # only the users programs
     my_programs = list(set(row["programName"] for row in user_prog)) # list of the names of the users programs
     date_format = session.get("settings", {}).get("date_format", 1)
+    last_overall = getLastEnteredLog(session["user_id"])
 
     success_message = None
     error_message = None
 
-    selected_prog = request.args.get("program") or request.form.get("selected_prog") # selected prog
+    selected_prog = request.args.get("program") or request.form.get("selected_prog")# selected prog
     if not selected_prog or selected_prog not in my_programs:
-        selected_prog = my_programs[0] if my_programs else None
+        if last_overall:
+            selected_prog = last_overall["program"]
+        else:
+            selected_prog = my_programs[0] if my_programs else None
 
     selected_ex = request.args.get("exercise") or request.form.get("selected_ex")
     exercises = [row for row in user_prog if row["programName"] == selected_prog]
     exercise_names = [row["exerciseName"] for row in exercises]
     if not selected_ex or selected_ex not in exercise_names:
-        selected_ex = exercise_names[0] if exercise_names else None
+        last_in_prog = getLastEnteredLog(session["user_id"], program=selected_prog)
+        if last_in_prog:
+            selected_ex = last_in_prog["exerciseName"]
+        else:
+            selected_ex = exercise_names[0] if exercise_names else None
 
     exercise_data = next((row for row in exercises if row["exerciseName"] == selected_ex), None)
     num_sets = int(exercise_data["numSets"]) if exercise_data else 1
@@ -1305,7 +1319,10 @@ def logs():
     if selected_set > num_sets:
         selected_set = num_sets
 
-    user_data = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
+    user_data_exercise = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
+
+    programLogs = [row for row in user_data_exercise]
+    last = programLogs[-1] if programLogs else None
 
     action = request.form.get("action")
     # unit = exercises[selected_ex]["unit"]
@@ -1317,7 +1334,7 @@ def logs():
             log_reps = request.form.get("log_reps")
             log_notes = request.form.get("log_notes")
 
-            matching = [row for row in user_data
+            matching = [row for row in user_data_exercise
                         if str(row["userId"]) == str(session["user_id"]) and
                         row["program"] == selected_prog and
                         row["exerciseName"] == selected_ex and
@@ -1329,7 +1346,7 @@ def logs():
             for row in matching:
                 deleteLog(row["id"])
             success_message = "Log deleted!"
-            user_data = getUserLogs(session["user_id"])
+            user_data_exercise = getUserLogs(session["user_id"])
 
 
         elif action == "save_log":
@@ -1343,7 +1360,7 @@ def logs():
             upd_notes = request.form.get("upd_notes", "")
             new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
 
-            matching = next((row for row in user_data
+            matching = next((row for row in user_data_exercise
                              if str(row["userId"]) == str(session["user_id"]) and
                              row["program"] == selected_prog and
                              row["exerciseName"] == selected_ex and
@@ -1354,8 +1371,8 @@ def logs():
                              str(row["notes"]) == str(orig_notes)), None)
 
             if matching:
-                before = find_date(user_data, matching["id"], direction=-1)  # chronologically earlier
-                after = find_date(user_data, matching["id"], direction=1)  # chronologically later
+                before = find_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
+                after = find_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
                 new_diff = round(new_1rm - before["1rm"], 3) if before else 0
                 new_diff_weight = round(upd_weight - before["weight"], 3) if before else 0
 
@@ -1382,10 +1399,10 @@ def logs():
                     })
 
             success_message = "Log updated!"
-            user_data = getUserLogs(session["user_id"])
+            user_data_exercise = getUserLogs(session["user_id"])
 
     exercise_logs = [
-        row for row in user_data
+        row for row in user_data_exercise
         if row["program"] == selected_prog
            and row["exerciseName"] == selected_ex
            and int(row["setNum"]) == selected_set
@@ -1418,7 +1435,7 @@ def logs():
         chart_data = df[["date", "date_display", "weight", "reps", "1rm", "diff", "diff_weight"]] \
             .sort_values("date").to_dict(orient="records")
 
-    log_cap_warning = len(user_data) >= 1000
+    log_cap_warning = len(user_data_exercise) >= 1000
 
     return render_template("logs.html",
                            my_programs=my_programs,
