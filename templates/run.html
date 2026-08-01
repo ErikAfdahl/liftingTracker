@@ -96,11 +96,11 @@
             {% set absolute_last = prev_entries.get(ex.exerciseName) %}
 
             <div class="mb-4">
-                <div class="d-flex align-items-baseline gap-3 mb-1">
+                <div class="d-flex flex-column mb-1">
                     <h6 class="fw-bold mb-0">Set {{ s }}</h6>
                     {% set rr = rep_ranges.get(key) %}
                     {% if rr %}
-                        <small class="text-secondary">{{ rr }}</small>
+                        <small class="text-secondary ms-3">{{ rr }}</small>
                     {% endif %}
                 </div>
 
