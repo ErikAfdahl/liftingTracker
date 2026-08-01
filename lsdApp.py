@@ -588,7 +588,8 @@ def home():
         if len(my_programs) == num_prog:
             break
 
-    my_programs = my_programs.reverse()
+    print(my_programs)
+    # my_programs = my_programs.reverse()
 
     log_cap_warning = len(user_data) >= 1000
     #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
@@ -1398,11 +1399,11 @@ def logs():
                     "notes": upd_notes
                 })
 
-                print(before)
+                # print(before)
 
                 if after:
-                    print("I love you king julian")
-                    print(after)
+                    # print("I love you king julian")
+                    # print(after)
                     updateLog(after["id"], {
                         "diff": round(after["1rm"] - new_1rm, 3),
                         "diff_weight": round(after["weight"] - upd_weight, 3)
