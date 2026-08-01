@@ -582,18 +582,17 @@ def home():
     num_prog = len(set(row["programName"] for row in user_prog))
     my_programs = []
 
-    for row in user_data:
+    for row in reversed(user_data):
         if row["program"] not in my_programs:
             my_programs.append(row["program"])
         if len(my_programs) == num_prog:
             break
 
-    print(my_programs)
+    # print(my_programs)
     # my_programs = my_programs.reverse()
 
     log_cap_warning = len(user_data) >= 1000
     #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
-    welcome_message = None
     forced_home = request.args.get("home") == "1"
 
     narrator = session.get("settings", {}).get("narrator", "default")
