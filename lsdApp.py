@@ -588,7 +588,7 @@ def home():
         if len(my_programs) == num_prog:
             break
 
-    my_programs.reverse()
+    my_programs = my_programs.reverse()
 
     log_cap_warning = len(user_data) >= 1000
     #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
