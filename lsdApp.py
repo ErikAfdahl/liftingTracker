@@ -578,7 +578,17 @@ def home():
 
     prog_data = getAllProgram()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog))
+    num_prog = len(set(row["programName"] for row in user_prog))
+    my_programs = []
+
+    for row in user_prog:
+        if row not in my_programs:
+            my_programs.append(row)
+        if len(my_programs) == num_prog:
+            break
+
+    my_programs.reverse()
+
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
     #print(f"Total logs fetched: {len(getAllLogs())}, User logs: {len(user_data)}")
