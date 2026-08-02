@@ -970,8 +970,7 @@ def run_results():
     report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
                              currentImprov, heaviest, date_last, date_format, narrator)
 
-    visual_program_dates = [iso_to_display(prog_date, date_format) for prog_date in program_dates]
-
+    program_dates_display = {d: iso_to_display(d, date_format) for d in program_dates}
 
     return render_template("results.html",
                            selected=selected,
@@ -984,9 +983,9 @@ def run_results():
                            newPRs=newPRs,
                            report=report,
                            program_dates=program_dates,
-                           visual_program_dates=visual_program_dates,
-                           date_last=iso_to_display(date_last, date_format),
-                           date_prev=iso_to_display(date_prev, date_format),
+                           program_dates_display=program_dates_display,
+                           date_last=date_last,
+                           date_prev=date_prev,
                            narrator=narrator)
 
 @app.route("/manage", methods=["GET", "POST"])
