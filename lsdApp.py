@@ -988,6 +988,7 @@ def run_results():
                            date_prev=date_prev,
                            narrator=narrator)
 
+
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
     if "user_id" not in session:
