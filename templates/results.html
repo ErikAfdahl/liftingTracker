@@ -14,7 +14,7 @@
     </div>
 </div>
 
-{% if not visual_program_dates %}
+{% if not program_dates %}
     <div class="alert alert-secondary">No data logged for this program yet.</div>
 {% else %}
 
@@ -23,8 +23,10 @@
             <label class="text-secondary small mb-0">Comparing</label>
             <select class="form-select form-select-sm" style="width: auto;"
                     onchange="window.location.href='/run/results?program={{ selected }}&date_last=' + this.value + '&date_prev={{ date_prev }}'">
-                {% for date in visual_program_dates %}
-                <option value="{{ date }}" {% if date == date_last %}selected{% endif %}>{{ date }}</option>
+                {% for date in program_dates %}
+                <option value="{{ date }}" {% if date == date_last %}selected{% endif %}>
+                    {{ program_dates_display[date] }}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -32,8 +34,10 @@
         <div class="d-flex align-items-center gap-2">
             <select class="form-select form-select-sm" style="width: auto;"
                     onchange="window.location.href='/run/results?program={{ selected }}&date_last={{ date_last }}&date_prev=' + this.value">
-                {% for date in visual_program_dates %}
-                <option value="{{ date }}" {% if date == date_prev %}selected{% endif %}>{{ date }}</option>
+                {% for date in program_dates %}
+                <option value="{{ date }}" {% if date == date_prev %}selected{% endif %}>
+                    {{ program_dates_display[date] }}
+                </option>
                 {% endfor %}
             </select>
         </div>
