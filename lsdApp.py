@@ -149,7 +149,7 @@ def find_date(data, updated_id, direction=1):
 
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
-    date_last = iso_to_display(date_last, date_format)
+    # date_last = iso_to_display(date_last, date_format)
 
     prd = newPRs
     exercise_names = [ex["exerciseName"] for ex in exercises]

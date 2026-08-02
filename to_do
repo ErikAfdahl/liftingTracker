@@ -1,9 +1,8 @@
 to do list
-let the user customize what exactly they see, and make the user able to turn more things on/off in run program
 make the ordering system work more efficiently
 add a timer potentially
 fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
 add a weight streak to run program
 fix things not going to deleted logs
-make logs go to the last program run
-allow user to quick jump to the logs of the exercise theyre on from run program
+fix minor bugs, when a user enteres a log, 1rm is calculated based on date of the log not the chronilogical order
+when a log is deleted, update differences of the log after
