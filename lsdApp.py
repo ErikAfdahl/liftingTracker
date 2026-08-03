@@ -967,7 +967,7 @@ def run_results():
     date_format = session.get("settings", {}).get("date_format", 1)
     date_last_visual, date_prev_visual = iso_to_display(date_last, date_format), iso_to_display(date_prev, date_format)
     report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
-                             currentImprov, heaviest, date_last, date_format, narrator)
+                             currentImprov, heaviest, date_last_visual, date_format, narrator)
 
     program_dates_display = {d: iso_to_display(d, date_format) for d in program_dates}
 
