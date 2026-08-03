@@ -807,7 +807,7 @@ def run():
                     streaks_1rm[key] = streak_1rm_message
 
                 if occur_weight and (session.get("settings", {}).get("show_streak", 1) == 1):
-                    streaks_weight[key] = f"Weight Streak: {last_entries[key]["weight"]} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
+                    streaks_weight[key] = f"Weight Streak: {last_entries[key]['weight']} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
 
                 if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
                     recommendations[key] = None
