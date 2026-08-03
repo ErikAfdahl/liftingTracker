@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    <p class="text-secondary mb-4">Here's how <strong class="text-light">{{ selected }}</strong> went on <strong class="text-light">{{ date_last }}</strong> compared to <strong class="text-light">{{ date_prev }}</strong>.</p>
+    <p class="text-secondary mb-4">Here's how <strong class="text-light">{{ selected }}</strong> went on <strong class="text-light">{{ date_last_visual }}</strong> compared to <strong class="text-light">{{ date_prev_visual }}</strong>.</p>
 
     {% for ex in exercises %}
         <div class="card mb-4">
@@ -54,8 +54,8 @@
                     <thead>
                         <tr>
                             <th class="text-secondary small">Set</th>
-                            <th class="text-secondary small" colspan="3">{{ date_last }}</th>
-                            <th class="text-secondary small" colspan="3">{{ date_prev }}</th>
+                            <th class="text-secondary small" colspan="3">{{ date_last_visual }}</th>
+                            <th class="text-secondary small" colspan="3">{{ date_prev_visual }}</th>
                         </tr>
                         <tr>
                             <th></th>

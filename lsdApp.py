@@ -150,8 +150,6 @@ def find_date(data, updated_id, direction=1):
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
 
-    date_last = iso_to_display(date_last, date_format)
-
     prd = newPRs
     exercise_names = [ex["exerciseName"] for ex in exercises]
 
@@ -967,6 +965,7 @@ def run_results():
                     newPRs.append(ex['exerciseName'])
     narrator = session.get("settings", {}).get("narrator", "default")
     date_format = session.get("settings", {}).get("date_format", 1)
+    date_last_visual, date_prev_visual = iso_to_display(date_last, date_format), iso_to_display(date_prev, date_format)
     report = generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight,
                              currentImprov, heaviest, date_last, date_format, narrator)
 
@@ -985,7 +984,9 @@ def run_results():
                            program_dates=program_dates,
                            program_dates_display=program_dates_display,
                            date_last=date_last,
+                           date_last_visual=date_last_visual,
                            date_prev=date_prev,
+                           date_prev_visual=date_prev_visual,
                            narrator=narrator)
 
 
