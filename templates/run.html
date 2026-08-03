@@ -115,8 +115,11 @@
                             ({{ last.date }})
                         </small><br>
                     {% endif %}
-                    {% if streaks.get(key) %}
-                        <small class="text-secondary fst-italic">{{ streaks.get(key) }}</small><br>
+                    {% if streaks_1rm.get(key) %}
+                        <small class="text-secondary fst-italic">{{ streaks_1rm.get(key) }}</small><br>
+                    {% endif %}
+                    {% if streaks_weight.get(key) %}
+                        <small class="text-secondary fst-italic">{{ streaks_weight.get(key) }}</small><br>
                     {% endif %}
                     {% if rec %}
                         <small class="text-secondary fst-italic">{{ rec }}</small>

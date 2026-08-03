@@ -97,37 +97,36 @@ def get_best_entry(data, program, exercise, set_num):
 # has been progressing, and 0 if it has been stagnating) and then count how many occurances of that there are
 
 def get_occurrences(data, program, exercise, set_num, direction=0):
-    acc = 0
+    if direction == 2:
+        acc = 1
+        for row in reversed(data):
+            if row["diff_weight"] == 0:
+                acc += 1
+            else:
+                return acc
 
-    for row in reversed(data):
-        if (row["program"] == program and row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num)):
+    else:
+        acc = 0
+        for row in reversed(data):
+            if (row["program"] == program and row["exerciseName"] == exercise and
+                    int(row["setNum"]) == int(set_num)):
 
-            if direction == -1: # if 1rm is regressing
-                if row["diff"] < 0:
-                    acc += 1
-                else:
-                    return acc
-            elif direction == 0: # if 1rm is stagnating
-                if row["diff"] == 0:
-                    acc += 1
-                else:
-                    return acc
-            elif direction == 1: # if 1rm is improving
-                if row["diff"] > 0:
-                    acc += 1
-                else:
-                    return acc
-            elif direction == -2: # if weight is regressing
-                if row["diff_weight"] < 0:
-                    acc += 1
-                else:
-                    return acc
-            elif direction == 2: # if weight is improving
-                if row["diff_weight"] > 0:
-                    acc += 1
-                else:
-                    return acc
+                if direction == -1: # if 1rm is regressing
+                    if row["diff"] < 0:
+                        acc += 1
+                    else:
+                        return acc
+                elif direction == 0: # if 1rm is stagnating
+                    if row["diff"] == 0:
+                        acc += 1
+                    else:
+                        return acc
+                elif direction == 1: # if 1rm is improving
+                    if row["diff"] > 0:
+                        acc += 1
+                    else:
+                        return acc
+
     return acc
 
 def find_date(data, updated_id, direction=1):
@@ -762,7 +761,8 @@ def run():
     rep_ranges = {}
     last_entries = {}
     recommendations = {}
-    streaks = {}
+    streaks_1rm = {}
+    streaks_weight = {}
     rec_weights = {}
     rec_reps = {}
     for ex in exercises:
@@ -787,23 +787,27 @@ def run():
 
             if last:
                 if last["diff"] > 0:
-                    streak = 1
+                    streak_1rm = 1
                 elif last["diff"] < 0:
-                    streak = -1
+                    streak_1rm = -1
                 else:
-                    streak = 0
+                    streak_1rm = 0
 
-                occur = get_occurrences(user_data, selected, ex["exerciseName"], s, streak)
+                occur_1rm = get_occurrences(user_data, selected, ex["exerciseName"], s, streak_1rm)
+                occur_weight = get_occurrences(user_data, selected, ex["exerciseName"], s, 2)
 
-                if occur and (session.get("settings", {}).get("show_streak", 1) == 1):
-                    streak_message = f"Streak: {occur} session "
-                    if streak == -1:
-                        streak_message += f"regression streak."
-                    elif streak == 0:
-                        streak_message += f"stagnation streak."
-                    elif streak == 1:
-                        streak_message += f"improvement streak."
-                    streaks[key] = streak_message
+                if occur_1rm and (session.get("settings", {}).get("show_streak", 1) == 1):
+                    streak_1rm_message = f"1RM Streak: {occur_1rm} session "
+                    if streak_1rm == -1:
+                        streak_1rm_message += f"regression streak."
+                    elif streak_1rm == 0:
+                        streak_1rm_message += f"stagnation streak."
+                    elif streak_1rm == 1:
+                        streak_1rm_message += f"improvement streak."
+                    streaks_1rm[key] = streak_1rm_message
+
+                if occur_weight and (session.get("settings", {}).get("show_streak", 1) == 1):
+                    streaks_weight[key] = f"Weight Streak: {last_entries[key]["weight"]} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
 
                 if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
                     recommendations[key] = None
@@ -850,7 +854,8 @@ def run():
                                              last_entries=last_entries, # data from previous session
                                              prev_entries=prev_entries, # for last log only
                                              recommendations=recommendations, # recommendations (dict of strings)
-                                             streaks=streaks, # streaks (dict of strings)
+                                             streaks_1rm=streaks_1rm, # streaks (dict of strings)
+                                             streaks_weight=streaks_weight,
                                              rep_ranges=rep_ranges, # rep ranges for the sets (dict of strings)
                                              rec_weights=rec_weights, # recommended weight (dict of floats)
                                              rec_reps=rec_reps, # recommended rep amounts (dict of ints)
