@@ -100,10 +100,12 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
     if direction == 2:
         acc = 1
         for row in reversed(data):
-            if row["diff_weight"] == 0:
-                acc += 1
-            else:
-                return acc
+            if (row["program"] == program and row["exerciseName"] == exercise and
+                    int(row["setNum"]) == int(set_num)):
+                if row["diff_weight"] == 0:
+                    acc += 1
+                else:
+                    return acc
 
     else:
         acc = 0
