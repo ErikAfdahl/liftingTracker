@@ -483,6 +483,7 @@ def login():
                     "show_rep": 1,
                     "show_last": 1,
                     "show_streak": 1,
+                    "show_streak_weight": 1,
                     "show_rec": 1,
                     "weight_autofill": 1,
                     "reps_autofill": 1,
@@ -508,6 +509,7 @@ def settings():
         show_rep = 1 if request.form.get("show_rep") else 0
         show_last = 1 if request.form.get("show_last") else 0
         show_streak = 1 if request.form.get("show_streak") else 0
+        show_streak_weight = 1 if request.form.get("show_streak_weight") else 0
         show_rec = 1 if request.form.get("show_rec") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         quick_resume = 1 if request.form.get("quick_resume") else 0
@@ -525,6 +527,7 @@ def settings():
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
+            "show_streak_weight":show_streak_weight,
             "show_rec": show_rec,
             "weight_autofill": int(weight_autofill),
             "reps_autofill": int(reps_autofill),
@@ -540,6 +543,7 @@ def settings():
             "show_rep": show_rep,
             "show_last": show_last,
             "show_streak": show_streak,
+            "show_streak_weight":show_streak_weight,
             "show_rec": show_rec,
             "weight_autofill": int(weight_autofill),
             "reps_autofill": int(reps_autofill),
@@ -562,6 +566,7 @@ def settings():
         "show_rep": bool(int(user.get("show_rep", 1))) if user else True,
         "show_last": bool(int(user.get("show_last", 1))) if user else True,
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
+        "show_streak_weight": bool(int(user.get("show_streak_weight", 1))) if user else True,
         "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
@@ -808,7 +813,7 @@ def run():
                         streak_1rm_message += f"improvement streak."
                     streaks_1rm[key] = streak_1rm_message
 
-                if occur_weight and (session.get("settings", {}).get("show_streak", 1) == 1):
+                if occur_weight and (session.get("settings", {}).get("show_streak_weight", 1) == 1):
                     streaks_weight[key] = f"Weight Streak: {last_entries[key]['weight']} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
 
                 if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
