@@ -89,3 +89,9 @@ def updateProgram(program_id, updates: dict):
 
 def deleteProgram(program_id):
     supabase.table("programs").delete().eq("id", program_id).execute()
+
+def renameLogsProgram(user_id, old_program, new_program):
+    supabase.table("logs").update({"program": new_program}) \
+        .eq("userId", user_id) \
+        .eq("program", old_program) \
+        .execute()
