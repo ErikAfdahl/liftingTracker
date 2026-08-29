@@ -1082,6 +1082,53 @@ def manage():
             prog_data = getAllExercises()
             user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
+        elif action == "edit_program":
+            new_name = request.form.get("new_program_name", "").strip()
+
+            if not new_name:
+                error_message = "Please enter a program name."
+
+            elif new_name in my_programs:
+                error_message = "A program with that name already exists."
+
+            else:
+                # 1. programs table — one row
+
+                program_row = next((row for row in user_programs if row["programName"] == selected_edit), None)
+                if program_row:
+                    updateProgram(program_row["id"], {"programName": new_name})
+
+                # 2. exercises table — a handful of rows
+
+                exercises_to_update = [row for row in user_prog if row["programName"] == selected_edit]
+                for row in exercises_to_update:
+                    updateExercise(row["id"], {"programName": new_name})
+
+                # 3. logs, per exercise+set — derived straight from the logs themselves,
+                # so it covers dead/deleted exercises and doesn't depend on the current numSets
+
+                sets_to_update = set(
+                    (row["exerciseName"], int(row["setNum"]))
+                    for row in user_data if row["program"] == selected_edit
+                )
+
+                for ex_name, set_num in sets_to_update:
+                    logs_for_exercise = getUserLogsByExercise(session["user_id"], selected_edit, ex_name, set_num)
+
+                    for log in logs_for_exercise:
+                        updateLog(log["id"], {"program": new_name})
+
+                my_programs = [new_name if p == selected_edit else p for p in my_programs]
+                selected_edit = new_name
+                success_message = f"Renamed program to '{new_name}'!"
+                prog_data = getAllExercises()
+                user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+                program_data = getAllPrograms()
+                user_programs = sorted(
+                    [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+                    key=lambda x: int(x["id"])
+                )
+
         elif action == "add_exercise":
             new_exercise = request.form.get("new_exercise", "").strip()
             new_sets = int(request.form.get("new_sets", 1))

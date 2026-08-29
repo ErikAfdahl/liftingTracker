@@ -87,6 +87,30 @@
     </div>
 </div>
 
+<!-- Edit Program -->
+<div class="card mb-4">
+    <div class="card-header">
+        <a class="text-decoration-none text-light" data-bs-toggle="collapse" href="#editProgram">Edit Program</a>
+    </div>
+    <div class="collapse" id="editProgram">
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="edit_program">
+                <input type="hidden" name="selected_program" value="{{ selected_edit }}">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Program Name</label>
+                        <input type="text" name="new_program_name" class="form-control form-control-sm" value="{{ selected_edit }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
     <!-- Add Exercise -->
     <div class="card mb-4">
         <div class="card-header">
