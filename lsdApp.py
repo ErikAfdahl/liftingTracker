@@ -631,7 +631,7 @@ def home():
     workout_incomplete = last and (
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
             (last["setNum"] != last_exercise_in_program["numSets"])
-    ) and last["date"] != today
+    ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
 
     if workout_incomplete and not forced_home and quick_resume == 1:
