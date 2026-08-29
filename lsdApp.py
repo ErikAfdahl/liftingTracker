@@ -656,7 +656,7 @@ def run():
         key=lambda x: int(x["id"])
     )
     my_programs = [row["programName"] for row in user_programs]
-    print(program_data)
+    # print(program_data)
 
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
@@ -789,7 +789,8 @@ def run():
             key = f"{ex['exerciseName']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
-            last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
+            if last_entries[key]:
+                last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             last = last_entries[key]
 
             # units[key] = ex["unit"]
