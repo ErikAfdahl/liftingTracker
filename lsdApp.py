@@ -428,7 +428,7 @@ def parseRepRange(repRange, numSets):
         return []
 
 def getLastEnteredLog(user_id, program=None):
-    query = supabase.table("Logs").select("*").eq("userId", user_id)
+    query = supabase.table("logs").select("*").eq("userId", user_id)
     if program:
         query = query.eq("program", program)
     data = query.order("id", desc=True).limit(1).execute().data
