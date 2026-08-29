@@ -656,6 +656,7 @@ def run():
         key=lambda x: int(x["id"])
     )
     my_programs = [row["programName"] for row in user_programs]
+    print(program_data)
 
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
