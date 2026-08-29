@@ -581,11 +581,14 @@ def home():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     user_data = getUserLogs(session["user_id"])
     num_prog = len(set(row["programName"] for row in user_prog))
     my_programs = []
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
+    today = now.strftime("%Y-%m-%d")
 
     for row in reversed(user_data):
         if row["program"] not in my_programs:
@@ -623,7 +626,7 @@ def home():
     workout_incomplete = last and (
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
             (last["setNum"] != last_exercise_in_program["numSets"])
-    )
+    ) and last["date"] != today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
 
     if workout_incomplete and not forced_home and quick_resume == 1:
@@ -645,9 +648,14 @@ def run():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+    program_data = getAllPrograms()
+    user_programs = sorted(
+        [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+        key=lambda x: int(x["id"])
+    )
+    my_programs = [row["programName"] for row in user_programs]
 
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
@@ -888,7 +896,7 @@ def run_results():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
     date_format = session.get("settings", {}).get("date_format", 1)
@@ -1007,9 +1015,16 @@ def manage():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog))
+
+    program_data = getAllPrograms()
+    user_programs = sorted(
+        [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+        key=lambda x: int(x["id"])
+    )
+    my_programs = [row["programName"] for row in user_programs]
+
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
 
@@ -1022,7 +1037,6 @@ def manage():
     else:
         selected_edit = request.args.get("program")
 
-    # Keep your fallback logic right below it
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
@@ -1039,28 +1053,23 @@ def manage():
                 appendProgram({
                     "userId": int(session["user_id"]),
                     "programName": new_program_name,
-                    "exerciseName": "",
-                    "numSets": 0,
-                    "increment": 0,
-                    "minReps": "0",
-                    "maxReps": "0",
-                    "order": 0,
-                    "notes": "",
-                    "unit": "rep"
+                    "notes": ""
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
 
         elif action == "delete_program":
-            # Delete all program rows
             rows_to_delete = [row for row in user_prog
                               if str(row["userId"]) == str(session["user_id"])
                               and row["programName"] == selected_edit]
             for row in rows_to_delete:
-                deleteProgram(row["id"])
+                deleteExercise(row["id"])
 
-            # Set status to 0 in logs
+            program_row = next((row for row in user_programs if row["programName"] == selected_edit), None)
+            if program_row:
+                deleteProgram(program_row["id"])
+
             logs_to_update = [row for row in user_data
                               if row["program"] == selected_edit]
             for row in logs_to_update:
@@ -1069,7 +1078,7 @@ def manage():
             success_message = f"Deleted program '{selected_edit}'!"
             my_programs = [p for p in my_programs if p != selected_edit]
             selected_edit = my_programs[0] if my_programs else None
-            prog_data = getAllProgram()
+            prog_data = getAllExercises()
             user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "add_exercise":
@@ -1087,7 +1096,6 @@ def manage():
             new_max = parseRepRange(new_max, new_sets)
             rangeError = False
 
-
             if len(new_min) != 0 and len(new_max) != 0:
                 for i in range(len(new_min)):
                     if new_min[i] > new_max[i]:
@@ -1101,20 +1109,13 @@ def manage():
             elif rangeError:
                 error_message = "Minimum units must be less than or equal to maximum units."
             else:
-                # Handle order conflict
                 for ex in edit_exercises:
                     if int(ex["order"]) == new_order:
                         next_order = max(int(e["order"]) for e in edit_exercises) + 1
-                        updateProgram(ex["id"], {"order": next_order})
+                        updateExercise(ex["id"], {"order": next_order})
                         break
 
-                # Remove placeholder row if exists
-                placeholder = next((row for row in edit_exercises
-                                    if not str(row["exerciseName"]).strip()), None)
-                if placeholder:
-                    deleteProgram(placeholder["id"])
-
-                appendProgram({
+                appendExercise({
                     "userId": int(session["user_id"]),
                     "programName": selected_edit,
                     "exerciseName": new_exercise,
@@ -1127,16 +1128,15 @@ def manage():
                     "unit": new_unit
                 })
 
-                # check for deleted logs, if any exist, set their status to alive again
                 logs_to_update = [row for row in user_data
                                   if row["program"] == selected_edit
                                   and row["exerciseName"] == new_exercise
-                                  and int(row["status"]) == 0]  # only dead logs
+                                  and int(row["status"]) == 0]
                 for row in logs_to_update:
                     updateLog(row["id"], {"status": 1})
 
                 success_message = f"Added {new_exercise} to {selected_edit}!"
-                prog_data = getAllProgram()
+                prog_data = getAllExercises()
                 user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "delete_exercise":
@@ -1146,18 +1146,15 @@ def manage():
             deleted_order = next((int(row["order"]) for row in edit_exercises
                                   if row["exerciseName"] == exercise_name), None)
 
-            # Delete the exercise
             for row in edit_exercises:
                 if row["exerciseName"] == exercise_name:
-                    deleteProgram(row["id"])
+                    deleteExercise(row["id"])
 
-            # Shift order down for exercises that followed
             if deleted_order is not None:
                 for row in edit_exercises:
                     if int(row["order"]) > deleted_order:
-                        updateProgram(row["id"], {"order": int(row["order"]) - 1})
+                        updateExercise(row["id"], {"order": int(row["order"]) - 1})
 
-            # Set status to 0 in logs
             logs_to_update = [row for row in user_data
                               if row["program"] == selected_edit
                               and row["exerciseName"] == exercise_name]
@@ -1165,7 +1162,7 @@ def manage():
                 updateLog(row["id"], {"status": 0})
 
             success_message = f"Deleted {exercise_name}!"
-            prog_data = getAllProgram()
+            prog_data = getAllExercises()
             user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "save_exercise":
@@ -1197,19 +1194,17 @@ def manage():
             elif rangeError:
                 error_message = "Minimum units must be less than or equal to maximum units."
             else:
-                # Handle order conflict
                 swapped_name = None
                 for ex in edit_exercises:
                     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
                         swapped_name = ex["exerciseName"]
                         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                        updateProgram(ex["id"], {"order": int(orig_order)})
+                        updateExercise(ex["id"], {"order": int(orig_order)})
                         break
 
-                # Update the exercise
                 target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
                 if target:
-                    updateProgram(target["id"], {
+                    updateExercise(target["id"], {
                         "exerciseName": upd_name,
                         "numSets": upd_sets,
                         "increment": upd_inc,
@@ -1220,7 +1215,6 @@ def manage():
                         "unit": upd_unit
                     })
 
-                # Rename in logs if name changed
                 if upd_name != exercise_name:
                     logs_to_update = [row for row in user_data
                                       if row["program"] == selected_edit
@@ -1228,10 +1222,9 @@ def manage():
                     for row in logs_to_update:
                         updateLog(row["id"], {"exerciseName": upd_name})
 
-                    # check for deleted logs, if any exist, set their status to alive again
                     logs_to_update = [row for row in user_data
                                       if row["program"] == selected_edit
-                                      and row["exerciseName"] == upd_name  # use upd_name, not exercise_name
+                                      and row["exerciseName"] == upd_name
                                       and int(row["status"]) == 0]
                     for row in logs_to_update:
                         updateLog(row["id"], {"status": 1})
@@ -1239,11 +1232,11 @@ def manage():
                 success_message = f"Saved changes to {upd_name}!"
                 if swapped_name:
                     success_message += f" Swapped order with '{swapped_name}'."
-                prog_data = getAllProgram()
+                prog_data = getAllExercises()
                 user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
-        [row for row in user_prog if row["programName"] == selected_edit and row["exerciseName"] != ""],
+        [row for row in user_prog if row["programName"] == selected_edit],
         key=lambda x: int(x["order"])
     ) if selected_edit else []
 
@@ -1264,7 +1257,7 @@ def templates():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
     my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
 
@@ -1282,7 +1275,7 @@ def templates():
         else:
             rows_to_copy = [row for row in template_prog if row["programName"] == prog_name]
             for row in rows_to_copy:
-                appendProgram({
+                appendExercise({
                     "userId": int(session["user_id"]),
                     "programName": row["programName"],
                     "exerciseName": row["exerciseName"],
@@ -1308,7 +1301,7 @@ def logs():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllProgram() # all the programs
+    prog_data = getAllExercises() # all the programs
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])] # only the users programs
     my_programs = list(set(row["programName"] for row in user_prog)) # list of the names of the users programs
     date_format = session.get("settings", {}).get("date_format", 1)
@@ -1531,7 +1524,7 @@ def program_manifest():
     if "user_id" not in session:
         return jsonify({}), 401
 
-    prog_data = getAllProgram()
+    prog_data = getAllExercises()
     user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
     # Structure: { "Push": { "Bench Press": 3, "Incline DB": 4 }, "Pull": { ... } }

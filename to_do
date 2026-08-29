@@ -6,3 +6,4 @@ add a weight streak to run program
 fix things not going to deleted logs
 fix minor bugs, when a user enteres a log, 1rm is calculated based on date of the log not the chronilogical order
 when a log is deleted, update differences of the log after
+allow user to customize coeffient for progress
