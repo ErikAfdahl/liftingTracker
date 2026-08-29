@@ -489,7 +489,7 @@ def login():
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
                     "reps_autofill_absent": 1,
-                    "imporvement_coef":0.25
+                    "improvement_coef":0.25
                 })
                 error = "Account created! You can now log in."
 
@@ -519,7 +519,7 @@ def settings():
         reps_autofill = request.form.get("reps_autofill", 1)
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
         reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
-        imporvement_coef = 1 if request.form.get("imporvement_coef") else 0
+        improvement_coef = 1 if request.form.get("improvement_coef") else 0
 
         updateUser(session["user_id"], {
             "narrator": narrator,
@@ -535,7 +535,7 @@ def settings():
             "reps_autofill": int(reps_autofill),
             "weight_autofill_absent": int(weight_autofill_absent),
             "reps_autofill_absent": int(reps_autofill_absent),
-            "imporvement_coef": float(imporvement_coef)
+            "improvement_coef": float(improvement_coef)
         })
 
         session["settings"] = {
@@ -552,7 +552,7 @@ def settings():
             "reps_autofill": int(reps_autofill),
             "weight_autofill_absent": int(weight_autofill_absent),
             "reps_autofill_absent": int(reps_autofill_absent),
-            "imporvement_coef": float(imporvement_coef)
+            "improvement_coef": float(improvement_coef)
         }
 
         return redirect(url_for("settings", success=1))
@@ -576,7 +576,7 @@ def settings():
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
         "reps_autofill_absent": user.get("reps_autofill_absent", 1) if user else 1,
-        "imporvement_coef": bool(float(user.get("imporvement_coef", 0.25))) if user else True,
+        "improvement_coef": bool(float(user.get("improvement_coef", 0.25))) if user else True,
     }
 
     return render_template("settings.html", settings=settings, success_message=success_message)
@@ -831,7 +831,7 @@ def run():
                 if occur_weight and (session.get("settings", {}).get("show_streak_weight", 1) == 1):
                     streaks_weight[key] = f"Weight Streak: {last_entries[key]['weight']} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
 
-                imprv_coef = session.get('settings', {}).get('imporvement_coef', 0.25)
+                imprv_coef = session.get('settings', {}).get('improvement_coef', 0.25)
 
                 if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
                     recommendations[key] = None
