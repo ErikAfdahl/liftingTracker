@@ -931,6 +931,7 @@ def run_results():
     )
 
     if (not program_dates or not exercises) or (len(program_dates) == 1):
+        print(program_dates)
         if len(program_dates) == 1:
             message = "Come back when you have another session to compare."
         else:
