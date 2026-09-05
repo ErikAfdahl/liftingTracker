@@ -586,10 +586,10 @@ def home():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    ex_data = getAllExercises()
+    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
     user_data = getUserLogs(session["user_id"])
-    num_prog = len(set(row["programName"] for row in user_prog))
+    num_prog = len(set(row["programName"] for row in user_ex))
     my_programs = []
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -624,9 +624,9 @@ def home():
 
     last = user_data[-1] if user_data else None
     last_exercise_in_program = sorted(
-        [row for row in user_prog if row["programName"] == last["program"]],
+        [row for row in user_ex if row["programName"] == last["program"]],
         key=lambda x: int(x["order"])
-    )[-1] if last else None
+    )[-1] if last and user_ex else None
 
     workout_incomplete = last and (
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
