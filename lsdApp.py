@@ -629,7 +629,7 @@ def home():
         key=lambda x: int(x["order"])
     )[-1] if exercises_for_last_program else None
 
-    workout_incomplete = last and (
+    workout_incomplete = last and last_exercise_in_program and (
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
             (last["setNum"] != last_exercise_in_program["numSets"])
     ) and last["date"] == today
