@@ -1329,6 +1329,11 @@ def templates():
                 })
             success_message = f"'{prog_name}' added to your programs!"
             my_programs.append(prog_name)
+            appendProgram({
+                "userId": int(session["user_id"]),
+                "programName": prog_name,
+                "notes": ""
+            })
 
     return render_template("templates.html",
                            template_prog=template_prog,
