@@ -1243,9 +1243,13 @@ def manage():
             elif rangeError:
                 error_message = "Minimum units must be less than or equal to maximum units."
             else:
+                orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
                 for ex in edit_exercises:
                     if int(ex["order"]) >= upd_order:
                         updateExercise(ex["id"], {"order": ex["order"] + 1})
+                    elif ex["order"] > orig_order:
+                        updateExercise(ex["id"], {"order": ex["order"] - 1})
+
                 # swapped_name = None
                 # for ex in edit_exercises:
                 #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
