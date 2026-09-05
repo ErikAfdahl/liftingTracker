@@ -623,10 +623,11 @@ def home():
         welcome_message = f"Welcome back {session['username']}"
 
     last = user_data[-1] if user_data else None
+    exercises_for_last_program = [row for row in user_ex if last and row["programName"] == last["program"]]
     last_exercise_in_program = sorted(
-        [row for row in user_ex if row["programName"] == last["program"]],
+        exercises_for_last_program,
         key=lambda x: int(x["order"])
-    )[-1] if last and user_ex else None
+    )[-1] if exercises_for_last_program else None
 
     workout_incomplete = last and (
             (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
