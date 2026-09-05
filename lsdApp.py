@@ -906,9 +906,9 @@ def run_results():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+    ex_data = getAllExercises()
+    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+    my_programs = list(set(row["programName"] for row in user_ex if row["programName"] != " "))
     date_format = session.get("settings", {}).get("date_format", 1)
 
     user_data = getUserLogs(session["user_id"])
@@ -920,7 +920,7 @@ def run_results():
         return redirect(url_for("run"))
 
     exercises = sorted(
-        [row for row in user_prog if row["programName"] == selected],
+        [row for row in user_ex if row["programName"] == selected],
         key=lambda x: int(x["order"])
     )
 

@@ -45,11 +45,12 @@ def getUserLogsByExercise(user_id, program, exercise, set_num):
             .execute().data)
 
 def getUserLogsByDates(user_id, program, date_last, date_prev):
+    dates = [d for d in [date_last, date_prev] if d is not None]
     return (supabase.table("logs")
             .select("*")
             .eq("userId", user_id)
             .eq("program", program)
-            .in_("date", [date_last, date_prev])
+            .in_("date", dates)
             .execute().data)
 
 def getAllLogs():
