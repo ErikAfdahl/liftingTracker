@@ -931,6 +931,11 @@ def run_results():
     )
 
     if (not program_dates or not exercises) or (len(program_dates) == 1):
+        if len(program_dates) == 1:
+            message = "Come back when you have another session to compare."
+        else:
+            message = "No data logged."
+
         return render_template("results.html",
                                selected=selected,
                                my_programs=my_programs,
@@ -944,6 +949,7 @@ def run_results():
                                program_dates=[],
                                date_last=None,
                                date_prev=None,
+                               message=message,
                                narrator=session.get("settings", {}).get("narrator", "default"))
 
     timezone = pytz.timezone("America/Chicago")
@@ -1017,6 +1023,7 @@ def run_results():
                            date_last_visual=date_last_visual,
                            date_prev=date_prev,
                            date_prev_visual=date_prev_visual,
+                           message=None,
                            narrator=narrator)
 
 
