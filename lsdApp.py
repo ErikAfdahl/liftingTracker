@@ -930,7 +930,7 @@ def run_results():
         reverse=True
     )
 
-    if not program_dates or not exercises:
+    if (not program_dates or not exercises) or (len(program_dates) == 1):
         return render_template("results.html",
                                selected=selected,
                                my_programs=my_programs,
