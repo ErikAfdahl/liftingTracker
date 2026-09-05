@@ -1282,8 +1282,8 @@ def manage():
                         updateLog(row["id"], {"status": 1})
 
                 success_message = f"Saved changes to {upd_name}!"
-                if swapped_name:
-                    success_message += f" Swapped order with '{swapped_name}'."
+                # if swapped_name:
+                #     success_message += f" Swapped order with '{swapped_name}'."
                 prog_data = getAllExercises()
                 user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
 
