@@ -641,7 +641,7 @@ def home():
 
     return render_template("home.html",
                            username=session["username"],
-                           user_prog=user_prog,
+                           user_ex=user_ex,
                            my_programs=my_programs,
                            user_data=user_data,
                            log_cap_warning=log_cap_warning,
