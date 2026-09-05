@@ -931,7 +931,7 @@ def run_results():
     )
 
     if (not program_dates or not exercises) or (len(program_dates) == 1):
-        print(program_dates)
+        # print(program_dates)
         if len(program_dates) == 1:
             message = "Come back when you have another session to compare."
         else:
@@ -1160,10 +1160,9 @@ def manage():
                 error_message = "Minimum units must be less than or equal to maximum units."
             else:
                 for ex in edit_exercises:
-                    if int(ex["order"]) == new_order:
-                        next_order = max(int(e["order"]) for e in edit_exercises) + 1
-                        updateExercise(ex["id"], {"order": next_order})
-                        break
+                    if int(ex["order"]) >= new_order:
+                        # next_order = max(int(e["order"]) for e in edit_exercises) + 1
+                        updateExercise(ex["id"], {"order": ex["order"] + 1})
 
                 appendExercise({
                     "userId": int(session["user_id"]),
@@ -1244,13 +1243,16 @@ def manage():
             elif rangeError:
                 error_message = "Minimum units must be less than or equal to maximum units."
             else:
-                swapped_name = None
                 for ex in edit_exercises:
-                    if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
-                        swapped_name = ex["exerciseName"]
-                        orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                        updateExercise(ex["id"], {"order": int(orig_order)})
-                        break
+                    if int(ex["order"]) >= upd_order:
+                        updateExercise(ex["id"], {"order": ex["order"] + 1})
+                # swapped_name = None
+                # for ex in edit_exercises:
+                #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
+                #         swapped_name = ex["exerciseName"]
+                #         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                #         updateExercise(ex["id"], {"order": int(orig_order)})
+                #         break
 
                 target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
                 if target:

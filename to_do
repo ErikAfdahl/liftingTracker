@@ -1,10 +1,7 @@
 to do list
-make the ordering system work more efficiently
-add a timer potentially
-fix diff stuff so that it doesnt look for the most recent in terms of logs, but most recent in terms of date
-add a weight streak to run program
+add a timer potentially (probably not)
 fix things not going to deleted logs
 fix minor bugs, when a user enteres a log, 1rm is calculated based on date of the log not the chronilogical order
 when a log is deleted, update differences of the log after
-allow user to customize coeffient for progress
 add a least squares regression line to charts
+make changing the order of exercises faster
