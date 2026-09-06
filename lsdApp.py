@@ -1315,7 +1315,7 @@ def manage():
                            my_programs=my_programs,
                            selected_edit=selected_edit,
                            edit_exercises=edit_exercises,
-                           next_order=next_order,
+                           next_order=open_order,
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
                            success_message=success_message,
