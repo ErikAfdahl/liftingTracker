@@ -1033,8 +1033,8 @@ def manage():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    ex_data = getAllExercises()
+    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
     program_data = getAllPrograms()
     user_programs = sorted(
@@ -1060,6 +1060,20 @@ def manage():
 
     action = request.form.get("action")
 
+    edit_exercises = sorted(
+        [row for row in user_ex if row["programName"] == selected_edit],
+        key=lambda x: int(x["order"])
+    )
+
+    open_order = 1
+
+    for ex in edit_exercises:
+        if ex["order"] - 1 != open_order:
+            open_order += 1
+        else:
+            break
+
+
     if request.method == "POST":
         if action == "create_program":
             new_program_name = request.form.get("new_program_name", "").strip()
@@ -1078,7 +1092,7 @@ def manage():
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
 
         elif action == "delete_program":
-            rows_to_delete = [row for row in user_prog
+            rows_to_delete = [row for row in user_ex
                               if str(row["userId"]) == str(session["user_id"])
                               and row["programName"] == selected_edit]
             for row in rows_to_delete:
@@ -1096,8 +1110,8 @@ def manage():
             success_message = f"Deleted program '{selected_edit}'!"
             my_programs = [p for p in my_programs if p != selected_edit]
             selected_edit = my_programs[0] if my_programs else None
-            prog_data = getAllExercises()
-            user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+            prog_ex = getAllExercises()
+            user_ex = [row for row in prog_ex if str(row["userId"]) == str(session["user_id"])]
 
 
         elif action == "edit_program":
@@ -1114,7 +1128,7 @@ def manage():
 
                 if program_row:
                     updateProgram(program_row["id"], {"programName": new_name})
-                exercises_to_update = [row for row in user_prog if row["programName"] == selected_edit]
+                exercises_to_update = [row for row in user_ex if row["programName"] == selected_edit]
 
                 for row in exercises_to_update:
                     updateExercise(row["id"], {"programName": new_name})
@@ -1123,8 +1137,8 @@ def manage():
                 my_programs = [new_name if p == selected_edit else p for p in my_programs]
                 selected_edit = new_name
                 success_message = f"Renamed program to '{new_name}'!"
-                prog_data = getAllExercises()
-                user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+                ex_data = getAllExercises()
+                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
                 program_data = getAllPrograms()
                 user_programs = sorted(
                     [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
@@ -1138,9 +1152,8 @@ def manage():
             new_min = request.form.get("new_min", "6,2")
             new_max = request.form.get("new_max", "8,4")
             new_notes = request.form.get("new_notes", "")
-            new_order = int(request.form.get("new_order", 1))
+            new_order = int(request.form.get("new_order", open_order))
             new_unit = request.form.get("new_unit", "rep")
-            edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
 
             new_min = parseRepRange(new_min, new_sets)
             new_max = parseRepRange(new_max, new_sets)
@@ -1185,13 +1198,11 @@ def manage():
                     updateLog(row["id"], {"status": 1})
 
                 success_message = f"Added {new_exercise} to {selected_edit}!"
-                prog_data = getAllExercises()
-                user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+                ex_data = getAllExercises()
+                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "delete_exercise":
             exercise_name = request.form.get("exercise_name")
-            edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
-
             deleted_order = next((int(row["order"]) for row in edit_exercises
                                   if row["exerciseName"] == exercise_name), None)
 
@@ -1211,8 +1222,8 @@ def manage():
                 updateLog(row["id"], {"status": 0})
 
             success_message = f"Deleted {exercise_name}!"
-            prog_data = getAllExercises()
-            user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+            ex_data = getAllExercises()
+            user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
@@ -1224,7 +1235,7 @@ def manage():
             upd_notes = request.form.get("upd_notes", "")
             upd_order = int(request.form.get("upd_order"))
             upd_unit = request.form.get("upd_unit")
-            edit_exercises = [row for row in user_prog if row["programName"] == selected_edit]
+            edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
 
             upd_min = parseRepRange(upd_min, upd_sets)
             upd_max = parseRepRange(upd_max, upd_sets)
@@ -1245,10 +1256,12 @@ def manage():
             else:
                 orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
                 for ex in edit_exercises:
-                    if int(ex["order"]) >= upd_order:
-                        updateExercise(ex["id"], {"order": ex["order"] + 1})
-                    elif ex["order"] > orig_order:
+                    if ex["exerciseName"] == exercise_name:
+                        continue
+                    elif (int(ex["order"]) <= upd_order) and (int(ex["order"]) > orig_order):
                         updateExercise(ex["id"], {"order": ex["order"] - 1})
+                    elif (int(ex["order"]) >= upd_order) and (int(ex["order"]) < orig_order):
+                        updateExercise(ex["id"], {"order": ex["order"] + 1})
 
                 # swapped_name = None
                 # for ex in edit_exercises:
@@ -1288,11 +1301,11 @@ def manage():
                 success_message = f"Saved changes to {upd_name}!"
                 # if swapped_name:
                 #     success_message += f" Swapped order with '{swapped_name}'."
-                prog_data = getAllExercises()
-                user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+                ex_data = getAllExercises()
+                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
-        [row for row in user_prog if row["programName"] == selected_edit],
+        [row for row in user_ex if row["programName"] == selected_edit],
         key=lambda x: int(x["order"])
     ) if selected_edit else []
 
