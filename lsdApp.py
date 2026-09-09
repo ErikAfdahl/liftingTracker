@@ -743,7 +743,7 @@ def run():
             set_num = int(request.form.get("set_num"))
             notes = request.form.get("notes", "")
             selected = request.form.get("selected_program")
-            
+
             if reps > 1:
                 one_rm = round(weight * (1 + float(reps) / 30), 3)
             else:
@@ -1009,7 +1009,12 @@ def run_results():
             if not last or not prev:
                 continue
 
-            newImprov = 1.0 - (prev["1rm"] / last["1rm"])
+            if last["1rm"] != 0
+                newImprov = 1.0 - (prev["1rm"] / last["1rm"])
+            else:
+                newImprov = 0
+
+
             newHvy = last["weight"]
             if newImprov > currentImprov:
                 currentImprov = newImprov
