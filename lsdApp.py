@@ -1009,7 +1009,7 @@ def run_results():
             if not last or not prev:
                 continue
 
-            if last["1rm"] != 0
+            if last["1rm"] != 0:
                 newImprov = 1.0 - (prev["1rm"] / last["1rm"])
             else:
                 newImprov = 0
