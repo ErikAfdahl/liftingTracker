@@ -715,21 +715,24 @@ def run():
         date_format = session.get('settings', {}).get('date_format', 1)
         weight = request.form.get("weight")
         reps = request.form.get("reps")
+        con_error = False
 
         try:
             weight = float(weight)
         except:
             error_message = (f"{weight} is not a valid input for weight. ")
+            con_error = True
 
         try:
             reps = int(reps)
         except:
-            error_message = (f"{reps} is not a valid input for weight. ")
+            error_message = (f"{reps} is not a valid input for reps. ")
+            con_error = True
 
         if not check_date(workout_date):
             error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                              f"{iso_to_display(today, date_format)}).")
-        else:
+        elif not con_error:
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
             notes = request.form.get("notes", "")
