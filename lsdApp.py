@@ -720,16 +720,22 @@ def run():
         try:
             weight = float(weight)
         except:
-            error_message = (f"{weight} is not a valid input for weight. ")
+            if (weight == "") or (weight == " "):
+                error_message = "Please enter input for reps."
+            else:
+                error_message = (f"{weight} is not a valid input for weight. ")
             con_error = True
 
         try:
             reps = int(reps)
         except:
-            error_message = (f"{reps} is not a valid input for reps. ")
+            if (reps == "") or (reps == " "):
+                error_message = "Please enter input for reps."
+            else:
+                error_message = (f"{reps} is not a valid input for reps. ")
             con_error = True
 
-        if not check_date(workout_date):
+        if (not check_date(workout_date)) and (not con_error):
             error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                              f"{iso_to_display(today, date_format)}).")
         elif not con_error:
