@@ -743,8 +743,12 @@ def run():
             set_num = int(request.form.get("set_num"))
             notes = request.form.get("notes", "")
             selected = request.form.get("selected_program")
+            
+            if reps > 1:
+                one_rm = round(weight * (1 + float(reps) / 30), 3)
+            else:
+                one_rm = weight * reps
 
-            one_rm = round(weight * (1 + float(reps) / 30), 3)
             diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
             diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
