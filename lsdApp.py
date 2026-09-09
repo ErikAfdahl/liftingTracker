@@ -712,16 +712,18 @@ def run():
 
     if request.method == "POST" and request.form.get("action") == "log_set":
         workout_date = request.form.get("workout_date")
+        date_format = session.get('settings', {}).get('date_format', 1)
+        weight = float(request.form.get("weight"))
+        reps = int(request.form.get("reps"))
 
         if not check_date(workout_date):
-            date_format = session.get('settings', {}).get('date_format', 1)
             error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                              f"{iso_to_display(today, date_format)}).")
+        elif (not weight) or (not reps):
+            error_message = (f"Please input both weight and reps. ")
         else:
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
-            weight = float(request.form.get("weight"))
-            reps = int(request.form.get("reps"))
             notes = request.form.get("notes", "")
             selected = request.form.get("selected_program")
 
@@ -733,7 +735,7 @@ def run():
                 "userId": int(session["user_id"]),
                 "program": selected,
                 "status": 1,
-                "date": display_to_iso(workout_date, 1),
+                "date": display_to_iso(workout_date, date_format),
                 "exerciseName": exercise_name,
                 "setNum": set_num,
                 "weight": weight,
