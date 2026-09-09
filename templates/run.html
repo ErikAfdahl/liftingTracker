@@ -158,8 +158,8 @@
                                 {% set formatted_weight = w_float | int if w_float == w_float | int else w_float %}
                             {% endif %}
 
-                            <input type="number" name="weight" class="form-control form-control-sm" min="0"
-                                   value="{{ formatted_weight }}">
+                            <input type="number" name="weight" class="form-control form-control-sm" min="0" step="any"
+                                    value="{{ formatted_weight }}">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
