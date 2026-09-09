@@ -589,19 +589,12 @@ def home():
     ex_data = getAllExercises()
     user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
     user_data = getUserLogs(session["user_id"])
-    num_prog = len(set(row["programName"] for row in user_ex))
-    my_programs = []
+    prog_data = getAllPrograms()
+    my_programs = [row for row in prog_data if (str(row["userId"]) == str(session["user_id"])) and (row["active"] == 1)]
+    num_prog = len(set(my_programs))
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
     today = now.strftime("%Y-%m-%d")
-
-    for row in reversed(user_data):
-        if row["program"] not in my_programs:
-            my_programs.append(row["program"])
-        if len(my_programs) == num_prog:
-            break
-
-    my_programs.reverse()
 
     # print(my_programs)
     # my_programs = my_programs.reverse()
@@ -1113,7 +1106,8 @@ def manage():
                 appendProgram({
                     "userId": int(session["user_id"]),
                     "programName": new_program_name,
-                    "notes": ""
+                    "notes": "",
+                    "active": 1
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
@@ -1144,6 +1138,8 @@ def manage():
 
         elif action == "edit_program":
             new_name = request.form.get("new_program_name", "").strip()
+            notes = request.form.get("notes", "").strip()
+            active = request.form.get("active", "").strip()
 
             if not new_name:
                 error_message = "Please enter a program name."
@@ -1155,7 +1151,11 @@ def manage():
                 program_row = next((row for row in user_programs if row["programName"] == selected_edit), None)
 
                 if program_row:
-                    updateProgram(program_row["id"], {"programName": new_name})
+                    updateProgram(program_row["id"], {
+                        "programName": new_name,
+                        "notes": notes,
+                        "active": active
+                    })
                 exercises_to_update = [row for row in user_ex if row["programName"] == selected_edit]
 
                 for row in exercises_to_update:
