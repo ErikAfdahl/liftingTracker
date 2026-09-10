@@ -540,6 +540,8 @@ def logout():
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
+    error_message = None
+
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -557,45 +559,48 @@ def settings():
         reps_autofill = request.form.get("reps_autofill", 1)
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
         reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
-        improvement_coef = 1 if request.form.get("improvement_coef") else 0
+        improvement_coef = request.form.get("improvement_coef").replace(" ", "")
 
-        updateUser(session["user_id"], {
-            "narrator": narrator,
-            "quick_indexing": quick_indexing,
-            "quick_resume": quick_resume,
-            "date_format": date_format,
-            "show_rep": show_rep,
-            "show_last": show_last,
-            "show_streak": show_streak,
-            "show_streak_weight":show_streak_weight,
-            "show_rec": show_rec,
-            "weight_autofill": int(weight_autofill),
-            "reps_autofill": int(reps_autofill),
-            "weight_autofill_absent": int(weight_autofill_absent),
-            "reps_autofill_absent": int(reps_autofill_absent),
-            "improvement_coef": float(improvement_coef)
-        })
+        if improvement_coef:
+            error_message = "Missing value for improvement coefficient."
+        else:
+            updateUser(session["user_id"], {
+                "narrator": narrator,
+                "quick_indexing": quick_indexing,
+                "quick_resume": quick_resume,
+                "date_format": date_format,
+                "show_rep": show_rep,
+                "show_last": show_last,
+                "show_streak": show_streak,
+                "show_streak_weight":show_streak_weight,
+                "show_rec": show_rec,
+                "weight_autofill": int(weight_autofill),
+                "reps_autofill": int(reps_autofill),
+                "weight_autofill_absent": int(weight_autofill_absent),
+                "reps_autofill_absent": int(reps_autofill_absent),
+                "improvement_coef": float(improvement_coef)
+            })
 
-        session["settings"] = {
-            "narrator": narrator,
-            "quick_indexing": quick_indexing,
-            "quick_resume": quick_resume,
-            "date_format": date_format,
-            "show_rep": show_rep,
-            "show_last": show_last,
-            "show_streak": show_streak,
-            "show_streak_weight":show_streak_weight,
-            "show_rec": show_rec,
-            "weight_autofill": int(weight_autofill),
-            "reps_autofill": int(reps_autofill),
-            "weight_autofill_absent": int(weight_autofill_absent),
-            "reps_autofill_absent": int(reps_autofill_absent),
-            "improvement_coef": float(improvement_coef)
-        }
+            session["settings"] = {
+                "narrator": narrator,
+                "quick_indexing": quick_indexing,
+                "quick_resume": quick_resume,
+                "date_format": date_format,
+                "show_rep": show_rep,
+                "show_last": show_last,
+                "show_streak": show_streak,
+                "show_streak_weight":show_streak_weight,
+                "show_rec": show_rec,
+                "weight_autofill": int(weight_autofill),
+                "reps_autofill": int(reps_autofill),
+                "weight_autofill_absent": int(weight_autofill_absent),
+                "reps_autofill_absent": int(reps_autofill_absent),
+                "improvement_coef": float(improvement_coef)
+            }
 
-        return redirect(url_for("settings", success=1))
+            return redirect(url_for("settings", success=1))
 
-    success_message = "Settings saved!" if request.args.get("success") else None
+        success_message = "Settings saved!" if request.args.get("success") else None
 
     users = getAllUsers()
     user = next((u for u in users if str(u["userId"]) == str(session["user_id"])), None)
@@ -614,12 +619,12 @@ def settings():
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
         "reps_autofill_absent": user.get("reps_autofill_absent", 1) if user else 1,
-        "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else True,
+        "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else 0.25
     }
 
     print(f"Improvement coefficient: {settings['improvement_coef']}")
 
-    return render_template("settings.html", settings=settings, success_message=success_message)
+    return render_template("settings.html", settings=settings, success_message=success_message, error_message=error_message)
 
 @app.route("/home")
 def home():
