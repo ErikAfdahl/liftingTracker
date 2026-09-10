@@ -1136,11 +1136,12 @@ def manage():
             user_ex = [row for row in prog_ex if str(row["userId"]) == str(session["user_id"])]
 
 
+
         elif action == "edit_program":
             new_name = request.form.get("new_program_name", "").strip()
-            notes = request.form.get("notes", "").strip()
-            active = request.form.get("active", "").strip()
-
+            notes = request.form.get("new_program_notes", "").strip()
+            active = 1 if request.form.get("new_program_active") == "1" else 0
+            
             if not new_name:
                 error_message = "Please enter a program name."
 
@@ -1168,6 +1169,7 @@ def manage():
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
                 program_data = getAllPrograms()
+
                 user_programs = sorted(
                     [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
                     key=lambda x: int(x["id"])
