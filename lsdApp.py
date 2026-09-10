@@ -1223,7 +1223,7 @@ def manage():
                 new_sets = int(new_sets)
                 new_inc = float(new_inc)
                 new_order = int(new_order)
-                
+
                 new_min = parseRepRange(new_min, new_sets)
                 new_max = parseRepRange(new_max, new_sets)
 
@@ -1286,13 +1286,13 @@ def manage():
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
-            upd_name = request.form.get("upd_name", exercise_name).replace(" ", "")
-            upd_sets = request.form.get("upd_sets")
-            upd_inc = request.form.get("upd_inc")
+            upd_name = request.form.get("upd_name", exercise_name)
+            upd_sets = request.form.get("upd_sets").replace(" ", "")
+            upd_inc = request.form.get("upd_inc").replace(" ", "")
             upd_min = request.form.get("upd_min").replace(" ", "")
             upd_max = request.form.get("upd_max").replace(" ", "")
             upd_notes = request.form.get("upd_notes", "")
-            upd_order = request.form.get("upd_order")
+            upd_order = request.form.get("upd_order").replace(" ", "")
             upd_unit = request.form.get("upd_unit")
             edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
 
