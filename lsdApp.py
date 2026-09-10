@@ -1220,16 +1220,16 @@ def manage():
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
             else:
+                new_sets = int(new_sets)
+                new_inc = float(new_inc)
+                new_order = int(new_order)
+                
                 new_min = parseRepRange(new_min, new_sets)
                 new_max = parseRepRange(new_max, new_sets)
 
                 if not check_ranges2(new_min, new_max):
                     error_message = "Each set needs to have the max range to be more than or equal to the min range."
                 else:
-                    new_sets = int(new_sets)
-                    new_inc = float(new_inc)
-                    new_order = int(new_order)
-
                     if new_order != open_order:
                         for ex in edit_exercises:
                             if int(ex["order"]) >= new_order:
@@ -1287,12 +1287,12 @@ def manage():
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
             upd_name = request.form.get("upd_name", exercise_name).replace(" ", "")
-            upd_sets = int(request.form.get("upd_sets"))
-            upd_inc = float(request.form.get("upd_inc"))
+            upd_sets = request.form.get("upd_sets")
+            upd_inc = request.form.get("upd_inc")
             upd_min = request.form.get("upd_min").replace(" ", "")
             upd_max = request.form.get("upd_max").replace(" ", "")
             upd_notes = request.form.get("upd_notes", "")
-            upd_order = int(request.form.get("upd_order"))
+            upd_order = request.form.get("upd_order")
             upd_unit = request.form.get("upd_unit")
             edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
 
@@ -1307,6 +1307,10 @@ def manage():
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
             else:
+                upd_sets = int(upd_sets)
+                upd_inc = float(upd_inc)
+                upd_order = int(upd_order)
+
                 upd_min = parseRepRange(upd_min, upd_sets)
                 upd_max = parseRepRange(upd_max, upd_sets)
 
@@ -1357,7 +1361,7 @@ def manage():
                                           and int(row["status"]) == 0]
                         for row in logs_to_update:
                             updateLog(row["id"], {"status": 1})
-    
+
                     success_message = f"Saved changes to {upd_name}!"
                     # if swapped_name:
                     #     success_message += f" Swapped order with '{swapped_name}'."
