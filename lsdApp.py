@@ -617,6 +617,8 @@ def settings():
         "improvement_coef": bool(float(user.get("improvement_coef", 0.25))) if user else True,
     }
 
+    print(f"Improvement coefficient: {settings["improvement_coef"]}")
+
     return render_template("settings.html", settings=settings, success_message=success_message)
 
 @app.route("/home")
