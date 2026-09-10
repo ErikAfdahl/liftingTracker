@@ -562,7 +562,7 @@ def settings():
         reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
         improvement_coef = request.form.get("improvement_coef", 0.25).replace(" ", "")
 
-        if improvement_coef:
+        if not improvement_coef:
             error_message = "Missing value for improvement coefficient."
         else:
             updateUser(session["user_id"], {
