@@ -80,6 +80,44 @@ def check_date(date_string, fmt=DATE_FORMATS[1]):
     except ValueError:
         return False
 
+def check_ranges1(min, max):
+    if (not min) or (not max):
+        print(f"1: {min}, {max}")
+        return False
+    elif (min[-1] == ",") or (max[-1] == ","):
+        print(f"2: {min[-1]}, {max[-1]}")
+        return False
+    else:
+        for i in range(len(min)):
+            if (not min[i].isdigit()) and (min[i] != ","):
+                print(f"3: {min[i]}")
+                return False
+
+        for i in range(len(max)):
+            if (not max[i].isdigit()) and (max[i] != ","):
+                print(f"3: {max[i]}")
+                return False
+
+    return True
+
+def parseRepRange(repRange, numSets):
+    try:
+        parts = [int(x.strip()) for x in str(repRange).split(",")]
+
+        if len(parts) >= numSets:
+            return parts[:numSets]
+        else:
+            return parts + [parts[-1]] * (numSets - len(parts))
+    except ValueError:
+        return []
+
+def check_ranges2(min, max):
+    if len(min) != 0 and len(max) != 0:
+        for i in range(len(min)):
+            if min[i] > max[i]:
+                return False
+    return True
+
 def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
@@ -704,34 +742,21 @@ def run():
             ex_index = 0
 
     if request.method == "POST" and request.form.get("action") == "log_set":
-        workout_date = request.form.get("workout_date")
+        workout_date = request.form.get("workout_date").replace(" ", "")
         date_format = session.get('settings', {}).get('date_format', 1)
-        weight = request.form.get("weight")
-        reps = request.form.get("reps")
-        con_error = False
+        weight = request.form.get("weight").replace(" ", "")
+        reps = request.form.get("reps").replace(" ", "")
 
-        try:
-            weight = float(weight)
-        except:
-            if (weight == "") or (weight == " "):
-                error_message = "Please enter input for reps."
-            else:
-                error_message = (f"{weight} is not a valid input for weight. ")
-            con_error = True
-
-        try:
-            reps = int(reps)
-        except:
-            if (reps == "") or (reps == " "):
-                error_message = "Please enter input for reps."
-            else:
-                error_message = (f"{reps} is not a valid input for reps. ")
-            con_error = True
-
-        if (not check_date(workout_date)) and (not con_error):
+        if not check_date(workout_date):
             error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                              f"{iso_to_display(today, date_format)}).")
-        elif not con_error:
+        elif not weight:
+            error_message = "Missing value for weight."
+        elif not reps:
+            error_message = "Missing value for reps."
+        else:
+            weight = float(weight)
+            reps = int(reps)
             exercise_name = request.form.get("exercise_name")
             set_num = int(request.form.get("set_num"))
             notes = request.form.get("notes", "")
@@ -1175,61 +1200,65 @@ def manage():
                 )
 
         elif action == "add_exercise":
-            new_exercise = request.form.get("new_exercise", "").strip()
-            new_sets = int(request.form.get("new_sets", 1))
-            new_inc = float(request.form.get("new_inc", 5.0))
-            new_min = request.form.get("new_min", "6,2")
-            new_max = request.form.get("new_max", "8,4")
+            new_exercise = request.form.get("new_exercise", "")
+            new_sets = request.form.get("new_sets", 1).replace(" ", "")
+            new_inc = request.form.get("new_inc", 5.0).replace(" ", "")
+            new_min = request.form.get("new_min", "6,2").replace(" ", "")
+            new_max = request.form.get("new_max", "8,4").replace(" ", "")
             new_notes = request.form.get("new_notes", "")
-            new_order = int(request.form.get("new_order", open_order))
+            new_order = request.form.get("new_order", open_order).replace(" ", "")
             new_unit = request.form.get("new_unit", "rep")
-
-            new_min = parseRepRange(new_min, new_sets)
-            new_max = parseRepRange(new_max, new_sets)
-            rangeError = False
-
-            if len(new_min) != 0 and len(new_max) != 0:
-                for i in range(len(new_min)):
-                    if new_min[i] > new_max[i]:
-                        rangeError = True
-                        break
 
             if not new_exercise:
                 error_message = "Please enter an exercise name."
-            elif len(new_min) == 0 or len(new_max) == 0:
-                error_message = "Please enter a valid range."
-            elif rangeError:
-                error_message = "Minimum units must be less than or equal to maximum units."
+            elif not new_sets:
+                error_message = "Missing value for number of sets."
+            elif not new_inc:
+                error_message = "Missing value for increment."
+            elif not new_order:
+                error_message = "Missing value for order."
+            elif not check_ranges1(new_min, new_max):
+                error_message = "Invalid rep range format."
             else:
-                if new_order != open_order:
-                    for ex in edit_exercises:
-                        if int(ex["order"]) >= new_order:
-                            # next_order = max(int(e["order"]) for e in edit_exercises) + 1
-                            updateExercise(ex["id"], {"order": ex["order"] + 1})
+                new_min = parseRepRange(new_min, new_sets)
+                new_max = parseRepRange(new_max, new_sets)
 
-                appendExercise({
-                    "userId": int(session["user_id"]),
-                    "programName": selected_edit,
-                    "exerciseName": new_exercise,
-                    "numSets": new_sets,
-                    "increment": new_inc,
-                    "minReps": ",".join(str(x) for x in new_min),
-                    "maxReps": ",".join(str(x) for x in new_max),
-                    "order": new_order,
-                    "notes": new_notes,
-                    "unit": new_unit
-                })
+                if not check_ranges2(new_min, new_max):
+                    error_message = "Each set needs to have the max range to be more than or equal to the min range."
+                else:
+                    new_sets = int(new_sets)
+                    new_inc = float(new_inc)
+                    new_order = int(new_order)
 
-                logs_to_update = [row for row in user_data
-                                  if row["program"] == selected_edit
-                                  and row["exerciseName"] == new_exercise
-                                  and int(row["status"]) == 0]
-                for row in logs_to_update:
-                    updateLog(row["id"], {"status": 1})
+                    if new_order != open_order:
+                        for ex in edit_exercises:
+                            if int(ex["order"]) >= new_order:
+                                # next_order = max(int(e["order"]) for e in edit_exercises) + 1
+                                updateExercise(ex["id"], {"order": ex["order"] + 1})
 
-                success_message = f"Added {new_exercise} to {selected_edit}!"
-                ex_data = getAllExercises()
-                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+                    appendExercise({
+                        "userId": int(session["user_id"]),
+                        "programName": selected_edit,
+                        "exerciseName": new_exercise,
+                        "numSets": new_sets,
+                        "increment": new_inc,
+                        "minReps": ",".join(str(x) for x in new_min),
+                        "maxReps": ",".join(str(x) for x in new_max),
+                        "order": new_order,
+                        "notes": new_notes,
+                        "unit": new_unit
+                    })
+
+                    logs_to_update = [row for row in user_data
+                                      if row["program"] == selected_edit
+                                      and row["exerciseName"] == new_exercise
+                                      and int(row["status"]) == 0]
+                    for row in logs_to_update:
+                        updateLog(row["id"], {"status": 1})
+
+                    success_message = f"Added {new_exercise} to {selected_edit}!"
+                    ex_data = getAllExercises()
+                    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
         elif action == "delete_exercise":
             exercise_name = request.form.get("exercise_name")
@@ -1257,82 +1286,83 @@ def manage():
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
-            upd_name = request.form.get("upd_name", exercise_name).strip()
+            upd_name = request.form.get("upd_name", exercise_name).replace(" ", "")
             upd_sets = int(request.form.get("upd_sets"))
             upd_inc = float(request.form.get("upd_inc"))
-            upd_min = request.form.get("upd_min")
-            upd_max = request.form.get("upd_max")
+            upd_min = request.form.get("upd_min").replace(" ", "")
+            upd_max = request.form.get("upd_max").replace(" ", "")
             upd_notes = request.form.get("upd_notes", "")
             upd_order = int(request.form.get("upd_order"))
             upd_unit = request.form.get("upd_unit")
             edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
 
-            upd_min = parseRepRange(upd_min, upd_sets)
-            upd_max = parseRepRange(upd_max, upd_sets)
-            rangeError = False
-
-            if len(upd_min) != 0 and len(upd_max) != 0:
-                for i in range(len(upd_min)):
-                    if upd_min[i] > upd_max[i]:
-                        rangeError = True
-                        break
-
-            if not exercise_name:
+            if not upd_name:
                 error_message = "Please enter an exercise name."
-            elif len(upd_min) == 0 or len(upd_max) == 0:
-                error_message = "Please enter a valid range."
-            elif rangeError:
-                error_message = "Minimum units must be less than or equal to maximum units."
+            elif not upd_sets:
+                error_message = "Missing value for number of sets."
+            elif not upd_inc:
+                error_message = "Missing value for increment."
+            elif not upd_order:
+                error_message = "Missing value for order."
+            elif not check_ranges1(upd_min, upd_max):
+                error_message = "Invalid rep range format."
             else:
-                orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                for ex in edit_exercises:
-                    if ex["exerciseName"] == exercise_name:
-                        continue
-                    elif (int(ex["order"]) <= upd_order) and (int(ex["order"]) > orig_order):
-                        updateExercise(ex["id"], {"order": ex["order"] - 1})
-                    elif (int(ex["order"]) >= upd_order) and (int(ex["order"]) < orig_order):
-                        updateExercise(ex["id"], {"order": ex["order"] + 1})
+                upd_min = parseRepRange(upd_min, upd_sets)
+                upd_max = parseRepRange(upd_max, upd_sets)
 
-                # swapped_name = None
-                # for ex in edit_exercises:
-                #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
-                #         swapped_name = ex["exerciseName"]
-                #         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                #         updateExercise(ex["id"], {"order": int(orig_order)})
-                #         break
+                if not check_ranges2(upd_min, upd_max):
+                    error_message = "Each set needs to have the max range to be more than or equal to the min range."
+                else:
 
-                target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
-                if target:
-                    updateExercise(target["id"], {
-                        "exerciseName": upd_name,
-                        "numSets": upd_sets,
-                        "increment": upd_inc,
-                        "minReps": ",".join(str(x) for x in upd_min),
-                        "maxReps": ",".join(str(x) for x in upd_max),
-                        "order": upd_order,
-                        "notes": upd_notes,
-                        "unit": upd_unit
-                    })
+                    orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    for ex in edit_exercises:
+                        if ex["exerciseName"] == exercise_name:
+                            continue
+                        elif (int(ex["order"]) <= upd_order) and (int(ex["order"]) > orig_order):
+                            updateExercise(ex["id"], {"order": ex["order"] - 1})
+                        elif (int(ex["order"]) >= upd_order) and (int(ex["order"]) < orig_order):
+                            updateExercise(ex["id"], {"order": ex["order"] + 1})
 
-                if upd_name != exercise_name:
-                    logs_to_update = [row for row in user_data
-                                      if row["program"] == selected_edit
-                                      and row["exerciseName"] == exercise_name]
-                    for row in logs_to_update:
-                        updateLog(row["id"], {"exerciseName": upd_name})
+                    # swapped_name = None
+                    # for ex in edit_exercises:
+                    #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
+                    #         swapped_name = ex["exerciseName"]
+                    #         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    #         updateExercise(ex["id"], {"order": int(orig_order)})
+                    #         break
 
-                    logs_to_update = [row for row in user_data
-                                      if row["program"] == selected_edit
-                                      and row["exerciseName"] == upd_name
-                                      and int(row["status"]) == 0]
-                    for row in logs_to_update:
-                        updateLog(row["id"], {"status": 1})
+                    target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
+                    if target:
+                        updateExercise(target["id"], {
+                            "exerciseName": upd_name,
+                            "numSets": upd_sets,
+                            "increment": upd_inc,
+                            "minReps": ",".join(str(x) for x in upd_min),
+                            "maxReps": ",".join(str(x) for x in upd_max),
+                            "order": upd_order,
+                            "notes": upd_notes,
+                            "unit": upd_unit
+                        })
 
-                success_message = f"Saved changes to {upd_name}!"
-                # if swapped_name:
-                #     success_message += f" Swapped order with '{swapped_name}'."
-                ex_data = getAllExercises()
-                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+                    if upd_name != exercise_name:
+                        logs_to_update = [row for row in user_data
+                                          if row["program"] == selected_edit
+                                          and row["exerciseName"] == exercise_name]
+                        for row in logs_to_update:
+                            updateLog(row["id"], {"exerciseName": upd_name})
+
+                        logs_to_update = [row for row in user_data
+                                          if row["program"] == selected_edit
+                                          and row["exerciseName"] == upd_name
+                                          and int(row["status"]) == 0]
+                        for row in logs_to_update:
+                            updateLog(row["id"], {"status": 1})
+    
+                    success_message = f"Saved changes to {upd_name}!"
+                    # if swapped_name:
+                    #     success_message += f" Swapped order with '{swapped_name}'."
+                    ex_data = getAllExercises()
+                    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
         [row for row in user_ex if row["programName"] == selected_edit],
@@ -1411,6 +1441,10 @@ def logs():
     date_format = session.get("settings", {}).get("date_format", 1)
     last_overall = getLastEnteredLog(session["user_id"])
 
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
+    today = now.strftime("%Y-%m-%d")
+
     success_message = None
     error_message = None
 
@@ -1477,11 +1511,11 @@ def logs():
             orig_weight = request.form.get("orig_weight")
             orig_reps = request.form.get("orig_reps")
             orig_notes = request.form.get("orig_notes")
-            upd_date = display_to_iso(request.form.get("upd_date"), date_format)
-            upd_weight = float(request.form.get("upd_weight"))
-            upd_reps = int(request.form.get("upd_reps"))
+            upd_date = request.form.get("upd_date").replace(" ", "")
+            upd_weight = request.form.get("upd_weight").replace(" ", "")
+            upd_reps = request.form.get("upd_reps").replace(" ", "")
             upd_notes = request.form.get("upd_notes", "")
-            new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
+
 
             matching = next((row for row in user_data_exercise
                              if str(row["userId"]) == str(session["user_id"]) and
@@ -1493,7 +1527,18 @@ def logs():
                              int(row["reps"]) == int(orig_reps) and
                              str(row["notes"]) == str(orig_notes)), None)
 
-            if matching:
+            if not check_date(upd_date):
+                error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
+                                 f"{iso_to_display(today, date_format)}).")
+            elif not upd_weight:
+                error_message = "Missing value from weight."
+            elif not upd_reps:
+                error_message = "Missing value from reps."
+            elif matching:
+                upd_date = display_to_iso(upd_date, date_format)
+                upd_weight = float(upd_weight)
+                upd_reps = int(upd_reps)
+                new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
                 before = find_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
                 after = find_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
                 new_diff = round(new_1rm - before["1rm"], 3) if before else 0
