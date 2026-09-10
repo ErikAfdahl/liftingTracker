@@ -5,6 +5,7 @@
     <div>
         <h2 class="fw-bold mb-0">{{ welcome_message }}</h2>
         <p class="text-secondary fst-italic mb-0">For lifters who want to see everything.</p>
+        <p class="text-secondary small mb-0">Version: 2.8.4</p>
         {% if user_data %}
             <p class="text-secondary small mb-0">Last session: <span class="text-light">{{ user_data[-1]["program"] }}</span> on {{ date }}</p>
         {% endif %}
@@ -22,11 +23,12 @@
     <a class="text-secondary" data-bs-toggle="collapse" href="#updateSection">Updates ▾</a>
     <div class="collapse mt-2" id="updateSection">
         <div class="card card-body text-secondary small">
-            <p><strong>07-28-2026</strong> — Added quick resume feature.</p>
-            <p><strong>07-30-2026</strong> — Allowed the user to change formats for dates.</p>
-            <p><strong>07-31-2026</strong> — Finished rework on date format change.</p>
-            <p><strong>07-31-2026</strong> — Changes to run program screen.</p>
-            <p><strong>07-31-2026</strong> — Home screen now displays programs in the order of least recent to most.</p>
+            <p><strong>09-04-2026</strong> — Added program database.</p>
+            <p><strong>09-05-2026</strong> — Allowed users to change their program names.</p>
+            <p><strong>09-09-2026</strong> — Changed how changing the ordering of exercises works.</p>
+            <p><strong>09-09-2026</strong> — Added an active switch on programs, when activated it removes them from the home screen only.</p>
+            <p><strong>09-10-2026</strong> — Massive overhaul on guarding against errors on inputs.</p>
+            <p><strong>09-10-2026</strong> — Fixed improvement coefficient resetting to 0.</p>
         </div>
     </div>
 </div>

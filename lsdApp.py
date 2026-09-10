@@ -614,7 +614,7 @@ def settings():
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
         "reps_autofill_absent": user.get("reps_autofill_absent", 1) if user else 1,
-        "improvement_coef": bool(float(user.get("improvement_coef", 0.25))) if user else True,
+        "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else True,
     }
 
     print(f"Improvement coefficient: {settings['improvement_coef']}")
