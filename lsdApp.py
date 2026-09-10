@@ -540,6 +540,7 @@ def logout():
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
+    success_message = None
     error_message = None
 
     if "user_id" not in session:
