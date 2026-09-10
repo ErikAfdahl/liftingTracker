@@ -1200,7 +1200,7 @@ def manage():
                 )
 
         elif action == "add_exercise":
-            new_exercise = request.form.get("new_exercise", "")
+            new_exercise = request.form.get("new_exercise", "Exercise")
             new_sets = request.form.get("new_sets", 1).replace(" ", "")
             new_inc = request.form.get("new_inc", 5.0).replace(" ", "")
             new_min = request.form.get("new_min", "6,2").replace(" ", "")
@@ -1570,8 +1570,8 @@ def logs():
                         "diff_weight": round(after["weight"] - upd_weight, 3)
                     })
 
-            success_message = "Log updated!"
-            user_data_exercise = getUserLogs(session["user_id"])
+                success_message = "Log updated!"
+                user_data_exercise = getUserLogs(session["user_id"])
 
     exercise_logs = [
         row for row in user_data_exercise
