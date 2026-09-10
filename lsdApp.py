@@ -1135,13 +1135,12 @@ def manage():
             prog_ex = getAllExercises()
             user_ex = [row for row in prog_ex if str(row["userId"]) == str(session["user_id"])]
 
-
-
         elif action == "edit_program":
+            my_programs = [p for p in my_programs if p != selected_edit]
             new_name = request.form.get("new_program_name", "").strip()
             notes = request.form.get("new_program_notes", "").strip()
             active = 1 if request.form.get("new_program_active") == "1" else 0
-            
+
             if not new_name:
                 error_message = "Please enter a program name."
 
