@@ -82,20 +82,20 @@ def check_date(date_string, fmt=DATE_FORMATS[1]):
 
 def check_ranges1(min, max):
     if (not min) or (not max):
-        print(f"1: {min}, {max}")
+        # print(f"1: {min}, {max}")
         return False
     elif (min[-1] == ",") or (max[-1] == ","):
-        print(f"2: {min[-1]}, {max[-1]}")
+        # print(f"2: {min[-1]}, {max[-1]}")
         return False
     else:
         for i in range(len(min)):
             if (not min[i].isdigit()) and (min[i] != ","):
-                print(f"3: {min[i]}")
+                # print(f"3: {min[i]}")
                 return False
 
         for i in range(len(max)):
             if (not max[i].isdigit()) and (max[i] != ","):
-                print(f"3: {max[i]}")
+                # print(f"3: {max[i]}")
                 return False
 
     return True
