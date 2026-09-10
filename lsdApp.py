@@ -560,7 +560,7 @@ def settings():
         reps_autofill = request.form.get("reps_autofill", 1)
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
         reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
-        improvement_coef = request.form.get("improvement_coef").replace(" ", "")
+        improvement_coef = request.form.get("improvement_coef", 0.25).replace(" ", "")
 
         if improvement_coef:
             error_message = "Missing value for improvement coefficient."
