@@ -443,16 +443,16 @@
                             <div class="row g-2 align-items-end">
                                 <div class="col-md-2">
                                     <label class="form-label text-secondary small">Date</label>
-                                    <input type="text" name="upd_date" class="form-control form-control-sm" value="{{ log.date }}">
+                                    <input type="text" name="upd_date" class="form-control form-control-sm" value="{{ log.date }}" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label text-secondary small">Weight</label>
                                     <input type="number" name="upd_weight" class="form-control form-control-sm" step="any"
-                                           value="{{ log.weight }}">
+                                           value="{{ log.weight }}" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label text-secondary small">{{ selected_unit | capitalize }}s</label>
-                                    <input type="number" name="upd_reps" class="form-control form-control-sm" value="{{ log.reps }}" min="0">
+                                    <input type="number" name="upd_reps" class="form-control form-control-sm" value="{{ log.reps }}" min="0" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-secondary small">Notes</label>
