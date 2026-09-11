@@ -1589,9 +1589,10 @@ def logs():
                 prev_weight = None
 
                 for log in programLogs:
+                    print(f"Program {log['exerciseName']} set {log['setNum']}")
                     reps = float(log["reps"])
                     weight = float(log["weight"])
-
+                    print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
                     if reps >= 2:
                         new_1rm = round(weight * (1 + reps / 30), 3)
                     elif reps == 1:
@@ -1605,6 +1606,8 @@ def logs():
                     else:
                         new_diff = 0
                         new_diff_weight = 0
+
+                    print(f"Updated {log['1rm']} {log['diff']} {log['diff_weight']}")
 
                     updateLog(log["id"], {
                         "1rm": new_1rm,
