@@ -1550,7 +1550,11 @@ def logs():
                 upd_date = display_to_iso(upd_date, date_format)
                 upd_weight = float(upd_weight)
                 upd_reps = int(upd_reps)
-                new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
+
+                if upd_reps > 1:
+                    new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
+                else:
+                    new_1rm = upd_weight * upd_reps
                 before = find_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
                 after = find_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
                 new_diff = round(new_1rm - before["1rm"], 3) if before else 0

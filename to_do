@@ -1,7 +1,10 @@
 to do list
 add a timer potentially (probably not)
 fix things not going to deleted logs
-fix minor bugs, when a user enteres a log, 1rm is calculated based on date of the log not the chronilogical order
+fix minor bugs, when a user enters a log, 1rm is calculated based on date of the log not the chronilogical order
+
+if date is not today then check
+
 when a log is deleted, update differences of the log after
 add a least squares regression line to charts
-make changing the order of exercises faster
+add an option to change time zone
