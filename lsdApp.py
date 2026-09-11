@@ -1584,43 +1584,41 @@ def logs():
 
                 success_message = "Log updated!"
                 user_data_exercise = getUserLogs(session["user_id"])
-            elif action == "recalculate_logs":
-                print("fgweoiwfefew")
-                print(programLogs)
-                prev_1rm = None
-                prev_weight = None
+        elif action == "recalculate_logs":
+            prev_1rm = None
+            prev_weight = None
 
-                for log in programLogs:
-                    print(f"Program {log['exerciseName']} set {log['setNum']}")
-                    reps = float(log["reps"])
-                    weight = float(log["weight"])
-                    print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
-                    if reps >= 2:
-                        new_1rm = round(weight * (1 + reps / 30), 3)
-                    elif reps == 1: 
-                        new_1rm = weight
-                    else:
-                        new_1rm = 0
+            for log in programLogs:
+                # print(f"Program {log['exerciseName']} set {log['setNum']}")
+                reps = float(log["reps"])
+                weight = float(log["weight"])
+                # print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
+                if reps >= 2:
+                    new_1rm = round(weight * (1 + reps / 30), 3)
+                elif reps == 1:
+                    new_1rm = weight
+                else:
+                    new_1rm = 0
 
-                    if prev_1rm is not None:
-                        new_diff = round(new_1rm - prev_1rm, 3)
-                        new_diff_weight = round(weight - prev_weight, 3)
-                    else:
-                        new_diff = 0
-                        new_diff_weight = 0
+                if prev_1rm is not None:
+                    new_diff = round(new_1rm - prev_1rm, 3)
+                    new_diff_weight = round(weight - prev_weight, 3)
+                else:
+                    new_diff = 0
+                    new_diff_weight = 0
 
-                    print(f"Updated {log['1rm']} {log['diff']} {log['diff_weight']}")
+                # print(f"Updated {log['1rm']} {log['diff']} {log['diff_weight']}")
 
-                    updateLog(log["id"], {
-                        "1rm": new_1rm,
-                        "diff": new_diff,
-                        "diff_weight": new_diff_weight
-                    })
+                updateLog(log["id"], {
+                    "1rm": new_1rm,
+                    "diff": new_diff,
+                    "diff_weight": new_diff_weight
+                })
 
-                    prev_1rm = new_1rm
-                    prev_weight = weight
+                prev_1rm = new_1rm
+                prev_weight = weight
 
-                    user_data_exercise = getUserLogs(session["user_id"])
+                user_data_exercise = getUserLogs(session["user_id"])
 
 
     exercise_logs = [
