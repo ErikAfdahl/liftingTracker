@@ -2,9 +2,12 @@ to do list
 add a timer potentially (probably not)
 fix things not going to deleted logs
 fix minor bugs, when a user enters a log, 1rm is calculated based on date of the log not the chronilogical order
-
-if date is not today then check
-
+    if date is not today then check
 when a log is deleted, update differences of the log after
 add a least squares regression line to charts
 add an option to change time zone
+add a refresh logs button that goes through and updates all logs of a program/exercise/set
+    in case of refreshing data (specifically diff weight/1rm)
+add a log all button
+    dropdown menu after the sets section in run program, allowing the user to mass select
+add a bulk add exercise opition

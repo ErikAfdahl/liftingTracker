@@ -474,7 +474,18 @@
 
     {% endif %}
 {% endif %}
-<div class="text-end mt-4">
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <div>
+        {% if visual_exercise_logs %}
+        <form method="POST" onsubmit="return confirm('Recalculate 1RM and diffs for every log in this exercise and set? This can\'t be undone.')">
+            <input type="hidden" name="action" value="recalculate_logs">
+            <input type="hidden" name="selected_prog" value="{{ selected_prog }}">
+            <input type="hidden" name="selected_ex" value="{{ selected_ex }}">
+            <input type="hidden" name="selected_set" value="{{ selected_set }}">
+            <button type="submit" class="btn btn-outline-warning btn-sm">Recalculate 1RM &amp; Diffs</button>
+        </form>
+        {% endif %}
+    </div>
     <a href="/logs/deleted" class="text-secondary small">View Deleted Logs →</a>
 </div>
 
