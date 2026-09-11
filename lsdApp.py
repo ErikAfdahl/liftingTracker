@@ -1615,6 +1615,8 @@ def logs():
                     prev_1rm = new_1rm
                     prev_weight = weight
 
+                    user_data_exercise = getUserLogs(session["user_id"])
+
 
     exercise_logs = [
         row for row in user_data_exercise
