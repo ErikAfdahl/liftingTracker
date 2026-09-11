@@ -1597,7 +1597,7 @@ def logs():
                     print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
                     if reps >= 2:
                         new_1rm = round(weight * (1 + reps / 30), 3)
-                    elif reps == 1:
+                    elif reps == 1: 
                         new_1rm = weight
                     else:
                         new_1rm = 0
