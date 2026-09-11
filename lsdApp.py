@@ -1584,6 +1584,7 @@ def logs():
 
                 success_message = "Log updated!"
                 user_data_exercise = getUserLogs(session["user_id"])
+
         elif action == "recalculate_logs":
             prev_1rm = None
             prev_weight = None
