@@ -52,6 +52,13 @@ def getUserLogsByDates(user_id, program, date_last, date_prev):
             .in_("date", [date_last, date_prev])
             .execute().data)
 
+def getUserLogsUnactive(user_id):
+    return (supabase.table("logs")
+            .select("*")
+            .eq("userId", user_id)
+            .eq("status", 0)
+            .execute().data)
+
 def getAllLogs():
     return supabase.table("logs").select("*").limit(10000).execute().data
 

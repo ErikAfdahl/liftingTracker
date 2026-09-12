@@ -15,7 +15,7 @@ tokens_sheet = getTokens()
 
 cookie_manager = stx.CookieManager()
 
-# streamlit run gymApp.py
+# streamlit run gymApp_old.py
 
 def hashPassword(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -464,7 +464,7 @@ else:
                     st.divider()
 
 
-            #streamlit run gymApp.py
+            #streamlit run gymApp_old.py
 
     with tab4:
         if len(myPrograms) > 0:

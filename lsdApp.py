@@ -1683,7 +1683,7 @@ def deleted_logs():
 
     if request.method == "POST":
         action = request.form.get("action")
-        all_logs = getAllLogs()
+        all_logs = getUserLogsUnactive(session["user_id"])
 
         if action == "delete_one":
             date = request.form.get("log_date")
