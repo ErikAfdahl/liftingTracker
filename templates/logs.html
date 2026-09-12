@@ -475,17 +475,17 @@
     {% endif %}
 {% endif %}
 <div class="d-flex justify-content-between align-items-center mt-4">
-    <div>
-        {% if visual_exercise_logs %}
-        <form method="POST" onsubmit="return confirm('Confirm?')">
-            <input type="hidden" name="action" value="recalculate_logs">
-            <input type="hidden" name="selected_prog" value="{{ selected_prog }}">
-            <input type="hidden" name="selected_ex" value="{{ selected_ex }}">
-            <input type="hidden" name="selected_set" value="{{ selected_set }}">
-            <button type="submit" class="text-secondary small">Mass Recalculate 1RM &amp; Diffs</button>
-        </form>
-        {% endif %}
-    </div>
+    {% if visual_exercise_logs %}
+    <form method="POST">
+        <input type="hidden" name="action" value="recalculate_logs">
+        <input type="hidden" name="selected_prog" value="{{ selected_prog }}">
+        <input type="hidden" name="selected_ex" value="{{ selected_ex }}">
+        <input type="hidden" name="selected_set" value="{{ selected_set }}">
+        <button type="submit" class="btn btn-link text-secondary small p-0">Recalculate 1RM &amp; Diffs →</button>
+    </form>
+    {% else %}
+    <span></span>
+    {% endif %}
     <a href="/logs/deleted" class="text-secondary small">View Deleted Logs →</a>
 </div>
 <!--doife-->
