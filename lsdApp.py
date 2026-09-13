@@ -839,9 +839,11 @@ def run():
                     ex_index = 0
     elif request.method == "POST" and request.form.get("action") == "log_all_sets":
         date_format = session.get('settings', {}).get('date_format', 1)
+        log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
         exercise_name = request.form.get("exercise_name")
         selected = request.form.get("selected_program")
 
+        log_all_toggle = {}
         exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
 
         if not exercise:
@@ -852,7 +854,19 @@ def run():
 
             for i in range(num_sets):
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
-                print(f"confirming log here {confirm_log}, set number {i + 1}")
+                # print(f"confirming log here {confirm_log}, set number {i + 1}")
+                key = f"{exercise_name}_{i + 1}"
+
+                if log_all_preference == 0:
+                    log_all_toggle[key] = False
+                elif log_all_preference == 1:
+                    log_all_toggle[key] = True
+                elif log_all_preference == 2:
+                    last_entry = get_last_entry(user_data, selected, exercise_name, i + 1)
+                    if last_entry["date"] == today:
+                        log_all_toggle[key] = False
+                    else:
+                        log_all_toggle[key] = True
 
                 if not confirm_log:
                     continue
@@ -884,7 +898,7 @@ def run():
                     diff = calculate_diff(user_data, selected, exercise_name, i + 1, one_rm)
                     diff_weight = calculate_diff(user_data, selected, exercise_name, i + 1, weight, 1)
 
-                    print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
+                    # print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
 
                     appendLog({
                         "userId": int(session["user_id"]),
@@ -939,7 +953,6 @@ def run():
     streaks_weight = {}
     rec_weights = {}
     rec_reps = {}
-    log_all_toggle = {}
 
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
@@ -948,18 +961,12 @@ def run():
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
-            log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             if last_entries[key]:
                 last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             last = last_entries[key]
 
             # units[key] = ex["unit"]
-
-            if log_all_preference == 0:
-                log_all_toggle[key] = False
-            elif log_all_preference == 1:
-                log_all_toggle[key] = True
 
             if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
                 rep_ranges[key] = None
@@ -969,12 +976,6 @@ def run():
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
             if last:
-                if log_all_preference == 2:
-                    if last["date"] == today:
-                        log_all_toggle[key] = False
-                    else:
-                        log_all_toggle[key] = True
-
                 if last["diff"] > 0:
                     streak_1rm = 1
                 elif last["diff"] < 0:
