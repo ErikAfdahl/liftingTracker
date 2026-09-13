@@ -101,10 +101,6 @@
                 <div class="d-flex justify-content-between align-items-start mb-1">
                     <div class="d-flex flex-column">
                         <h6 class="fw-bold mb-0">Set {{ s }}</h6>
-                        {% set rr = rep_ranges.get(key) %}
-                        {% if rr %}
-                            <small class="text-secondary">{{ rr }}</small>
-                        {% endif %}
                     </div>
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" name="confirm_{{ s }}" role="switch" id="confirm_{{ s }}"
@@ -113,9 +109,14 @@
                     </div>
                 </div>
 
+                {% set rr = rep_ranges.get(key) %}
+                {% if rr %}
+                    <small class="text-secondary fst-italic">{{ rr }}</small><br>
+                {% endif %}
+
                 {% if last %}
                     {% if show_last == 1 %}
-                        <small class="text-secondary">
+                        <small class="text-secondary fst-italic">
                             {% set last_w = last.weight | float %}
                             Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
                             {% if last.notes %} — "{{ last.notes }}"{% endif %}
