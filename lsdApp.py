@@ -532,7 +532,8 @@ def login():
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
                     "reps_autofill_absent": 1,
-                    "improvement_coef":0.25
+                    "improvement_coef":0.25,
+                    "log_all_preference":2
                 })
                 error = "Account created! You can now log in."
 
@@ -566,6 +567,7 @@ def settings():
         weight_autofill_absent = request.form.get("weight_autofill_absent", 1)
         reps_autofill_absent = request.form.get("reps_autofill_absent", 1)
         improvement_coef = request.form.get("improvement_coef", 0.25).replace(" ", "")
+        log_all_preference = request.form.get("log_all_preference", 2)
 
         if not improvement_coef:
             error_message = "Missing value for improvement coefficient."
@@ -584,7 +586,8 @@ def settings():
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
                 "reps_autofill_absent": int(reps_autofill_absent),
-                "improvement_coef": float(improvement_coef)
+                "improvement_coef": float(improvement_coef),
+                "log_all_preference":int(log_all_preference)
             })
 
             session["settings"] = {
@@ -602,6 +605,7 @@ def settings():
                 "weight_autofill_absent": int(weight_autofill_absent),
                 "reps_autofill_absent": int(reps_autofill_absent),
                 "improvement_coef": float(improvement_coef)
+                "log_all_preference":int(log_all_preference)
             }
 
             return redirect(url_for("settings", success=1))
@@ -625,7 +629,8 @@ def settings():
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
         "reps_autofill_absent": user.get("reps_autofill_absent", 1) if user else 1,
-        "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else 0.25
+        "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else 0.25,
+        "log_all_preference":int(user.get("log_all_preference", 2)) if user else 2
     }
 
     print(f"Improvement coefficient: {settings['improvement_coef']}")
@@ -934,6 +939,8 @@ def run():
     streaks_weight = {}
     rec_weights = {}
     rec_reps = {}
+    log_all_toggle = {}
+
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
         maxRepRange = [int(x.strip()) for x in str(ex["maxReps"]).split(",")]
@@ -941,12 +948,18 @@ def run():
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
+            log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
             last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
             if last_entries[key]:
                 last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             last = last_entries[key]
 
             # units[key] = ex["unit"]
+
+            if log_all_preference == 0:
+                log_all_toggle[key] = False
+            elif log_all_preference == 1:
+                log_all_toggle[key] = True
 
             if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
                 rep_ranges[key] = None
@@ -956,6 +969,12 @@ def run():
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
             if last:
+                if log_all_preference == 2:
+                    if last["date"] == today:
+                        log_all_toggle[key] = False
+                    else:
+                        log_all_toggle[key] = True
+
                 if last["diff"] > 0:
                     streak_1rm = 1
                 elif last["diff"] < 0:
@@ -1031,6 +1050,7 @@ def run():
                                              rep_ranges=rep_ranges, # rep ranges for the sets (dict of strings)
                                              rec_weights=rec_weights, # recommended weight (dict of floats)
                                              rec_reps=rec_reps, # recommended rep amounts (dict of ints)
+                                             log_all_toggle=log_all_toggle,
                                              user_data=user_data, # user logs (data)
                                              log_cap_warning=log_cap_warning,
                                              error_message=error_message,
