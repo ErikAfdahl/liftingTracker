@@ -72,10 +72,10 @@ def get_date_entry(data, program, exercise, set_num, date):
     return None
 
 def check_date(date_string, fmt):
-    print("foiewiewioew")
-    print(fmt)
-    print(date_string)
-    print(DATE_FORMATS[1])
+    # print("foiewiewioew")
+    # print(fmt)
+    # print(date_string)
+    # print(DATE_FORMATS[1])
     fmt = DATE_FORMATS[int(fmt)]
     if not date_string:
         return False
@@ -735,7 +735,6 @@ def run():
     today = now.strftime("%Y-%m-%d")
     success_message = None
     error_message = ""
-    log_all_toggle = {}
 
     ex_index = request.args.get("ex_index", type=int)
 
@@ -840,7 +839,6 @@ def run():
                     ex_index = 0
     elif request.method == "POST" and request.form.get("action") == "log_all_sets":
         date_format = session.get('settings', {}).get('date_format', 1)
-        log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
         exercise_name = request.form.get("exercise_name")
         selected = request.form.get("selected_program")
         exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
@@ -854,26 +852,9 @@ def run():
             for i in range(num_sets):
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
                 # print(f"confirming log here {confirm_log}, set number {i + 1}")
-                key = f"{exercise_name}_{i + 1}"
-                print("fwefoew")
-                print(f"key {key}")
-
-                if log_all_preference == 0:
-                    log_all_toggle[key] = False
-                elif log_all_preference == 1:
-                    log_all_toggle[key] = True
-                elif log_all_preference == 2:
-                    last_entry = get_last_entry(user_data, selected, exercise_name, i + 1)
-                    print(last_entry["date"])
-                    if last_entry["date"] == today:
-                        log_all_toggle[key] = False
-                    else:
-                        log_all_toggle[key] = True
-
-                print(log_all_toggle[key])
-                print(today)
-
-
+                # key = f"{exercise_name}_{i + 1}"
+                # print("fwefoew")
+                # print(f"key {key}")
 
 
                 if not confirm_log:
@@ -953,6 +934,7 @@ def run():
                         ex_index = 0
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
+    log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
 
     rep_ranges = {}
     last_entries = {}
@@ -961,6 +943,8 @@ def run():
     streaks_weight = {}
     rec_weights = {}
     rec_reps = {}
+    log_all_toggle = {}
+
 
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
@@ -983,7 +967,22 @@ def run():
             else:
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
+            if log_all_preference == 0:
+                log_all_toggle[key] = False
+            elif log_all_preference == 1:
+                log_all_toggle[key] = True
+
+
             if last:
+                if log_all_preference == 2:
+                    print(last["date"])
+                    print(today)
+                    if last["date"] == today:
+                        log_all_toggle[key] = False
+                    else:
+                        log_all_toggle[key] = True
+
+
                 if last["diff"] > 0:
                     streak_1rm = 1
                 elif last["diff"] < 0:
