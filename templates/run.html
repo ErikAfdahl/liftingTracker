@@ -205,18 +205,36 @@
     const logAllForm = document.getElementById("logAllForm");
     const numSets = {{ ex.numSets | int }};
 
+    function appendHidden(form, name, value) {
+        // Remove any stale hidden input with the same name first,
+        // so repeated clicks of "Log All" don't stack duplicate fields.
+        const existing = form.querySelector(`input[name="${name}"]`);
+        if (existing) existing.remove();
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = name;
+        hidden.value = value;
+        form.appendChild(hidden);
+    }
+
     logAllBtn.addEventListener("click", function() {
         const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
+
         for (let s = 1; s <= numSets; s++) {
+            // The "Include" switch (confirm_{{ s }}) lives inside each set's own
+            // per-set <form>, not inside #logAllForm, so it never gets submitted
+            // on its own. Copy its checked state into #logAllForm manually.
+            // Sending "" for an unchecked switch lets the backend's
+            // `if not confirm_log: continue` correctly skip that set.
+            const confirmBox = document.getElementById(`confirm_${s}`);
+            appendHidden(logAllForm, `confirm_${s}`, confirmBox && confirmBox.checked ? "on" : "");
+
             fieldPrefixes.forEach(function(prefix) {
                 const fieldId = `${prefix}_${s}`;
                 const sourceInput = document.getElementById(fieldId);
                 if (sourceInput) {
-                    const hidden = document.createElement("input");
-                    hidden.type = "hidden";
-                    hidden.name = fieldId;
-                    hidden.value = sourceInput.value;
-                    logAllForm.appendChild(hidden);
+                    appendHidden(logAllForm, fieldId, sourceInput.value);
                 }
             });
         }
