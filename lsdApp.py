@@ -842,6 +842,7 @@ def run():
         exercise_name = request.form.get("exercise_name")
         selected = request.form.get("selected_program")
         exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
+        lastSet = False
 
         if not exercise:
             error_message = "Could not find that exercise. Please try again."
@@ -859,6 +860,9 @@ def run():
 
                 if not confirm_log:
                     continue
+
+                if i + 1 == num_sets:
+                    lastSet = True
 
                 workout_date = (request.form.get(f"workout_date_{i + 1}") or "").replace(" ", "")
                 weight = (request.form.get(f"weight_{i + 1}") or "").replace(" ", "")
@@ -926,10 +930,13 @@ def run():
                 if quick_index == 1:
                     if match:
                         current_index = int(match["order"]) - 1
-                        if int(match["order"]) == int(exercises[-1]["order"]):
-                            ex_index = current_index
+                        if lastSet:
+                            if int(match["order"]) == int(exercises[-1]["order"]):
+                                ex_index = current_index
+                            else:
+                                ex_index = current_index + 1
                         else:
-                            ex_index = current_index + 1
+                            ex_index = current_index
                     else:
                         ex_index = 0
 
