@@ -735,7 +735,7 @@ def run():
     today = now.strftime("%Y-%m-%d")
     success_message = None
     error_message = ""
-    log_all_toggle = None
+    log_all_toggle = {}
 
     ex_index = request.args.get("ex_index", type=int)
 
@@ -843,8 +843,6 @@ def run():
         log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
         exercise_name = request.form.get("exercise_name")
         selected = request.form.get("selected_program")
-
-        log_all_toggle = {}
         exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
 
         if not exercise:
