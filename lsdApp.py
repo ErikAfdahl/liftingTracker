@@ -72,6 +72,9 @@ def get_date_entry(data, program, exercise, set_num, date):
     return None
 
 def check_date(date_string, fmt):
+    print("foiewiewioew")
+    print(fmt)
+    print(date_string)
     fmt = DATE_FORMATS[fmt]
     if not date_string:
         return False
