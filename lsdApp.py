@@ -934,7 +934,7 @@ def run():
                         ex_index = 0
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
-    log_all_preference = session.get("settings", {}).get("log_all_preference", 1)
+    log_all_preference = session.get("settings", {}).get("log_all_preference", 2)
 
     rep_ranges = {}
     last_entries = {}
