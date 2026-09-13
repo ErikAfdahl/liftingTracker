@@ -958,6 +958,9 @@ def run():
                 last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             last = last_entries[key]
 
+
+            print(key)
+
             # units[key] = ex["unit"]
 
             if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
@@ -967,9 +970,13 @@ def run():
             else:
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
+            print(log_all_preference)
+
             if log_all_preference == 0:
+                print("set to false")
                 log_all_toggle[key] = False
             elif log_all_preference == 1:
+                print("set to true")
                 log_all_toggle[key] = True
 
 
