@@ -845,6 +845,11 @@ def run():
             num_sets = int(exercise["numSets"])
 
             for i in range(num_sets):
+                confirm_log = request.form.get(f"confirm_{i + 1}", "")
+
+                if not confirm_log:
+                    continue
+
                 workout_date = (request.form.get(f"workout_date_{i + 1}") or "").replace(" ", "")
                 weight = (request.form.get(f"weight_{i + 1}") or "").replace(" ", "")
                 reps = (request.form.get(f"reps_{i + 1}") or "").replace(" ", "")
@@ -899,7 +904,7 @@ def run():
                     key=lambda x: int(x["order"])
                 )
 
-                quick_index = session.get("settings", {}).get("quick_indexing", 1)
+                quick_index = session.get("settings", {}).get("quick_indexing", 1) # if only the first couple logs are logged, dont go to the next page
                 match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
                 if quick_index == 1:
                     if match:
@@ -1623,7 +1628,7 @@ def logs():
                              int(row["reps"]) == int(orig_reps) and
                              str(row["notes"]) == str(orig_notes)), None)
 
-            if not check_date(upd_date):
+            if not check_date(upd_date, date_format):
                 error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                                  f"{iso_to_display(today, date_format)}).")
             elif not upd_weight:
