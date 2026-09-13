@@ -750,14 +750,19 @@ def run():
             ex_index = 0
 
     if request.method == "POST" and request.form.get("action") == "log_set":
-        workout_date = request.form.get("workout_date").replace(" ", "")
+        set_num = int(request.form.get(f"set_num"))
         date_format = session.get('settings', {}).get('date_format', 1)
-        weight = request.form.get("weight").replace(" ", "")
-        reps = request.form.get("reps").replace(" ", "")
+        workout_date = (request.form.get(f"workout_date_{set_num}") or "").replace(" ", "")
+        weight = (request.form.get(f"weight_{set_num}") or "").replace(" ", "")
+        reps = (request.form.get(f"reps_{set_num}") or "").replace(" ", "")
+        exercise_name = request.form.get(f"exercise_name")
+        notes = request.form.get(f"notes_{set_num}", "")
+        selected = request.form.get("selected_program")
 
-        if not check_date(workout_date):
-            error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
-                             f"{iso_to_display(today, date_format)}).")
+
+        if not check_date(workout_date, DATE_FORMATS[date_format]):
+            error_message = (f"Invalid date format! Please use the format matching your settings "
+                             f"(e.g., {iso_to_display(today, date_format)}).")
         elif not weight:
             error_message = "Missing value for weight."
         elif not reps:
@@ -765,10 +770,6 @@ def run():
         else:
             weight = float(weight)
             reps = int(reps)
-            exercise_name = request.form.get("exercise_name")
-            set_num = int(request.form.get("set_num"))
-            notes = request.form.get("notes", "")
-            selected = request.form.get("selected_program")
 
             if reps > 1:
                 one_rm = round(weight * (1 + float(reps) / 30), 3)
@@ -826,6 +827,84 @@ def run():
                         ex_index = current_index
                 else:
                     ex_index = 0
+    elif request.method == "POST" and request.form.get("action") == "log_all_sets":
+        date_format = session.get('settings', {}).get('date_format', 1)
+        exercise_name = request.form.get("exercise_name")
+        selected = request.form.get("selected_program")
+
+        exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
+
+        if not exercise:
+            error_message = "Could not find that exercise. Please try again."
+        else:
+            num_sets = int(exercise["numSets"])
+
+            for i in range(num_sets):
+                workout_date = (request.form.get(f"workout_date_{i + 1}") or "").replace(" ", "")
+                weight = (request.form.get(f"weight_{i + 1}") or "").replace(" ", "")
+                reps = (request.form.get(f"reps_{i + 1}") or "").replace(" ", "")
+                notes = request.form.get(f"notes_{i + 1}", "")
+
+                if not check_date(workout_date, DATE_FORMATS[date_format]):
+                    error_message = (f"Invalid date format for set {i + 1} "
+                                     f"(e.g., {iso_to_display(today, date_format)}).")
+                    break
+                elif not weight:
+                    error_message = f"Missing value for weight for set {i + 1}."
+                    break
+                elif not reps:
+                    error_message = f"Missing value for reps for set {i + 1}."
+                    break
+                else:
+                    weight = float(weight)
+                    reps = int(reps)
+
+                    if reps > 1:
+                        one_rm = round(weight * (1 + float(reps) / 30), 3)
+                    else:
+                        one_rm = weight * reps
+
+                    diff = calculate_diff(user_data, selected, exercise_name, i + 1, one_rm)
+                    diff_weight = calculate_diff(user_data, selected, exercise_name, i + 1, weight, 1)
+
+                    appendLog({
+                        "userId": int(session["user_id"]),
+                        "program": selected,
+                        "status": 1,
+                        "date": display_to_iso(workout_date, date_format),
+                        "exerciseName": exercise_name,
+                        "setNum": i + 1,
+                        "weight": weight,
+                        "reps": reps,
+                        "1rm": one_rm,
+                        "diff": diff,
+                        "notes": notes,
+                        "diff_weight": diff_weight
+                    })
+
+                    user_data = getUserLogs(session["user_id"])
+
+            if not error_message:
+                success_message = "Successful mass log."
+
+                narrator = session.get("settings", {}).get("narrator", "default")
+
+                exercises = sorted(
+                    [row for row in user_prog if row["programName"] == selected],
+                    key=lambda x: int(x["order"])
+                )
+
+                quick_index = session.get("settings", {}).get("quick_indexing", 1)
+                match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
+                if quick_index == 1:
+                    if match:
+                        current_index = int(match["order"]) - 1
+                        if int(match["order"]) == int(exercises[-1]["order"]):
+                            ex_index = current_index
+                        else:
+                            ex_index = current_index + 1
+                    else:
+                        ex_index = 0
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
 

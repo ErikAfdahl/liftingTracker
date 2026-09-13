@@ -138,7 +138,7 @@
                     <div class="row g-2 align-items-end">
                         <div class="col-md-2">
                             <label class="form-label text-secondary small">Date</label>
-                            <input type="text" name="workout_date" class="form-control form-control-sm"
+                            <input type="text" id="workout_date_{{ s }}" name="workout_date_{{ s }}" class="form-control form-control-sm"
                                    value="{{ today }}" required>
                         </div>
                         <div class="col-md-2">
@@ -158,7 +158,7 @@
                                 {% set formatted_weight = w_float | int if w_float == w_float | int else w_float %}
                             {% endif %}
 
-                            <input type="number" name="weight" class="form-control form-control-sm" min="0" step="any"
+                            <input type="number" id="weight_{{ s }}" name="weight_{{ s }}" class="form-control form-control-sm" min="0" step="any"
                                     value="{{ formatted_weight }}" required>
                         </div>
                         <div class="col-md-2">
@@ -166,12 +166,12 @@
                             {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
                             {% set current_min_reps = ex.minReps.split(',')[s - 1] if ex.minReps else '' %}
 
-                            <input type="number" name="reps" class="form-control form-control-sm" step="1" min="0"
-                                   value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}"required>
+                            <input type="number" id="reps_{{ s }}" name="reps_{{ s }}" class="form-control form-control-sm" step="1" min="0"
+                                   value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-secondary small">Notes (optional)</label>
-                            <input type="text" name="notes" class="form-control form-control-sm" placeholder="Any notes...">
+                            <input type="text" id="notes_{{ s }}" name="notes_{{ s }}" class="form-control form-control-sm" placeholder="Any notes...">
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
@@ -182,8 +182,42 @@
 
             {% if not loop.last %}<hr class="my-2">{% endif %}
         {% endfor %}
+
+        <form id="logAllForm" method="POST" action="/run">
+            <input type="hidden" name="action" value="log_all_sets">
+            <input type="hidden" name="selected_program" value="{{ selected }}">
+            <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+            <input type="hidden" name="ex_index" value="{{ ex_index }}">
+        </form>
+        <button type="button" id="logAllBtn" class="btn btn-success w-100 mt-3">Log All</button>
     </div>
 </div>
+
+<script>
+(function() {
+    const logAllBtn = document.getElementById("logAllBtn");
+    const logAllForm = document.getElementById("logAllForm");
+    const numSets = {{ ex.numSets | int }};
+
+    logAllBtn.addEventListener("click", function() {
+        const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
+        for (let s = 1; s <= numSets; s++) {
+            fieldPrefixes.forEach(function(prefix) {
+                const fieldId = `${prefix}_${s}`;
+                const sourceInput = document.getElementById(fieldId);
+                if (sourceInput) {
+                    const hidden = document.createElement("input");
+                    hidden.type = "hidden";
+                    hidden.name = fieldId;
+                    hidden.value = sourceInput.value;
+                    logAllForm.appendChild(hidden);
+                }
+            });
+        }
+        logAllForm.submit();
+    });
+})();
+</script>
 
     <!-- Back / Next navigation -->
     <div class="d-flex justify-content-between align-items-center">
