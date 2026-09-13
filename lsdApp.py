@@ -856,6 +856,8 @@ def run():
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
                 # print(f"confirming log here {confirm_log}, set number {i + 1}")
                 key = f"{exercise_name}_{i + 1}"
+                print("fwefoew")
+                print(f"key {key}")
 
                 if log_all_preference == 0:
                     log_all_toggle[key] = False
@@ -863,10 +865,17 @@ def run():
                     log_all_toggle[key] = True
                 elif log_all_preference == 2:
                     last_entry = get_last_entry(user_data, selected, exercise_name, i + 1)
+                    print(last_entry["date"])
                     if last_entry["date"] == today:
                         log_all_toggle[key] = False
                     else:
                         log_all_toggle[key] = True
+
+                print(log_all_toggle[key])
+                print(today)
+
+
+
 
                 if not confirm_log:
                     continue
