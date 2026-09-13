@@ -846,6 +846,7 @@ def run():
 
             for i in range(num_sets):
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
+                print(f"confirming log here {confirm_log}, set number {i + 1}")
 
                 if not confirm_log:
                     continue
@@ -876,6 +877,8 @@ def run():
 
                     diff = calculate_diff(user_data, selected, exercise_name, i + 1, one_rm)
                     diff_weight = calculate_diff(user_data, selected, exercise_name, i + 1, weight, 1)
+
+                    print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
 
                     appendLog({
                         "userId": int(session["user_id"]),
