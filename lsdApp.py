@@ -604,7 +604,7 @@ def settings():
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
                 "reps_autofill_absent": int(reps_autofill_absent),
-                "improvement_coef": float(improvement_coef)
+                "improvement_coef": float(improvement_coef),
                 "log_all_preference":int(log_all_preference)
             }
 
