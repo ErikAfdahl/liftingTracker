@@ -735,6 +735,7 @@ def run():
     today = now.strftime("%Y-%m-%d")
     success_message = None
     error_message = ""
+    log_all_toggle = None
 
     ex_index = request.args.get("ex_index", type=int)
 
