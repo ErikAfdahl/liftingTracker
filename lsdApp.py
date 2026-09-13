@@ -760,7 +760,7 @@ def run():
         selected = request.form.get("selected_program")
 
 
-        if not check_date(workout_date, DATE_FORMATS[date_format]):
+        if not check_date(workout_date, date_format):
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
         elif not weight:
@@ -845,7 +845,7 @@ def run():
                 reps = (request.form.get(f"reps_{i + 1}") or "").replace(" ", "")
                 notes = request.form.get(f"notes_{i + 1}", "")
 
-                if not check_date(workout_date, DATE_FORMATS[date_format]):
+                if not check_date(workout_date, date_format):
                     error_message = (f"Invalid date format for set {i + 1} "
                                      f"(e.g., {iso_to_display(today, date_format)}).")
                     break
