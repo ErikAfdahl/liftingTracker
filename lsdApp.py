@@ -843,6 +843,7 @@ def run():
             error_message = "Could not find that exercise. Please try again."
         else:
             num_sets = int(exercise["numSets"])
+            count = 0
 
             for i in range(num_sets):
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
@@ -895,10 +896,15 @@ def run():
                         "diff_weight": diff_weight
                     })
 
+                    count += 1
+
                     user_data = getUserLogs(session["user_id"])
 
             if not error_message:
-                success_message = "Successful mass log."
+                if count > 1:
+                    success_message = f"Successful mass log, {count} logs added." #add count that displays number of lgos updates
+                elif count == 1:
+                    success_message = f"Successful mass log, {count} log added."
 
                 narrator = session.get("settings", {}).get("narrator", "default")
 

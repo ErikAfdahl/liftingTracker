@@ -219,14 +219,22 @@
     }
 
     logAllBtn.addEventListener("click", function() {
-        const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
-
+        const included = [];
         for (let s = 1; s <= numSets; s++) {
-            // The "Include" switch (confirm_{{ s }}) lives inside each set's own
-            // per-set <form>, not inside #logAllForm, so it never gets submitted
-            // on its own. Copy its checked state into #logAllForm manually.
-            // Sending "" for an unchecked switch lets the backend's
-            // `if not confirm_log: continue` correctly skip that set.
+            const confirmBox = document.getElementById(`confirm_${s}`);
+            if (confirmBox && confirmBox.checked) included.push(s);
+        }
+
+        if (included.length === 0) {
+            alert("No sets are toggled on to log.");
+            return;
+        }
+
+        const ok = window.confirm(`Log ${included.length} set${included.length > 1 ? 's' : ''}?`);
+        if (!ok) return;
+
+        const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
+        for (let s = 1; s <= numSets; s++) {
             const confirmBox = document.getElementById(`confirm_${s}`);
             appendHidden(logAllForm, `confirm_${s}`, confirmBox && confirmBox.checked ? "on" : "");
 
