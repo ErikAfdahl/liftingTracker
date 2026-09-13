@@ -75,7 +75,8 @@ def check_date(date_string, fmt):
     print("foiewiewioew")
     print(fmt)
     print(date_string)
-    fmt = DATE_FORMATS[fmt]
+    print(DATE_FORMATS[1])
+    fmt = DATE_FORMATS[int(fmt)]
     if not date_string:
         return False
     try:
