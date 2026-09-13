@@ -984,7 +984,7 @@ def run():
                 if log_all_preference == 2:
                     print(last["date"])
                     print(today)
-                    if last["date"] == today:
+                    if last["date"] == iso_to_display(today, date_format):
                         log_all_toggle[key] = False
                     else:
                         log_all_toggle[key] = True
