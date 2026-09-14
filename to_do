@@ -6,10 +6,3 @@ fix minor bugs, when a user enters a log, 1rm is calculated based on date of the
 when a log is deleted, update differences of the log after
 add a least squares regression line to charts
 add an option to change time zone
-add a log all button
-    dropdown menu after the sets section in run program, allowing the user to mass select
-add a bulk add exercise opition
-    included, one thing is to let the suer customize the default of each include switch
-        1. All on
-        2. All off
-        3. Check whether or not theres already an entry for that date and if so default off, otherwise on
