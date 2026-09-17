@@ -973,7 +973,7 @@ def run():
             last = last_entries[key]
 
 
-            print(key)
+            # print(key)
 
             # units[key] = ex["unit"]
 
@@ -984,20 +984,21 @@ def run():
             else:
                 rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
 
-            print(log_all_preference)
+            # print(log_all_preference)
 
             if log_all_preference == 0:
-                print("set to false")
+                # print("set to false")
                 log_all_toggle[key] = False
             elif log_all_preference == 1:
-                print("set to true")
+                # print("set to true")
                 log_all_toggle[key] = True
 
 
             if last:
                 if log_all_preference == 2:
-                    print(last["date"])
-                    print(today)
+                    # print(last["date"])
+                    # print(today)"date"])
+                    # print(today)
                     if last["date"] == iso_to_display(today, date_format):
                         log_all_toggle[key] = False
                     else:
@@ -1575,7 +1576,9 @@ def templates():
                     "minReps": row["minReps"],
                     "maxReps": row["maxReps"],
                     "order": row["order"],
-                    "notes": row["notes"]
+                    "notes": row["notes"],
+                    "unit": row["unit"],
+                    "link": row["link"]
                 })
             success_message = f"'{prog_name}' added to your programs!"
             my_programs.append(prog_name)
