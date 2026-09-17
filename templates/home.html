@@ -55,12 +55,12 @@
                         </small><br>
                         {% if ex.notes %}
                             <small class="text-secondary">
-                                {{ ex.notes }}
+                                "{{ ex.notes }}"
                             </small><br>
                         {% endif %}
                         {% if ex.link %}
                             <small class="text-secondary">
-                                {{ ex.link }}
+                                {{ ex.link | urlize }}
                             </small><br>
                         {% endif %}
                     </div>
