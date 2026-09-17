@@ -192,9 +192,10 @@
             <small class="text-secondary fst-italic">Notes: "{{ ex.notes }}"</small><br>
         {% endif %}
         {% if ex.link and show_link %}
-            <small class="text-secondary">
+            <small class="text-secondary fst-italic">Instructional Video: "</small>
+            <small class="text-secondary fst-italic">
                 <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
-                    Instructional Video: {{ ex.link }}
+                    {{ ex.link }}
                 </a>
             </small><br>
         {% endif %}
