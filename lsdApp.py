@@ -1061,6 +1061,8 @@ def run():
     for ex in exercises:
         key = f"{ex['exerciseName']}"
         prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
+    print("feionweoifnewoifnweoifnio")
+    print(session.get("settings", {}).get("show_link", 1))
 
     # print(f"rec_weights: {rec_weights}")
     # print(f"rec_reps: {rec_reps}")
