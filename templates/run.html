@@ -189,12 +189,12 @@
         {% endfor %}
 
         {% if ex.notes %}
-            <small class="text-secondary fst-italic">"{{ ex.notes }}"</small><br>
+            <small class="text-secondary fst-italic">Notes: "{{ ex.notes }}"</small><br>
         {% endif %}
         {% if ex.link and show_link %}
             <small class="text-secondary">
                 <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
-                    {{ ex.link }}
+                    Instructional Video: {{ ex.link }}
                 </a>
             </small><br>
         {% endif %}
