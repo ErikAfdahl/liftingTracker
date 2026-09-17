@@ -1931,7 +1931,7 @@ def get_comparison_data():
 
     return jsonify(logs)
 
-@app.route("/feedback")
+@app.route("/feedback", methods=["GET", "POST"])
 def feedback():
     if "user_id" not in session:
         return redirect(url_for("login"))
