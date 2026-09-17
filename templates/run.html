@@ -86,16 +86,6 @@
         <div class="d-flex align-items-baseline gap-2">
             <span>{{ ex.exerciseName }}</span>
         </div>
-        {% if ex.notes %}
-            <small class="text-secondary fst-italic">"{{ ex.notes }}"</small><br>
-        {% endif %}
-        {% if ex.link and show_link %}
-            <small class="text-secondary">
-                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
-                    {{ ex.link }}
-                </a>
-            </small><br>
-        {% endif %}
     </div>
     <div class="card-body">
         {% for s in range(1, ex.numSets | int + 1) %}
@@ -197,6 +187,17 @@
 
             {% if not loop.last %}<hr class="my-2">{% endif %}
         {% endfor %}
+
+        {% if ex.notes %}
+            <small class="text-secondary fst-italic">"{{ ex.notes }}"</small><br>
+        {% endif %}
+        {% if ex.link and show_link %}
+            <small class="text-secondary">
+                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
+                    {{ ex.link }}
+                </a>
+            </small><br>
+        {% endif %}
 
         <form id="logAllForm" method="POST" action="/run">
             <input type="hidden" name="action" value="log_all_sets">
