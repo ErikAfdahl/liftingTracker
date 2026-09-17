@@ -743,6 +743,7 @@ def run():
     success_message = None
     error_message = ""
 
+
     ex_index = request.args.get("ex_index", type=int)
 
     if ex_index is None:
@@ -1929,6 +1930,57 @@ def get_comparison_data():
         pass
 
     return jsonify(logs)
+
+@app.route("/feedback")
+def feedback():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
+    today = now.strftime("%Y-%m-%d")
+    success_message = None
+    error_message = None
+
+    if session["user_id"] != 1:
+        userFeedback = getUserFeedback(session["user_id"])
+        adminFeedback = getUserFeedback(1)
+
+        action = request.form.get("action")
+
+        if request.method == "POST":
+            if action == "submit":
+                user_id = None
+                nextFeedback = 1
+                message = request.form.get("message")
+                message_type = request.form.get("message_type")
+                message_location = request.form.get("message_location")
+                anonymous = 1 if request.form.get("anonymous") else 0
+
+                if not anonymous:
+                    user_id = session["user_id"]
+                    if userFeedback:
+                        nextFeedback = userFeedback[-1]["message_num"] + 1
+
+                appendFeedback({
+                    "userId": user_id,
+                    "type": message_type,
+                    "location": message_location,
+                    "message": message,
+                    "message_num": nextFeedback,
+                    "status": 0,
+                    "date": today
+                })
+    else:
+        userFeedback = getUserFeedback(session["user_id"])
+        adminFeedback = getUserFeedback(1)
+
+    return render_template("feedback.html",
+                           userFeedback=userFeedback,
+                           adminFeedback=adminFeedback,
+                           success_message=success_message,
+                           error_message=error_message)
+
 
 @app.route("/about")
 def about():

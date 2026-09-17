@@ -102,3 +102,18 @@ def renameLogsProgram(user_id, old_program, new_program):
         .eq("userId", user_id) \
         .eq("program", old_program) \
         .execute()
+
+# ── feedback ──────────────────────────────────────────────
+def getAllFeedback():
+    return supabase.table("feedback").select("*").execute().data
+
+def getUserFeedback(user_id):
+    data = supabase.table("feedback").select("*").eq("userId", user_id) \
+        .order("message_num", desc=True).order("id", desc=True).limit(1000).execute().data
+    return list(reversed(data))
+
+def appendFeedback(row: dict):
+    supabase.table("feedback").insert(row).execute()
+
+def updateFeedback(user_id, updates: dict):
+    supabase.table("feedback").update(updates).eq("userId", user_id).execute()

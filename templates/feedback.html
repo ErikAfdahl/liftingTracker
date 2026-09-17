@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">Feedback</h2>
+
+{% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show">
+        {{ success_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
+{% if error_message %}
+    <div class="alert alert-danger alert-dismissible fade show">
+        {{ error_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
+
+{% if session.user_id == 1 %}
+
+    <!-- Admin view — placeholder until the inbox logic is built -->
+    <div class="alert alert-secondary">Admin feedback inbox coming soon.</div>
+
+{% else %}
+
+    {% set type_labels = {
+        "0": "Error", "1": "Bug", "2": "Remove Feature",
+        "3": "Add Feature", "4": "Change Visuals", "5": "Other"
+    } %}
+    {% set location_labels = {
+        "0": "Home Screen", "1": "Run Program", "2": "Results",
+        "3": "Manage Programs", "4": "Templates", "5": "Logs",
+        "6": "Deleted", "7": "About", "8": "Settings",
+        "9": "Login", "11": "Other"
+    } %}
+    {% set status_labels = {
+        "0": ("Open", "secondary"), "1": ("Read", "info"),
+        "2": ("In Progress", "warning"), "3": ("Resolved", "success")
+    } %}
+
+    <!-- Submit Feedback -->
+    <div class="card mb-4">
+        <div class="card-header">Submit Feedback</div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="submit">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Type</label>
+                        <select name="message_type" class="form-select form-select-sm">
+                            {% for val, label in type_labels.items() %}
+                                <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small">Location</label>
+                        <select name="message_location" class="form-select form-select-sm">
+                            {% for val, label in location_labels.items() %}
+                                <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-secondary small">Message</label>
+                    <textarea name="message" class="form-control form-control-sm" rows="3" placeholder="What's up?"></textarea>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" name="anonymous" id="anonymous" value="1">
+                        <label class="form-check-label small text-secondary" for="anonymous">Submit anonymously</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Your Past Feedback -->
+    <div class="card">
+        <div class="card-header">Your Feedback</div>
+        <div class="card-body p-0">
+            {% if not userFeedback %}
+                <div class="p-3 text-secondary small">You haven't submitted any feedback yet.</div>
+            {% else %}
+                {% for fb in userFeedback %}
+                <div class="p-3 border-bottom border-secondary">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="fw-bold">#{{ fb.message_num }}</span>
+                            <span class="text-secondary small ms-2">
+                                {{ type_labels.get(fb.type|string, "Other") }} · {{ location_labels.get(fb.location|string, "Other") }} · {{ fb.date }}
+                            </span>
+                        </div>
+                        {% set status = status_labels.get(fb.status|string, ("Unknown", "secondary")) %}
+                        <span class="badge bg-{{ status[1] }}">{{ status[0] }}</span>
+                    </div>
+                    <p class="mb-1 mt-2">{{ fb.message }}</p>
+                    {% if fb.response %}
+                        <div class="border-start border-secondary ps-2 mt-2">
+                            <small class="text-secondary fst-italic">Response: {{ fb.response }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+{% endif %}
+
+{% endblock %}
