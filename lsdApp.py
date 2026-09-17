@@ -1936,6 +1936,7 @@ def feedback():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
+    date_format = session.get("settings", {}).get("date_format", 1)
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
     today = now.strftime("%Y-%m-%d")
@@ -1971,6 +1972,11 @@ def feedback():
                     "status": 0,
                     "date": today
                 })
+
+                userFeedback = getUserFeedback(session["user_id"])
+
+        for i in range(len(userFeedback)):
+            userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
     else:
         userFeedback = getUserFeedback(session["user_id"])
         adminFeedback = getUserFeedback(1)
