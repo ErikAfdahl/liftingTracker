@@ -39,9 +39,11 @@
                                 "{{ ex.notes }}"
                             </small><br>
                         {% endif %}
-                        {% if ex.link %}
+                        {% if ex.link and show_link %}
                             <small class="text-secondary">
-                                {{ ex.link | urlize }}
+                                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
+                                    {{ ex.link }}
+                                </a>
                             </small><br>
                         {% endif %}
                     </div>

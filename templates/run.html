@@ -89,6 +89,13 @@
         {% if ex.notes %}
             <small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
         {% endif %}
+        {% if ex.link and show_link %}
+            <small class="text-secondary">
+                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
+                    {{ ex.link }}
+                </a>
+            </small><br>
+        {% endif %}
     </div>
     <div class="card-body">
         {% for s in range(1, ex.numSets | int + 1) %}

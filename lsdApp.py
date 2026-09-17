@@ -528,6 +528,7 @@ def login():
                     "show_streak": 1,
                     "show_streak_weight": 1,
                     "show_rec": 1,
+                    "show_link": 1,
                     "weight_autofill": 1,
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
@@ -559,6 +560,7 @@ def settings():
         show_streak = 1 if request.form.get("show_streak") else 0
         show_streak_weight = 1 if request.form.get("show_streak_weight") else 0
         show_rec = 1 if request.form.get("show_rec") else 0
+        show_link = 1 if request.form.get("show_link") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         quick_resume = 1 if request.form.get("quick_resume") else 0
         date_format = request.form.get("date_format", 1)
@@ -582,6 +584,7 @@ def settings():
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
                 "show_rec": show_rec,
+                "show_link": show_link,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -600,6 +603,7 @@ def settings():
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
                 "show_rec": show_rec,
+                "show_link": show_link,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -625,6 +629,7 @@ def settings():
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
         "show_streak_weight": bool(int(user.get("show_streak_weight", 1))) if user else True,
         "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
+        "show_link": bool(int(user.get("show_link", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
@@ -683,6 +688,7 @@ def home():
             (last["setNum"] != last_exercise_in_program["numSets"])
     ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
+    show_link = session.get("settings", {}).get("show_link", 1)
 
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
@@ -695,7 +701,8 @@ def home():
                            user_data=user_data,
                            log_cap_warning=log_cap_warning,
                            welcome_message=welcome_message,
-                           date=date
+                           date=date,
+                           show_link=show_link
                            )
 
 @app.route("/run", methods=["GET", "POST"])
@@ -1078,6 +1085,7 @@ def run():
                                              error_message=error_message,
                                              success_message=success_message,
                                              show_last=session.get("settings", {}).get("show_last", 1),
+                                             show_link=session.get("settings", {}).get("show_link", 1),
                                              weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
                                              weight_autofill_absent=session.get("settings", {}).get(

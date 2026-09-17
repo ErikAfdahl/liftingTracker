@@ -145,6 +145,19 @@
         <div class="card mb-3">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
+                    <span class="fw-bold">Show Link</span>
+                    <p class="text-secondary small mb-0">Display the link (when available).</p>
+                </div>
+                <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="show_link" id="show_link" value="1"
+                           {% if settings.show_link %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
                     <span class="fw-bold">Improvement Coefficient</span>
                     <p class="text-secondary small mb-0">How far outside the min/max rep range counts as a big increase or decrease — enter a value between 0 and 1 (e.g. 0.25 = 25% which means for an 6-8 rep range, 4 and below or 10 and above).</p>
                 </div>
