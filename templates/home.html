@@ -53,6 +53,11 @@
                             {{ ex.minReps }}–{{ ex.maxReps }} {{ ex.unit }}s &nbsp;·&nbsp;
                             {{ ex.increment }} lb increments
                         </small><br>
+                        {% if ex.notes %}
+                            <small class="text-secondary">
+                                {{ ex.notes }}
+                            </small><br>
+                        {% endif %}
                         {% if ex.link %}
                             <small class="text-secondary">
                                 {{ ex.link }}
