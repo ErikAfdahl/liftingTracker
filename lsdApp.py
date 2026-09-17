@@ -1568,7 +1568,7 @@ def templates():
             rows_to_copy = [row for row in template_prog if row["programName"] == prog_name]
             for row in rows_to_copy:
                 appendExercise({
-                    "userId": int(session["user_id"]),
+                    "userId": int(session["user_id"]), # didnt register
                     "programName": row["programName"],
                     "exerciseName": row["exerciseName"],
                     "numSets": row["numSets"],
