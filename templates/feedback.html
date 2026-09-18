@@ -16,6 +16,21 @@
     </div>
 {% endif %}
 
+{% set type_labels = {
+    "0": "Error", "1": "Bug", "2": "Remove Feature",
+    "3": "Add Feature", "4": "Change Visuals", "5": "Other"
+} %}
+{% set location_labels = {
+    "0": "Home Screen", "1": "Run Program", "2": "Results",
+    "3": "Manage Programs", "4": "Templates", "5": "Logs",
+    "6": "Deleted", "7": "About", "8": "Settings",
+    "9": "Login", "11": "Other"
+} %}
+{% set status_labels = {
+    "0": ("Open", "secondary"), "1": ("Read", "info"),
+    "2": ("In Progress", "warning"), "3": ("Resolved", "success")
+} %}
+
 {% if session.user_id == 1 %}
 
     <!-- Admin view — placeholder until the inbox logic is built -->
@@ -50,22 +65,6 @@
     </div>
 
 {% else %}
-
-    {% set type_labels = {
-        "0": "Error", "1": "Bug", "2": "Remove Feature",
-        "3": "Add Feature", "4": "Change Visuals", "5": "Other"
-    } %}
-    {% set location_labels = {
-        "0": "Home Screen", "1": "Run Program", "2": "Results",
-        "3": "Manage Programs", "4": "Templates", "5": "Logs",
-        "6": "Deleted", "7": "About", "8": "Settings",
-        "9": "Login", "11": "Other"
-    } %}
-    {% set status_labels = {
-        "0": ("Open", "secondary"), "1": ("Read", "info"),
-        "2": ("In Progress", "warning"), "3": ("Resolved", "success")
-    } %}
-
     <!-- Submit Feedback -->
     <div class="card mb-4">
         <div class="card-header">Submit Feedback</div>
