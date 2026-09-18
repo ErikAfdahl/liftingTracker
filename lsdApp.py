@@ -1979,6 +1979,7 @@ def feedback():
             userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
     else:
         allFeedback = getAllFeedback()  # all the programs
+        print(allFeedback)
         userFeedback = [row for row in allFeedback if int(row["userId"]) != 1]
         adminFeedback = getUserFeedback(1)
 
