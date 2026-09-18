@@ -1942,10 +1942,18 @@ def feedback():
     today = now.strftime("%Y-%m-%d")
     success_message = None
     error_message = None
+    thread_list = None  # only used on the admin side
 
     if session["user_id"] != 1:
-        userFeedback = getUserFeedback(session["user_id"])
-        adminFeedback = getUserFeedback(1)
+        allFeedback = getAllFeedback()
+        userFeedback = []
+        adminFeedback = []
+
+        for row in allFeedback:
+            if str(row["admin"]) == "1":
+                adminFeedback.append(row)
+            else:
+                userFeedback.append(row)
 
         action = request.form.get("action")
 
@@ -1970,6 +1978,7 @@ def feedback():
                     "message": message,
                     "message_num": nextFeedback,
                     "status": 0,
+                    "admin": 0,
                     "date": today
                 })
 
@@ -1978,19 +1987,64 @@ def feedback():
         for i in range(len(userFeedback)):
             userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
     else:
-        allFeedback = getAllFeedback()  # all the programs
-        print("contents of all")
-        print(allFeedback)
-        userFeedback = [row for row in allFeedback if str(row["userId"]) != "1"]
-        adminFeedback = getUserFeedback(1)
+        allFeedback = getAllFeedback()
+        userFeedback = []
+        adminFeedback = []
 
-        print("contents oif the stuff")
-        for row in userFeedback:
-            print(row)
+        for row in allFeedback:
+            if str(row["admin"]) == "1":
+                adminFeedback.append(row)
+            else:
+                userFeedback.append(row)
+
+        action = request.form.get("action")
+
+        if request.method == "POST":
+            if action == "respond":
+                user_id = request.form.get("user_id")
+                message_type = request.form.get("message_type")
+                message_location = request.form.get("message_location")
+                message_admin = request.form.get("message_admin")
+                message_num = request.form.get("message_num")
+
+                if not user_id:
+                    error_message = "Cannot respond to anonymous messages."
+                elif not message_admin:
+                    error_message = "Please enter a response."
+                else:
+                    appendFeedback({
+                        "userId": user_id,
+                        "type": message_type,
+                        "location": message_location,
+                        "message": message_admin,
+                        "message_num": int(message_num),
+                        "status": 0,  # status handling comes later
+                        "admin": 1,
+                        "date": today
+                    })
+
+                    allFeedback = getAllFeedback()
+                    userFeedback = [row for row in allFeedback if str(row["userId"]) != "1"]
+
+        for i in range(len(userFeedback)):
+            userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
+
+        threads = {}
+        for row in userFeedback + adminFeedback:
+            key = (str(row["userId"]), str(row["message_num"]))
+            if key not in threads:
+                threads[key] = {"original": None, "replies": []}
+            if int(row["admin"]) == 0:
+                threads[key]["original"] = row
+            else:
+                threads[key]["replies"].append(row)
+
+        thread_list = [t for t in threads.values() if t["original"]]
 
     return render_template("feedback.html",
                            userFeedback=userFeedback,
                            adminFeedback=adminFeedback,
+                           thread_list=thread_list,
                            success_message=success_message,
                            error_message=error_message)
 

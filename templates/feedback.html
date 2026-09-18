@@ -34,35 +34,47 @@
 {% if session.user_id == 1 %}
 
     <!-- Admin view — placeholder until the inbox logic is built -->
-    <div class="card">
-        <div class="card-header">Your Feedback</div>
-        <div class="card-body p-0">
-            {% if not userFeedback %}
-                <div class="p-3 text-secondary small">You haven't submitted any feedback yet.</div>
-            {% else %}
-                {% for fb in userFeedback %}
-                <div class="p-3 border-bottom border-secondary">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="fw-bold">#{{ fb.message_num }}</span>
-                            <span class="text-secondary small ms-2">
-                                {{ type_labels.get(fb.type|string, "Other") }} · {{ location_labels.get(fb.location|string, "Other") }} · {{ fb.date }}
-                            </span>
-                        </div>
-                        {% set status = status_labels.get(fb.status|string, ("Unknown", "secondary")) %}
-                        <span class="badge bg-{{ status[1] }}">{{ status[0] }}</span>
-                    </div>
-                    <p class="mb-1 mt-2">{{ fb.message }}</p>
-                    {% if fb.response %}
-                        <div class="border-start border-secondary ps-2 mt-2">
-                            <small class="text-secondary fst-italic">Response: {{ fb.response }}</small>
-                        </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            {% endif %}
+    {% for thread in thread_list %}
+    {% set fb = thread.original %}
+    <div class="p-3 border-bottom border-secondary">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="fw-bold">#{{ fb.message_num }}</span>
+                <span class="text-secondary small ms-2">
+                    {{ type_labels.get(fb.type|string, "Other") }} · {{ location_labels.get(fb.location|string, "Other") }} · {{ fb.date }}
+                </span>
+            </div>
         </div>
+
+        <p class="mb-1 mt-2">{{ fb.message }}</p>
+
+        {% for reply in thread.replies %}
+            <div class="border-start border-secondary ps-2 mt-2">
+                <small class="text-secondary fst-italic">Response ({{ reply.date }}): {{ reply.message }}</small>
+            </div>
+        {% endfor %}
+
+        {% if fb.userId %}
+            <button class="btn btn-link btn-sm text-secondary p-0 mt-2"
+                    data-bs-toggle="collapse" data-bs-target="#respond_{{ loop.index }}">Respond</button>
+            <div class="collapse mt-2" id="respond_{{ loop.index }}">
+                <form method="POST">
+                    <input type="hidden" name="action" value="respond">
+                    <input type="hidden" name="user_id" value="{{ fb.userId }}">
+                    <input type="hidden" name="message_type" value="{{ fb.type }}">
+                    <input type="hidden" name="message_location" value="{{ fb.location }}">
+                    <input type="hidden" name="message_num" value="{{ fb.message_num }}">
+                    <div class="mb-2 mt-2">
+                        <textarea name="message_admin" class="form-control form-control-sm" rows="2" placeholder="Write a response..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Send Response</button>
+                </form>
+            </div>
+        {% else %}
+            <small class="text-secondary fst-italic d-block mt-2">Anonymous — cannot respond.</small>
+        {% endif %}
     </div>
+    {% endfor %}
 
 {% else %}
     <!-- Submit Feedback -->
