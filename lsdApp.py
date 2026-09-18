@@ -1978,8 +1978,13 @@ def feedback():
         for i in range(len(userFeedback)):
             userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
     else:
-        userFeedback = [row for row in getUserFeedback(session["user_id"]) if row["userId"] != 1]
+        allFeedback = getAllFeedback()  # all the programs
+        userFeedback = [row for row in allFeedback if int(row["userId"]) != 1]
         adminFeedback = getUserFeedback(1)
+
+        print("contents oif the stuff")
+        for row in userFeedback:
+            print(row)
 
     return render_template("feedback.html",
                            userFeedback=userFeedback,
