@@ -1298,7 +1298,6 @@ def manage():
                 selected_edit = new_program_name
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
                 open_order = 1
-                # have website refresh
 
         elif action == "delete_program":
             rows_to_delete = [row for row in user_ex
