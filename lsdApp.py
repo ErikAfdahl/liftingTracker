@@ -1297,6 +1297,8 @@ def manage():
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
                 success_message = f"Program '{new_program_name}' created! Now add exercises to it."
+                open_order = 1
+                # have website refresh
 
         elif action == "delete_program":
             rows_to_delete = [row for row in user_ex
@@ -1352,12 +1354,12 @@ def manage():
                 success_message = f"Updated '{new_name}'"
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
-                program_data = getAllPrograms()
+                # program_data = getAllPrograms()
 
-                user_programs = sorted(
-                    [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
-                    key=lambda x: int(x["id"])
-                )
+                # user_programs = sorted(
+                #     [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+                #     key=lambda x: int(x["id"])
+                # )
 
         elif action == "add_exercise":
             new_exercise = request.form.get("new_exercise", "Exercise")
