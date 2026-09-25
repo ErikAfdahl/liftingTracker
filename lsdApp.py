@@ -1274,7 +1274,7 @@ def manage():
     open_order = 1
 
     for ex in edit_exercises:
-        if ex["order"] - 1 != open_order:
+        if ex["order"] == open_order:
             open_order += 1
         else:
             break
