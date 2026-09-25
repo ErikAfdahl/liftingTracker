@@ -1,8 +1,10 @@
 to do list
 add a timer potentially (probably not)
-fix things not going to deleted logs
+fix things not going to deleted logs (logs get updated, but not all logs get displayed)
 fix minor bugs, when a user enters a log, 1rm is calculated based on date of the log not the chronilogical order
-    if date is not today then check
+    if date is not today then check (mainly fixed)
 when a log is deleted, update differences of the log after
 add a least squares regression line to charts
 add an option to change time zone
+add a change password option in settings asking for old password, then new password two times
+add an option to only display an interval of time in the graph
