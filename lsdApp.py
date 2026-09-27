@@ -727,7 +727,7 @@ def run():
         last_program = user_data[-1]["program"] if user_data else None
         selected = last_program if last_program in my_programs else my_programs[0]
 
-    selected_prog = [row for row in my_programs if row["programName"] == selected][0]
+    selected_prog = [row for row in user_programs if row["programName"] == selected][0]
 
     exercises = sorted(
         [row for row in user_ex if row["programName"] == selected],
