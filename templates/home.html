@@ -46,6 +46,7 @@
             <div class="card h-100">
                 <div class="card-header">{{ prog }}</div>
                 <div class="card-body">
+                    {% set prog_data = user_programs | selectattr("programName", "equalto", prog) | first %}
                     {% set exercises = user_ex | selectattr("programName", "equalto", prog) | sort(attribute="order") | list %}
                     {% for ex in exercises %}
                     <div class="mb-2">
@@ -60,7 +61,7 @@
                                 "{{ ex.notes }}"
                             </small><br>
                         {% endif %}
-                        {% if ex.link and prog["show_links"] == 1 %}
+                        {% if ex.link and prog_data and prog_data.show_links == 1 %}
                             <small class="text-secondary">
                                 <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
                                     {{ ex.link }}
