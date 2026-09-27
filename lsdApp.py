@@ -1541,7 +1541,9 @@ def manage():
     ) if selected_edit else []
 
     next_order = (max(int(e["order"]) for e in edit_exercises) + 1) if edit_exercises else 1
-
+    print(selected_prog["show_links"])
+    print(selected_prog)
+    print("fgewoihefwoifweo")
     return render_template("manage.html",
                            my_programs=my_programs,
                            selected_edit=selected_edit,
@@ -1551,7 +1553,8 @@ def manage():
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
                            success_message=success_message,
-                           error_message=error_message)
+                           error_message=error_message
+                           )
 
 @app.route("/templates", methods=["GET", "POST"])
 def templates():
