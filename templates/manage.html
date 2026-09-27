@@ -113,6 +113,12 @@
                                    {% if not selected_program_data or selected_program_data.active %}checked{% endif %}>
                             <label class="form-check-label small text-secondary" for="new_program_active">Active</label>
                         </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   name="new_show_links" id="new_show_links" value="1"
+                                   {% if not selected_program_data or selected_program_data.show_links %}checked{% endif %}>
+                            <label class="form-check-label small text-secondary" for="new_show_links">Show Links</label>
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary btn-sm w-100">Save Changes</button>
@@ -178,6 +184,12 @@
                             <label class="form-label text-secondary small">Notes (optional)</label>
                             <input type="text" name="new_notes" class="form-control form-control-sm">
                         </div>
+                        { % if show_link == 1 %}
+                            <div class="col-md-4">
+                                <label class="form-label text-secondary small">Link (optional)</label>
+                                <input type="text" name="new_link" class="form-control form-control-sm">
+                            </div>
+                        { % endif % }
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-sm w-100">Add Exercise</button>
                         </div>
@@ -269,6 +281,12 @@
                                 <label class="form-label text-secondary small">Notes</label>
                                 <input type="text" name="upd_notes" class="form-control form-control-sm" value="{{ ex.notes }}">
                             </div>
+                            { % if show_link == 1 %}
+                                <div class="col-md-4">
+                                    <label class="form-label text-secondary small">Link (optional)</label>
+                                    <input type="text" name="upd_link" class="form-control form-control-sm">
+                                </div>
+                            { % endif % }
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>

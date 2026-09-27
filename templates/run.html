@@ -191,7 +191,7 @@
         {% if ex.notes %}
             <small class="text-secondary fst-italic">Notes: "{{ ex.notes }}"</small><br>
         {% endif %}
-        {% if ex.link and show_link %}
+        {% if ex.link and show_link == 1 %}
             <small class="text-secondary fst-italic">Instructional Video: </small>
             <small class="text-secondary fst-italic">
                 <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">

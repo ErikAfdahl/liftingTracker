@@ -1261,6 +1261,8 @@ def manage():
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
+    selected_prog = [row for row in user_programs if row["programName"] == selected_edit][0]
+
     action = request.form.get("action")
 
     edit_exercises = sorted(
@@ -1324,6 +1326,7 @@ def manage():
             new_name = request.form.get("new_program_name", "").strip()
             notes = request.form.get("new_program_notes", "").strip()
             active = 1 if request.form.get("new_program_active") == "1" else 0
+            show_links = 1 if request.form.get("new_show_links") == "1" else 0
 
             if not new_name:
                 error_message = "Please enter a program name."
@@ -1338,7 +1341,8 @@ def manage():
                     updateProgram(program_row["id"], {
                         "programName": new_name,
                         "notes": notes,
-                        "active": active
+                        "active": active,
+                        "show_links": show_links
                     })
                 exercises_to_update = [row for row in user_ex if row["programName"] == selected_edit]
 
@@ -1367,6 +1371,7 @@ def manage():
             new_notes = request.form.get("new_notes", "")
             new_order = request.form.get("new_order", open_order).replace(" ", "")
             new_unit = request.form.get("new_unit", "rep")
+            new_link = request.form.get("new_link", "")
 
             if not new_exercise:
                 error_message = "Please enter an exercise name."
@@ -1405,7 +1410,8 @@ def manage():
                         "maxReps": ",".join(str(x) for x in new_max),
                         "order": new_order,
                         "notes": new_notes,
-                        "unit": new_unit
+                        "unit": new_unit,
+                        "link": new_link
                     })
 
                     logs_to_update = [row for row in user_data
@@ -1453,6 +1459,7 @@ def manage():
             upd_notes = request.form.get("upd_notes", "")
             upd_order = request.form.get("upd_order").replace(" ", "")
             upd_unit = request.form.get("upd_unit")
+            upd_link = request.form.get("upd_link")
             edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
 
             if not upd_name:
@@ -1504,7 +1511,8 @@ def manage():
                             "maxReps": ",".join(str(x) for x in upd_max),
                             "order": upd_order,
                             "notes": upd_notes,
-                            "unit": upd_unit
+                            "unit": upd_unit,
+                            "link": upd_link
                         })
 
                     if upd_name != exercise_name:
@@ -1539,6 +1547,7 @@ def manage():
                            selected_edit=selected_edit,
                            edit_exercises=edit_exercises,
                            next_order=open_order,
+                           show_link=selected_prog["show_links"],
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
                            success_message=success_message,
