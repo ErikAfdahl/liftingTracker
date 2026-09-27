@@ -110,13 +110,13 @@
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch"
                                    name="new_program_active" id="new_program_active" value="1"
-                                   {% if not selected_program_data or selected_program_data.active %}checked{% endif %}>
+                                   {% if not selected_program_data or active %}checked{% endif %}>
                             <label class="form-check-label small text-secondary" for="new_program_active">Active</label>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch"
                                    name="new_show_links" id="new_show_links" value="1"
-                                   {% if not selected_program_data or selected_program_data.show_links %}checked{% endif %}>
+                                   {% if not selected_program_data or show_link %}checked{% endif %}>
                             <label class="form-check-label small text-secondary" for="new_show_links">Show Links</label>
                         </div>
                     </div>
