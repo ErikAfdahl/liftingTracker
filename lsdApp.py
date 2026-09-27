@@ -1327,6 +1327,8 @@ def manage():
             notes = request.form.get("new_program_notes", "").strip()
             active = 1 if request.form.get("new_program_active") == "1" else 0
             show_links = 1 if request.form.get("new_show_links") == "1" else 0
+            print(show_links)
+            print(type(show_links))
 
             if not new_name:
                 error_message = "Please enter a program name."
