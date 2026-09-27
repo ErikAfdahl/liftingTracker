@@ -1352,7 +1352,11 @@ def manage():
                     updateExercise(row["id"], {"programName": new_name})
 
                 renameLogsProgram(session["user_id"], selected_edit, new_name)
-                my_programs = [new_name if p == selected_edit else p for p in my_programs]
+                my_programs = sorted(
+                    [row["programName"] for row in program_data if str(row["userId"]) == str(session["user_id"])],
+                    key=lambda x: int(x["id"])
+                )
+                print(selected_edit)
                 selected_edit = new_name
                 print("eoifeiowefoi")
                 print(my_programs)
