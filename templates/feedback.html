@@ -14,11 +14,6 @@
         {{ error_message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-{% else %}
-    <div class ="alert alert-danger alert-dismissible fade show">
-        Feedback can still be submitted, all feedback is public (temporary) until this is fully working. Your username/user id is not public.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
 {% endif %}
 
 {% set type_labels = {
@@ -38,7 +33,6 @@
 
 {% if session.user_id == 1 %}
 
-    <!-- Admin view — placeholder until the inbox logic is built -->
     {% for thread in thread_list %}
     {% set fb = thread.original %}
     <div class="p-3 border-bottom border-secondary">

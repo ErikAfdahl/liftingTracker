@@ -528,7 +528,6 @@ def login():
                     "show_streak": 1,
                     "show_streak_weight": 1,
                     "show_rec": 1,
-                    "show_link": 1,
                     "weight_autofill": 1,
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
@@ -560,7 +559,6 @@ def settings():
         show_streak = 1 if request.form.get("show_streak") else 0
         show_streak_weight = 1 if request.form.get("show_streak_weight") else 0
         show_rec = 1 if request.form.get("show_rec") else 0
-        show_link = 1 if request.form.get("show_link") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         quick_resume = 1 if request.form.get("quick_resume") else 0
         date_format = request.form.get("date_format", 1)
@@ -584,7 +582,6 @@ def settings():
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
                 "show_rec": show_rec,
-                "show_link": show_link,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -603,7 +600,6 @@ def settings():
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
                 "show_rec": show_rec,
-                "show_link": show_link,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -629,7 +625,6 @@ def settings():
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
         "show_streak_weight": bool(int(user.get("show_streak_weight", 1))) if user else True,
         "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
-        "show_link": bool(int(user.get("show_link", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
@@ -688,7 +683,7 @@ def home():
             (last["setNum"] != last_exercise_in_program["numSets"])
     ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
-    show_link = session.get("settings", {}).get("show_link", 1)
+    show_link = {}
 
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
@@ -710,8 +705,8 @@ def run():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    ex_data = getAllExercises()
+    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
     program_data = getAllPrograms()
     user_programs = sorted(
         [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
@@ -732,8 +727,10 @@ def run():
         last_program = user_data[-1]["program"] if user_data else None
         selected = last_program if last_program in my_programs else my_programs[0]
 
+    selected_prog = [row for row in my_programs if row["programName"] == selected][0]
+
     exercises = sorted(
-        [row for row in user_prog if row["programName"] == selected],
+        [row for row in user_ex if row["programName"] == selected],
         key=lambda x: int(x["order"])
     )
 
@@ -827,7 +824,7 @@ def run():
                 success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
 
             exercises = sorted(
-                [row for row in user_prog if row["programName"] == selected],
+                [row for row in user_ex if row["programName"] == selected],
                 key=lambda x: int(x["order"])
             )
 
@@ -929,7 +926,7 @@ def run():
                 narrator = session.get("settings", {}).get("narrator", "default")
 
                 exercises = sorted(
-                    [row for row in user_prog if row["programName"] == selected],
+                    [row for row in user_ex if row["programName"] == selected],
                     key=lambda x: int(x["order"])
                 )
 
@@ -1063,8 +1060,8 @@ def run():
     for ex in exercises:
         key = f"{ex['exerciseName']}"
         prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
-    print("feionweoifnewoifnweoifnio")
-    print(session.get("settings", {}).get("show_link", 1))
+    # print("feionweoifnewoifnweoifnio")
+    # print(session.get("settings", {}).get("show_link", 1))
 
     # print(f"rec_weights: {rec_weights}")
     # print(f"rec_reps: {rec_reps}")
@@ -1089,7 +1086,7 @@ def run():
                                              error_message=error_message,
                                              success_message=success_message,
                                              show_last=session.get("settings", {}).get("show_last", 1),
-                                             show_link=session.get("settings", {}).get("show_link", 1),
+                                             show_link=selected_prog["show_links"],
                                              weight_autofill=session.get("settings", {}).get("weight_autofill", 1),
                                              reps_autofill=session.get("settings", {}).get("reps_autofill", 1),
                                              weight_autofill_absent=session.get("settings", {}).get(
@@ -1292,7 +1289,8 @@ def manage():
                     "userId": int(session["user_id"]),
                     "programName": new_program_name,
                     "notes": "",
-                    "active": 1
+                    "active": 1,
+                    "show_links": 0
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
@@ -1587,7 +1585,9 @@ def templates():
             appendProgram({
                 "userId": int(session["user_id"]),
                 "programName": prog_name,
-                "notes": ""
+                "notes": "",
+                "active": 1,
+                "show_links": 1
             })
 
     return render_template("templates.html",
