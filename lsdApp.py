@@ -1327,8 +1327,8 @@ def manage():
             notes = request.form.get("new_program_notes", "").strip()
             active = 1 if request.form.get("new_program_active") == "1" else 0
             show_links = 1 if request.form.get("new_show_links") == "1" else 0
-            print(show_links)
-            print(type(show_links))
+            # print(show_links)
+            # print(type(show_links))
 
             if not new_name:
                 error_message = "Please enter a program name."
@@ -1352,15 +1352,8 @@ def manage():
                     updateExercise(row["id"], {"programName": new_name})
 
                 renameLogsProgram(session["user_id"], selected_edit, new_name)
-                my_programs = sorted(
-                    [row["programName"] for row in program_data if str(row["userId"]) == str(session["user_id"])],
-                    key=lambda x: int(x["id"])
-                )
-                print(selected_edit)
+                my_programs.append(new_name)
                 selected_edit = new_name
-                print("eoifeiowefoi")
-                print(my_programs)
-                print(f"{selected_edit} type {type(selected_edit)}")
                 success_message = f"Updated '{new_name}'"
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
