@@ -217,8 +217,8 @@
                         {% if ex.notes %}
                             <br><small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
                         {% endif %}
-                        {% if ex.link and show_link == 1 %}
-                            <br><small class="text-secondary fst-italic">"{{ ex.link }}"</small>
+                        {% if ex.link %}
+                            <br><a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer" class="text-secondary fst-italic small">{{ ex.link }}</a>
                         {% endif %}
                     </div>
                     <div class="d-flex gap-2">
