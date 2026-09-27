@@ -1354,6 +1354,9 @@ def manage():
                 renameLogsProgram(session["user_id"], selected_edit, new_name)
                 my_programs = [new_name if p == selected_edit else p for p in my_programs]
                 selected_edit = new_name
+                print("eoifeiowefoi")
+                print(my_programs)
+                print(f"{selected_edit} type {type(selected_edit)}")
                 success_message = f"Updated '{new_name}'"
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
