@@ -1946,7 +1946,7 @@ def feedback():
     thread_list = None  # only used on the admin side
 
     if session["user_id"] != 1:
-        allFeedback = getAllFeedback()
+        allFeedback = getUserFeedback(session["user_id"])
         userFeedback = []
         adminFeedback = []
 
