@@ -184,12 +184,12 @@
                             <label class="form-label text-secondary small">Notes (optional)</label>
                             <input type="text" name="new_notes" class="form-control form-control-sm">
                         </div>
-                        { % if show_link == 1 %}
+                        {% if show_link == 1 %}
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small">Link (optional)</label>
                                 <input type="text" name="new_link" class="form-control form-control-sm">
                             </div>
-                        { % endif % }
+                        {% endif %}
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-sm w-100">Add Exercise</button>
                         </div>
@@ -281,12 +281,12 @@
                                 <label class="form-label text-secondary small">Notes</label>
                                 <input type="text" name="upd_notes" class="form-control form-control-sm" value="{{ ex.notes }}">
                             </div>
-                            { % if show_link == 1 %}
+                            {% if show_link == 1 %}
                                 <div class="col-md-4">
                                     <label class="form-label text-secondary small">Link (optional)</label>
                                     <input type="text" name="upd_link" class="form-control form-control-sm">
                                 </div>
-                            { % endif % }
+                            {% endif %}
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
