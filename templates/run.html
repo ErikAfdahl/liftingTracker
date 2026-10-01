@@ -8,6 +8,11 @@
         <p class="text-secondary">No programs yet!</p>
         <a href="/manage" class="btn btn-primary">Create Your First Program</a>
     </div>
+{% elif ex_index == -1 %}
+    <div class="text-center mt-5">
+        <p class="text-secondary">No exercises in program yet!</p>
+        <a href="/manage" class="btn btn-primary">Add Exercises</a>
+    </div>
 {% else %}
 
     {% if success_message %}
@@ -80,7 +85,6 @@
     </div>
 
     <!-- Current exercise -->
-{% if ex_index > -1 %}
     {% set ex = exercises[ex_index] %}
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -210,84 +214,83 @@
             <button type="button" id="logAllBtn" class="btn btn-success w-100 mt-3">Log All</button>
         </div>
     </div>
-{% endif %}
 
-<script>
-(function() {
-    const logAllBtn = document.getElementById("logAllBtn");
-    const logAllForm = document.getElementById("logAllForm");
-    const numSets = {{ ex.numSets | int }};
+    <script>
+    (function() {
+        const logAllBtn = document.getElementById("logAllBtn");
+        const logAllForm = document.getElementById("logAllForm");
+        const numSets = {{ ex.numSets | int }};
 
-    function appendHidden(form, name, value) {
-        // Remove any stale hidden input with the same name first,
-        // so repeated clicks of "Log All" don't stack duplicate fields.
-        const existing = form.querySelector(`input[name="${name}"]`);
-        if (existing) existing.remove();
+        function appendHidden(form, name, value) {
+            // Remove any stale hidden input with the same name first,
+            // so repeated clicks of "Log All" don't stack duplicate fields.
+            const existing = form.querySelector(`input[name="${name}"]`);
+            if (existing) existing.remove();
 
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.name = name;
-        hidden.value = value;
-        form.appendChild(hidden);
-    }
-
-    logAllBtn.addEventListener("click", function() {
-        const included = [];
-        for (let s = 1; s <= numSets; s++) {
-            const confirmBox = document.getElementById(`confirm_${s}`);
-            if (confirmBox && confirmBox.checked) included.push(s);
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = name;
+            hidden.value = value;
+            form.appendChild(hidden);
         }
 
-        if (included.length === 0) {
-            alert("No sets are toggled on to log.");
-            return;
-        }
+        logAllBtn.addEventListener("click", function() {
+            const included = [];
+            for (let s = 1; s <= numSets; s++) {
+                const confirmBox = document.getElementById(`confirm_${s}`);
+                if (confirmBox && confirmBox.checked) included.push(s);
+            }
 
-        const ok = window.confirm(`Log ${included.length} set${included.length > 1 ? 's' : ''}?`);
-        if (!ok) return;
+            if (included.length === 0) {
+                alert("No sets are toggled on to log.");
+                return;
+            }
 
-        const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
-        for (let s = 1; s <= numSets; s++) {
-            const confirmBox = document.getElementById(`confirm_${s}`);
-            appendHidden(logAllForm, `confirm_${s}`, confirmBox && confirmBox.checked ? "on" : "");
+            const ok = window.confirm(`Log ${included.length} set${included.length > 1 ? 's' : ''}?`);
+            if (!ok) return;
 
-            fieldPrefixes.forEach(function(prefix) {
-                const fieldId = `${prefix}_${s}`;
-                const sourceInput = document.getElementById(fieldId);
-                if (sourceInput) {
-                    appendHidden(logAllForm, fieldId, sourceInput.value);
-                }
-            });
-        }
-        logAllForm.submit();
-    });
-})();
-</script>
+            const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
+            for (let s = 1; s <= numSets; s++) {
+                const confirmBox = document.getElementById(`confirm_${s}`);
+                appendHidden(logAllForm, `confirm_${s}`, confirmBox && confirmBox.checked ? "on" : "");
 
-    <!-- Back / Next navigation -->
-    <div class="d-flex justify-content-between align-items-center">
-        <a href="/logs?program={{ selected | urlencode }}&exercise={{ ex.exerciseName | urlencode }}"
-           class="text-secondary small text-decoration-none">
-            View Logs
-        </a>
+                fieldPrefixes.forEach(function(prefix) {
+                    const fieldId = `${prefix}_${s}`;
+                    const sourceInput = document.getElementById(fieldId);
+                    if (sourceInput) {
+                        appendHidden(logAllForm, fieldId, sourceInput.value);
+                    }
+                });
+            }
+            logAllForm.submit();
+        });
+    })();
+    </script>
 
-        <div class="d-flex gap-2">
-            {% if ex_index > 0 %}
-                <a href="/run?program={{ selected }}&ex_index={{ ex_index - 1 }}"
-                   class="btn btn-secondary">Back</a>
-            {% endif %}
+        <!-- Back / Next navigation -->
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="/logs?program={{ selected | urlencode }}&exercise={{ ex.exerciseName | urlencode }}"
+               class="text-secondary small text-decoration-none">
+                View Logs
+            </a>
 
-            {% if ex_index < exercises | length - 1 %}
-                <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
-                   class="btn btn-primary">Next →</a>
-            {% else %}
-                <a href="/run/results?program={{ selected }}" class="btn btn-success">Results</a>
-            {% endif %}
+            <div class="d-flex gap-2">
+                {% if ex_index > 0 %}
+                    <a href="/run?program={{ selected }}&ex_index={{ ex_index - 1 }}"
+                       class="btn btn-secondary">Back</a>
+                {% endif %}
+
+                {% if ex_index < exercises | length - 1 %}
+                    <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
+                       class="btn btn-primary">Next →</a>
+                {% else %}
+                    <a href="/run/results?program={{ selected }}" class="btn btn-success">Results</a>
+                {% endif %}
+            </div>
         </div>
-    </div>
 
 
 
-{% endif %}
+    {% endif %}
 
 {% endblock %}

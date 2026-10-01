@@ -727,7 +727,6 @@ def run():
                                my_programs=[],
                                exercises=[],
                                user_data=[],
-                               ex_index=-1,
                                selected=None,
                                today=today
                                )
@@ -749,7 +748,6 @@ def run():
                                my_programs=my_programs,
                                exercises=[],
                                user_data=[],
-                               error_message="No exercises in selecte program.",
                                ex_index=-1,
                                selected=None,
                                today=""
