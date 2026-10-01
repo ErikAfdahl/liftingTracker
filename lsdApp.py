@@ -719,8 +719,14 @@ def run():
     log_cap_warning = len(user_data) >= 1000
 
     if not my_programs:
-        return render_template("run.html", my_programs=[], exercises=[], user_data=[],
-                               selected=None, today="")
+        return render_template("run.html",
+                               my_programs=[],
+                               exercises=[],
+                               user_data=[],
+                               ex_index=-1,
+                               selected=None,
+                               today=""
+                               )
 
     selected = request.args.get("program") or request.form.get("selected_program")
     if not selected or selected not in my_programs:

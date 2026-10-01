@@ -80,135 +80,137 @@
     </div>
 
     <!-- Current exercise -->
-{% set ex = exercises[ex_index] %}
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-baseline gap-2">
-            <span>{{ ex.exerciseName }}</span>
+{% if ex_index > -1 %}
+    {% set ex = exercises[ex_index] %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-baseline gap-2">
+                <span>{{ ex.exerciseName }}</span>
+            </div>
         </div>
-    </div>
-    <div class="card-body">
-        {% for s in range(1, ex.numSets | int + 1) %}
-            {% set key = ex.exerciseName ~ "_" ~ s %}
-            {% set last = last_entries.get(key) %}
-            {% set rec = recommendations.get(key) %}
-            {% set absolute_last = prev_entries.get(ex.exerciseName) %}
+        <div class="card-body">
+            {% for s in range(1, ex.numSets | int + 1) %}
+                {% set key = ex.exerciseName ~ "_" ~ s %}
+                {% set last = last_entries.get(key) %}
+                {% set rec = recommendations.get(key) %}
+                {% set absolute_last = prev_entries.get(ex.exerciseName) %}
 
-            <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                    <div class="d-flex flex-column">
-                        <h6 class="fw-bold mb-0">Set {{ s }}</h6>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <div class="d-flex flex-column">
+                            <h6 class="fw-bold mb-0">Set {{ s }}</h6>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <label class="form-check-label small text-secondary" for="confirm_{{ s }}">Include</label>
+                            <input class="form-check-input" type="checkbox" name="confirm_{{ s }}" role="switch" id="confirm_{{ s }}"
+                                   {% if log_all_toggle.get(key, True) %}checked{% endif %}>
+                        </div>
                     </div>
-                    <div class="form-check form-switch mb-0">
-                        <label class="form-check-label small text-secondary" for="confirm_{{ s }}">Include</label>
-                        <input class="form-check-input" type="checkbox" name="confirm_{{ s }}" role="switch" id="confirm_{{ s }}"
-                               {% if log_all_toggle.get(key, True) %}checked{% endif %}>
-                    </div>
+
+                    {% set rr = rep_ranges.get(key) %}
+                    {% if rr %}
+                        <small class="text-secondary fst-italic">{{ rr }}</small><br>
+                    {% endif %}
+
+                    {% if last %}
+                        {% if show_last == 1 %}
+                            <small class="text-secondary fst-italic">
+                                {% set last_w = last.weight | float %}
+                                Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
+                                {% if last.notes %} — "{{ last.notes }}"{% endif %}
+                                ({{ last.date }})
+                            </small><br>
+                        {% endif %}
+                        {% if streaks_1rm.get(key) %}
+                            <small class="text-secondary fst-italic">{{ streaks_1rm.get(key) }}</small><br>
+                        {% endif %}
+                        {% if streaks_weight.get(key) %}
+                            <small class="text-secondary fst-italic">{{ streaks_weight.get(key) }}</small><br>
+                        {% endif %}
+                        {% if rec %}
+                            <small class="text-secondary fst-italic">{{ rec }}</small>
+                        {% endif %}
+                    {% else %}
+                        <small class="text-secondary">No previous entry found.</small>
+                    {% endif %}
+
+                    <form method="POST" action="/run" class="mt-2">
+                        <input type="hidden" name="action" value="log_set">
+                        <input type="hidden" name="selected_program" value="{{ selected }}">
+                        <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                        <input type="hidden" name="set_num" value="{{ s }}">
+                        <input type="hidden" name="ex_index" value="{{ ex_index }}">
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Date</label>
+                                <input type="text" id="workout_date_{{ s }}" name="workout_date_{{ s }}" class="form-control form-control-sm"
+                                       value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">Weight (lbs)</label>
+                                {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
+
+                                {% set raw_weight = '' %}
+                                {% if current_max_reps|int == 0 %}
+                                    {% if weight_autofill_absent == 1 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill_absent == 2 and absolute_last %}{% set raw_weight = absolute_last.weight %}{% endif %}
+                                {% else %}
+                                    {% if weight_autofill == 3 and rec_weights.get(key) %}{% set raw_weight = rec_weights.get(key) %}{% elif weight_autofill == 3 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill == 1 and last %}{% set raw_weight = last.weight %}{% endif %}
+                                {% endif %}
+
+                                {% set formatted_weight = '' %}
+                                {% if raw_weight != '' and raw_weight is not none %}
+                                    {% set w_float = raw_weight | float %}
+                                    {% set formatted_weight = w_float | int if w_float == w_float | int else w_float %}
+                                {% endif %}
+
+                                <input type="number" id="weight_{{ s }}" name="weight_{{ s }}" class="form-control form-control-sm" min="0" step="any"
+                                        value="{{ formatted_weight }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
+                                {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
+                                {% set current_min_reps = ex.minReps.split(',')[s - 1] if ex.minReps else '' %}
+
+                                <input type="number" id="reps_{{ s }}" name="reps_{{ s }}" class="form-control form-control-sm" step="1" min="0"
+                                       value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-secondary small">Notes (optional)</label>
+                                <input type="text" id="notes_{{ s }}" name="notes_{{ s }}" class="form-control form-control-sm" placeholder="Any notes...">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
-                {% set rr = rep_ranges.get(key) %}
-                {% if rr %}
-                    <small class="text-secondary fst-italic">{{ rr }}</small><br>
-                {% endif %}
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+            {% endfor %}
 
-                {% if last %}
-                    {% if show_last == 1 %}
-                        <small class="text-secondary fst-italic">
-                            {% set last_w = last.weight | float %}
-                            Last time: {{ last_w | int if last_w == last_w | int else last_w }} lbs for {{ last.reps }} {{ ex.unit }}s
-                            {% if last.notes %} — "{{ last.notes }}"{% endif %}
-                            ({{ last.date }})
-                        </small><br>
-                    {% endif %}
-                    {% if streaks_1rm.get(key) %}
-                        <small class="text-secondary fst-italic">{{ streaks_1rm.get(key) }}</small><br>
-                    {% endif %}
-                    {% if streaks_weight.get(key) %}
-                        <small class="text-secondary fst-italic">{{ streaks_weight.get(key) }}</small><br>
-                    {% endif %}
-                    {% if rec %}
-                        <small class="text-secondary fst-italic">{{ rec }}</small>
-                    {% endif %}
-                {% else %}
-                    <small class="text-secondary">No previous entry found.</small>
-                {% endif %}
+            {% if ex.notes %}
+                <small class="text-secondary fst-italic">Notes: "{{ ex.notes }}"</small><br>
+            {% endif %}
+            {% if ex.link and show_link == 1 %}
+                <small class="text-secondary fst-italic">Instructional Video: </small>
+                <small class="text-secondary fst-italic">
+                    <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
+                        {{ ex.link }}
+                    </a>
+                </small><br>
+            {% endif %}
 
-                <form method="POST" action="/run" class="mt-2">
-                    <input type="hidden" name="action" value="log_set">
-                    <input type="hidden" name="selected_program" value="{{ selected }}">
-                    <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
-                    <input type="hidden" name="set_num" value="{{ s }}">
-                    <input type="hidden" name="ex_index" value="{{ ex_index }}">
-
-                    <div class="row g-2 align-items-end">
-                        <div class="col-md-2">
-                            <label class="form-label text-secondary small">Date</label>
-                            <input type="text" id="workout_date_{{ s }}" name="workout_date_{{ s }}" class="form-control form-control-sm"
-                                   value="{{ today }}" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label text-secondary small">Weight (lbs)</label>
-                            {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
-
-                            {% set raw_weight = '' %}
-                            {% if current_max_reps|int == 0 %}
-                                {% if weight_autofill_absent == 1 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill_absent == 2 and absolute_last %}{% set raw_weight = absolute_last.weight %}{% endif %}
-                            {% else %}
-                                {% if weight_autofill == 3 and rec_weights.get(key) %}{% set raw_weight = rec_weights.get(key) %}{% elif weight_autofill == 3 and last %}{% set raw_weight = last.weight %}{% elif weight_autofill == 1 and last %}{% set raw_weight = last.weight %}{% endif %}
-                            {% endif %}
-
-                            {% set formatted_weight = '' %}
-                            {% if raw_weight != '' and raw_weight is not none %}
-                                {% set w_float = raw_weight | float %}
-                                {% set formatted_weight = w_float | int if w_float == w_float | int else w_float %}
-                            {% endif %}
-
-                            <input type="number" id="weight_{{ s }}" name="weight_{{ s }}" class="form-control form-control-sm" min="0" step="any"
-                                    value="{{ formatted_weight }}" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
-                            {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
-                            {% set current_min_reps = ex.minReps.split(',')[s - 1] if ex.minReps else '' %}
-
-                            <input type="number" id="reps_{{ s }}" name="reps_{{ s }}" class="form-control form-control-sm" step="1" min="0"
-                                   value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-secondary small">Notes (optional)</label>
-                            <input type="text" id="notes_{{ s }}" name="notes_{{ s }}" class="form-control form-control-sm" placeholder="Any notes...">
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-sm w-100">Log Set</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            {% if not loop.last %}<hr class="my-2">{% endif %}
-        {% endfor %}
-
-        {% if ex.notes %}
-            <small class="text-secondary fst-italic">Notes: "{{ ex.notes }}"</small><br>
-        {% endif %}
-        {% if ex.link and show_link == 1 %}
-            <small class="text-secondary fst-italic">Instructional Video: </small>
-            <small class="text-secondary fst-italic">
-                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">
-                    {{ ex.link }}
-                </a>
-            </small><br>
-        {% endif %}
-
-        <form id="logAllForm" method="POST" action="/run">
-            <input type="hidden" name="action" value="log_all_sets">
-            <input type="hidden" name="selected_program" value="{{ selected }}">
-            <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
-            <input type="hidden" name="ex_index" value="{{ ex_index }}">
-        </form>
-        <button type="button" id="logAllBtn" class="btn btn-success w-100 mt-3">Log All</button>
+            <form id="logAllForm" method="POST" action="/run">
+                <input type="hidden" name="action" value="log_all_sets">
+                <input type="hidden" name="selected_program" value="{{ selected }}">
+                <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                <input type="hidden" name="ex_index" value="{{ ex_index }}">
+            </form>
+            <button type="button" id="logAllBtn" class="btn btn-success w-100 mt-3">Log All</button>
+        </div>
     </div>
-</div>
+{% endif %}
 
 <script>
 (function() {
