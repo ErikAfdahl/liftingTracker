@@ -705,6 +705,10 @@ def run():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
+    timezone = pytz.timezone("America/Chicago")
+    now = datetime.now(timezone)
+    today = now.strftime("%Y-%m-%d")
+
     ex_data = getAllExercises()
     user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
     program_data = getAllPrograms()
@@ -725,7 +729,7 @@ def run():
                                user_data=[],
                                ex_index=-1,
                                selected=None,
-                               today=""
+                               today=today
                                )
 
     selected = request.args.get("program") or request.form.get("selected_program")
@@ -741,12 +745,17 @@ def run():
     )
 
     if not exercises:
-        return render_template("run.html", my_programs=my_programs, exercises=[], user_data=[], error_message="No exercises in selecte program.",
-                               selected=None, today="")
+        return render_template("run.html",
+                               my_programs=my_programs,
+                               exercises=[],
+                               user_data=[],
+                               error_message="No exercises in selecte program.",
+                               ex_index=-1,
+                               selected=None,
+                               today=""
+                               )
 
-    timezone = pytz.timezone("America/Chicago")
-    now = datetime.now(timezone)
-    today = now.strftime("%Y-%m-%d")
+
     success_message = None
     error_message = ""
 
