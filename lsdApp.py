@@ -734,6 +734,10 @@ def run():
         key=lambda x: int(x["order"])
     )
 
+    if not exercises:
+        return render_template("run.html", my_programs=my_programs, exercises=[], user_data=[], error_message="No exercises in selecte program.",
+                               selected=None, today="")
+
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
     today = now.strftime("%Y-%m-%d")
