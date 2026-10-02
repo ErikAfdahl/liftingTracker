@@ -680,7 +680,7 @@ def home():
 
     workout_incomplete = last and last_exercise_in_program and (
             (last["exercise_name"] != last_exercise_in_program["exercise_name"]) or
-            (last["setNum"] != last_exercise_in_program["numSets"])
+            (last["set_num"] != last_exercise_in_program["numSets"])
     ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
     show_link = {}
@@ -769,7 +769,7 @@ def run():
             match = next((e for e in exercises if e["exercise_name"] == last_ex), None)
             if match:
                 current_index = int(match["exercise_order"]) - 1
-                if int(last["setNum"]) >= int(match["numSets"]):
+                if int(last["set_num"]) >= int(match["numSets"]):
                     if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                         ex_index = 0
                     else:
