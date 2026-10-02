@@ -204,7 +204,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     decreased = []
 
     for ex in exercises:
-        key = f"{ex['exerciseName']}_1"
+        key = f"{ex['exercise_Name']}_1"
         last = last_entries.get(key)
         prev = prev_entries.get(key)
 
@@ -257,12 +257,12 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     def list_exercises(lst):
         if len(lst) == 1:
-            return f"{lst[0]['exerciseName']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps"
+            return f"{lst[0]['exercise_Name']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps"
         elif len(lst) == 2:
-            return (f"{lst[0]['exerciseName']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps "
-                    f"and {lst[1]['exerciseName']} for {lst[1]['weight']} lbs and {lst[1]['reps']} reps")
+            return (f"{lst[0]['exercise_Name']} for {lst[0]['weight']} lbs and {lst[0]['reps']} reps "
+                    f"and {lst[1]['exercise_Name']} for {lst[1]['weight']} lbs and {lst[1]['reps']} reps")
         else:
-            parts = [f"{entry['exerciseName']} for {entry['weight']} lbs and {entry['reps']} reps" for entry in lst]
+            parts = [f"{entry['exercise_Name']} for {entry['weight']} lbs and {entry['reps']} reps" for entry in lst]
             return ", ".join(parts[:-1]) + f", and {parts[-1]}" # haha
 
     reports = []
@@ -438,7 +438,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     notes = []
     for ex in exercises:
         for s in range(1, int(ex["num_sets"]) + 1):
-            key = f"{ex['exerciseName']}_{s}"
+            key = f"{ex['exercise_Name']}_{s}"
             last = last_entries.get(key)
             if last and last["notes"] != "":
                 notes.append(last)
@@ -446,7 +446,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     if notes:
         report = " Some notes were made this session —"
         for i, entry in enumerate(notes):
-            note_text = f" on {entry['exerciseName']} where you lifted {entry['weight']} lbs for {entry['reps']} reps, you wrote \"{entry['notes']}\""
+            note_text = f" on {entry['exercise_Name']} where you lifted {entry['weight']} lbs for {entry['reps']} reps, you wrote \"{entry['notes']}\""
             if i < len(notes) - 1:
                 report += note_text + ","
             else:
@@ -980,7 +980,7 @@ def run():
         maxRepRange = [int(x.strip()) for x in str(ex["max_reps"]).split(",")]
 
         for s in range(1, int(ex["num_sets"]) + 1):
-            key = f"{ex['exerciseName']}_{s}"
+            key = f"{ex['exercise_Name']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
             last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
             if last_entries[key]:
@@ -1075,7 +1075,7 @@ def run():
 
     prev_entries = {}
     for ex in exercises:
-        key = f"{ex['exerciseName']}"
+        key = f"{ex['exercise_Name']}"
         prev_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], -1)
     # print("feionweoifnewoifnweoifnio")
     # print(session.get("settings", {}).get("show_link", 1))
@@ -1188,7 +1188,7 @@ def run_results():
 
     for ex in exercises:
         for s in range(1, int(ex["num_sets"]) + 1):
-            key = f"{ex['exerciseName']}_{s}"
+            key = f"{ex['exercise_Name']}_{s}"
 
             last = get_date_entry(user_data, selected, ex["exercise_name"], s, date_last) if date_last else None
             prev = get_date_entry(user_data, selected, ex["exercise_name"], s, date_prev) if date_prev else None
@@ -1217,9 +1217,9 @@ def run_results():
                 heaviest = last
 
             if s == 1:
-                all_time_best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
+                all_time_best = get_best_entry(user_data, selected, ex['exercise_Name'], 1)
                 if last["one_rm"] >= all_time_best:
-                    newPRs.append(ex['exerciseName'])
+                    newPRs.append(ex['exercise_Name'])
     narrator = session.get("settings", {}).get("narrator", "default")
     date_format = session.get("settings", {}).get("date_format", 1)
     date_last_visual, date_prev_visual = iso_to_display(date_last, date_format), iso_to_display(date_prev, date_format)
@@ -1777,7 +1777,7 @@ def logs():
             prev_weight = None
 
             for log in programLogs:
-                # print(f"Program {log['exerciseName']} set {log['setNum']}")
+                # print(f"Program {log['exercise_Name']} set {log['setNum']}")
                 reps = float(log["reps"])
                 weight = float(log["weight"])
                 # print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
