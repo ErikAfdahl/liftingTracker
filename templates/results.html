@@ -48,7 +48,7 @@
 
     {% for ex in exercises %}
         <div class="card mb-4">
-            <div class="card-header">{{ ex.exerciseName }}</div>
+            <div class="card-header">{{ ex.exercise_name }}</div>
             <div class="card-body p-0">
                 <table class="table table-dark mb-0">
                     <thead>
@@ -69,17 +69,17 @@
                     </thead>
                     <tbody>
                         {% for s in range(1, ex.num_sets | int + 1) %}
-                            {% set key = ex.exerciseName ~ "_" ~ s %}
+                            {% set key = ex.exercise_name ~ "_" ~ s %}
                             {% set today = last_entries.get(key) %}
                             {% set prev = prev_entries.get(key) %}
 
                             {% set t_weight = today.weight | float if today else 0 %}
                             {% set t_reps = today.reps | int if today else 0 %}
-                            {% set t_1rm = today["1rm"] | float if today else 0 %}
+                            {% set t_1rm = today["one_rm"] | float if today else 0 %}
 
                             {% set p_weight = prev.weight | float if prev else 0 %}
                             {% set p_reps = prev.reps | int if prev else 0 %}
-                            {% set p_1rm = prev["1rm"] | float if prev else 0 %}
+                            {% set p_1rm = prev["one_rm"] | float if prev else 0 %}
 
                             {% set improved = t_1rm > p_1rm %}
 
@@ -99,11 +99,11 @@
 
             <!-- Per exercise feedback -->
             <div class="card-footer text-secondary small">
-                {% set key1 = ex.exerciseName ~ "_1" %}
+                {% set key1 = ex.exercise_name ~ "_1" %}
                 {% set today1 = last_entries.get(key1) %}
                 {% set prev1 = prev_entries.get(key1) %}
-                {% set t1 = today1["1rm"] | float if today1 else 0 %}
-                {% set p1 = prev1["1rm"] | float if prev1 else 0 %}
+                {% set t1 = today1["one_rm"] | float if today1 else 0 %}
+                {% set p1 = prev1["one_rm"] | float if prev1 else 0 %}
                 {% set wt1 = today1["weight"] | float if today1 else 0 %}
                 {% set wp1 = prev1["weight"] | float if prev1 else 0 %}
                 {% set tr1 = today1["reps"] | int if today1 else 0 %}
@@ -112,11 +112,11 @@
     <!--            set one did better than last time-->
                 {% if t1 > p1 %}
                     {% if ex.num_sets | int >= 2 %}
-                        {% set key2 = ex.exerciseName ~ "_2" %}
+                        {% set key2 = ex.exercise_name ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
                         {% set prev2 = prev_entries.get(key2) %}
-                        {% set t2 = today2["1rm"] | float if today2 else 0 %}
-                        {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
+                        {% set t2 = today2["one_rm"] | float if today2 else 0 %}
+                        {% set p2 = prev2["one_rm"] | float if prev2 else 0 %}
     <!--                better 1rm first set, if set 2 has a higher 1rm-->
                         {% if t2 > p2 %}
                             {% if narrator == "mommy" %}
@@ -202,11 +202,11 @@
                     {% else %}
     <!--            if this exercise has more than 1 set-->
                         {% if ex.num_sets | int >= 2 %}
-                            {% set key2 = ex.exerciseName ~ "_2" %}
+                            {% set key2 = ex.exercise_name ~ "_2" %}
                             {% set today2 = last_entries.get(key2) %}
                             {% set prev2 = prev_entries.get(key2) %}
-                            {% set t2 = today2["1rm"] | float if today2 else 0 %}
-                            {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
+                            {% set t2 = today2["one_rm"] | float if today2 else 0 %}
+                            {% set p2 = prev2["one_rm"] | float if prev2 else 0 %}
     <!--                worse 1rm first set, if set 2 has a higher 1rm-->
                             {% if t2 > p2 %}
                                 {% if narrator == "mommy" %}
@@ -295,11 +295,11 @@
                         {% endif %}
     <!--                if there is more than one set-->
                     {% elif ex.num_sets | int >= 2 %}
-                        {% set key2 = ex.exerciseName ~ "_2" %}
+                        {% set key2 = ex.exercise_name ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
                         {% set prev2 = prev_entries.get(key2) %}
-                        {% set t2 = today2["1rm"] | float if today2 else 0 %}
-                        {% set p2 = prev2["1rm"] | float if prev2 else 0 %}
+                        {% set t2 = today2["one_rm"] | float if today2 else 0 %}
+                        {% set p2 = prev2["one_rm"] | float if prev2 else 0 %}
     <!--                    if set 2 improved and set 1 maintained-->
                         {% if t2 > p2 %}
                             {% if narrator == "mommy" %}
@@ -363,7 +363,7 @@
     {% set ns = namespace(total=0) %}
     {% for ex in exercises %}
         {% for s in range(1, ex.num_sets | int + 1) %}
-            {% set key = ex.exerciseName ~ "_" ~ s %}
+            {% set key = ex.exercise_name ~ "_" ~ s %}
             {% set entry = last_entries.get(key) %}
             {% if entry %}
                 {% set ns.total = ns.total + (entry.weight | float * entry.reps | int) %}
