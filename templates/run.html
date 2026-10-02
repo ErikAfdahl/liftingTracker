@@ -93,7 +93,7 @@
             </div>
         </div>
         <div class="card-body">
-            {% for s in range(1, ex.numSets | int + 1) %}
+            {% for s in range(1, ex.num_sets | int + 1) %}
                 {% set key = ex.exerciseName ~ "_" ~ s %}
                 {% set last = last_entries.get(key) %}
                 {% set rec = recommendations.get(key) %}
@@ -219,7 +219,7 @@
     (function() {
         const logAllBtn = document.getElementById("logAllBtn");
         const logAllForm = document.getElementById("logAllForm");
-        const numSets = {{ ex.numSets | int }};
+        const num_sets = {{ ex.num_sets | int }};
 
         function appendHidden(form, name, value) {
             // Remove any stale hidden input with the same name first,
@@ -236,7 +236,7 @@
 
         logAllBtn.addEventListener("click", function() {
             const included = [];
-            for (let s = 1; s <= numSets; s++) {
+            for (let s = 1; s <= num_sets; s++) {
                 const confirmBox = document.getElementById(`confirm_${s}`);
                 if (confirmBox && confirmBox.checked) included.push(s);
             }
@@ -250,7 +250,7 @@
             if (!ok) return;
 
             const fieldPrefixes = ["workout_date", "weight", "reps", "notes"];
-            for (let s = 1; s <= numSets; s++) {
+            for (let s = 1; s <= num_sets; s++) {
                 const confirmBox = document.getElementById(`confirm_${s}`);
                 appendHidden(logAllForm, `confirm_${s}`, confirmBox && confirmBox.checked ? "on" : "");
 
