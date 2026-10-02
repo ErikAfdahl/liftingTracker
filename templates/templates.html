@@ -25,7 +25,7 @@
             <div class="card h-100">
                 <div class="card-header">{{ prog }}</div>
                 <div class="card-body">
-                    {% set exercises = template_prog | selectattr("program_name", "equalto", prog) | sort(attribute="order") | list %}
+                    {% set exercises = template_prog | selectattr("program_name", "equalto", prog) | sort(attribute="exercise_order") | list %}
                     {% for ex in exercises %}
                     <div class="mb-2">
                         <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span><br>

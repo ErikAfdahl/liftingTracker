@@ -1293,6 +1293,9 @@ def manage():
     open_order = 1
     max_order = edit_exercises[-1]["exercise_order"] + 1
 
+    show_link = int(selected_prog["show_links"])
+    active = int(selected_prog["active"])
+
     for ex in edit_exercises:
         if ex["exercise_order"] == open_order:
             open_order += 1
@@ -1379,6 +1382,17 @@ def manage():
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
                 # program_data = getAllPrograms()
+                program_data = getAllPrograms()
+                user_programs = sorted(
+                    [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
+                    key=lambda x: int(x["id"])
+                )
+                selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
+
+                show_link = int(selected_prog["show_links"])
+                active = int(selected_prog["active"])
+
+
 
                 # user_programs = sorted(
                 #     [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
@@ -1447,6 +1461,14 @@ def manage():
                     success_message = f"Added {new_exercise} to {selected_edit}!"
                     ex_data = getAllExercises()
                     user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
+
+                    edit_exercises = sorted(
+                        [row for row in user_ex if row["program_name"] == selected_edit],
+                        key=lambda x: int(x["exercise_order"])
+                    )
+
+                    open_order = 1
+                    max_order = edit_exercises[-1]["exercise_order"] + 1
 
         elif action == "delete_exercise":
             exercise_name = request.form.get("exercise_name")
@@ -1564,7 +1586,6 @@ def manage():
     ) if selected_edit else []
 
     # next_order = (max(int(e["exercise_order"]) for e in edit_exercises) + 1) if edit_exercises else 1
-    selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
 
     return render_template("manage.html",
                            my_programs=my_programs,
@@ -1572,8 +1593,8 @@ def manage():
                            edit_exercises=edit_exercises,
                            next_order=open_order,
                            max_order=max_order,
-                           show_link=int(selected_prog["show_links"]),
-                           active=int(selected_prog["active"]),
+                           show_link=show_link,
+                           active=active,
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
                            success_message=success_message,
