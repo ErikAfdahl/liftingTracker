@@ -813,7 +813,7 @@ def run():
 
             appendLog({
                 "user_id": int(session["user_id"]),
-                "program": selected,
+                "program_name": selected,
                 "status": 1,
                 "date": display_to_iso(workout_date, date_format),
                 "exercise_name": exercise_name,
@@ -917,7 +917,7 @@ def run():
 
                     appendLog({
                         "user_id": int(session["user_id"]),
-                        "program": selected,
+                        "program_name": selected,
                         "status": 1,
                         "date": display_to_iso(workout_date, date_format),
                         "exercise_name": exercise_name,
