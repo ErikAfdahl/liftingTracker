@@ -437,7 +437,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     # Notes
     notes = []
     for ex in exercises:
-        for s in range(1, int(ex["numSets"]) + 1):
+        for s in range(1, int(ex["num_sets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             last = last_entries.get(key)
             if last and last["notes"] != "":
@@ -680,7 +680,7 @@ def home():
 
     workout_incomplete = last and last_exercise_in_program and (
             (last["exercise_name"] != last_exercise_in_program["exercise_name"]) or
-            (last["set_num"] != last_exercise_in_program["numSets"])
+            (last["set_num"] != last_exercise_in_program["num_sets"])
     ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
     show_link = {}
@@ -769,7 +769,7 @@ def run():
             match = next((e for e in exercises if e["exercise_name"] == last_ex), None)
             if match:
                 current_index = int(match["exercise_order"]) - 1
-                if int(last["set_num"]) >= int(match["numSets"]):
+                if int(last["set_num"]) >= int(match["num_sets"]):
                     if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                         ex_index = 0
                     else:
@@ -850,7 +850,7 @@ def run():
             if quick_index == 1:
                 if match:
                     current_index = int(match["exercise_order"]) - 1
-                    if set_num >= int(match["numSets"]):
+                    if set_num >= int(match["num_sets"]):
                         if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                             ex_index = current_index
                         else:
@@ -869,7 +869,7 @@ def run():
         if not exercise:
             error_message = "Could not find that exercise. Please try again."
         else:
-            num_sets = int(exercise["numSets"])
+            num_sets = int(exercise["num_sets"])
             count = 0
 
             for i in range(num_sets):
@@ -979,7 +979,7 @@ def run():
         minRepRange = [int(x.strip()) for x in str(ex["min_reps"]).split(",")]
         maxRepRange = [int(x.strip()) for x in str(ex["max_reps"]).split(",")]
 
-        for s in range(1, int(ex["numSets"]) + 1):
+        for s in range(1, int(ex["num_sets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
             last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
@@ -1187,7 +1187,7 @@ def run_results():
     newPRs = []
 
     for ex in exercises:
-        for s in range(1, int(ex["numSets"]) + 1):
+        for s in range(1, int(ex["num_sets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
 
             last = get_date_entry(user_data, selected, ex["exercise_name"], s, date_last) if date_last else None
@@ -1665,7 +1665,7 @@ def logs():
             selected_ex = exercise_names[0] if exercise_names else None
 
     exercise_data = next((row for row in exercises if row["exercise_name"] == selected_ex), None)
-    num_sets = int(exercise_data["numSets"]) if exercise_data else 1
+    num_sets = int(exercise_data["num_sets"]) if exercise_data else 1
     selected_unit  = exercise_data["unit"] if exercise_data else "rep"
     #print(selected_unit)
 
