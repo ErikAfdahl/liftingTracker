@@ -731,7 +731,7 @@ def run():
                                today=today
                                )
 
-    selected = request.args.get("program") or request.form.get("selected_program")
+    selected = request.args.get("program_name") or request.form.get("selected_program")
     if not selected or selected not in my_programs:
         last_program = user_data[-1]["program_name"] if user_data else None
         selected = last_program if last_program in my_programs else my_programs[0]
@@ -1128,7 +1128,7 @@ def run_results():
 
     user_data = getUserLogs(session["user_id"])
 
-    selected = request.args.get("program")
+    selected = request.args.get("program_name")
     if not selected or selected not in my_programs:
         selected = user_data[-1]["program_name"] if user_data else None
     if not selected:
@@ -1271,9 +1271,9 @@ def manage():
     error_message = None
 
     if request.method == "POST":
-        selected_edit = request.form.get("selected_program") or request.args.get("program")
+        selected_edit = request.form.get("selected_program") or request.args.get("program_name")
     else:
-        selected_edit = request.args.get("program")
+        selected_edit = request.args.get("program_name")
 
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
@@ -1647,14 +1647,14 @@ def logs():
     success_message = None
     error_message = None
 
-    selected_prog = request.args.get("program") or request.form.get("selected_prog")# selected prog
+    selected_prog = request.args.get("program_name") or request.form.get("selected_prog")# selected prog
     if not selected_prog or selected_prog not in my_programs:
         if last_overall:
             selected_prog = last_overall["program_name"]
         else:
             selected_prog = my_programs[0] if my_programs else None
 
-    selected_ex = request.args.get("exercise") or request.form.get("selected_ex")
+    selected_ex = request.args.get("exercise_name") or request.form.get("selected_ex")
     exercises = [row for row in user_prog if row["program_name"] == selected_prog]
     exercise_names = [row["exercise_name"] for row in exercises]
     if not selected_ex or selected_ex not in exercise_names:
@@ -1933,8 +1933,8 @@ def get_comparison_data():
     if "user_id" not in session:
         return jsonify([]), 401
 
-    prog = request.args.get("program")
-    ex = request.args.get("exercise")
+    prog = request.args.get("program_name")
+    ex = request.args.get("exercise_name")
     set_num = request.args.get("set_num")
 
     user_data = getUserLogs(session["user_id"])
