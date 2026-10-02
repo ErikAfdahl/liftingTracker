@@ -648,20 +648,20 @@ def settings():
 
     elif request.method == "POST" and request.form.get("action") == "save_account":
         password = request.form.get("password")
-        user_name = request.form.get("user_name")
+        username = request.form.get("username")
         print(session["user_id"])
 
         if not checkPassword(password, user["password"]):
             error_message = "Incorrect password."
-        elif any(u["username"] == user_name for u in users):
+        elif any(u["username"] == username for u in users):
             error_message = "Username already taken."
         else:
             updateUser(session["user_id"], {
-                "user_name": user_name
+                "username": username
             })
 
             session["settings"] = {
-                "user_name": user_name
+                "username": username
             }
 
         success_message = "Username Updated!" if request.args.get("success") else None
