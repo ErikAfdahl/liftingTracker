@@ -195,7 +195,7 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     import random
 
     prd = newPRs
-    exercise_names = [ex["exerciseName"] for ex in exercises]
+    exercise_names = [ex["exercise_name"] for ex in exercises]
 
     declined = []
     improved = []
@@ -272,10 +272,10 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
     pr_ratio = len(prd) / total if total > 0 else 0
 
     # Overall + highlight + heaviest
-    highlight_name = highlight["exerciseName"] if highlight else None
+    highlight_name = highlight["exercise_name"] if highlight else None
     highlight_weight = highlight["weight"] if highlight else None
     highlight_reps = highlight["reps"] if highlight else None
-    heaviest_name = heaviest["exerciseName"] if heaviest else None
+    heaviest_name = heaviest["exercise_name"] if heaviest else None
     heaviest_weight = heaviest["weight"] if heaviest else None
     heaviest_reps = heaviest["reps"] if heaviest else None
 
@@ -306,10 +306,10 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
         streaks = []
 
         for exercise in declined:
-            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, -1)
+            streak = get_occurrences(user_data, selected, exercise["exercise_name"], 1, -1)
 
             if streak > 1:
-                streaks.append((exercise["exerciseName"], streak))
+                streaks.append((exercise["exercise_name"], streak))
 
         if len(streaks) == 1:
             report += f" Worth noting, {streaks[0][0]} has now declined for {streaks[0][1]} straight sessions."
@@ -334,9 +334,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         streaks = []
         for exercise in stagnant:
-            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 0)
+            streak = get_occurrences(user_data, selected, exercise["exercise_name"], 1, 0)
             if streak > 1:
-                streaks.append((exercise["exerciseName"], streak))
+                streaks.append((exercise["exercise_name"], streak))
 
         if len(streaks) == 1:
             report += f" Worth noting, {streaks[0][0]} has now been stagnant for {streaks[0][1]} straight sessions."
@@ -363,9 +363,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         streaks = []
         for exercise in improved:
-            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 1)
+            streak = get_occurrences(user_data, selected, exercise["exercise_name"], 1, 1)
             if streak > 1:
-                streaks.append((exercise["exerciseName"], streak))
+                streaks.append((exercise["exercise_name"], streak))
 
         if len(streaks) == 1:
             report += f" Good work, {streaks[0][0]} has now been improving for {streaks[0][1]} straight sessions."
@@ -419,9 +419,9 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
         streaks = []
         for exercise in improved:
-            streak = get_occurrences(user_data, selected, exercise["exerciseName"], 1, 1)
+            streak = get_occurrences(user_data, selected, exercise["exercise_name"], 1, 1)
             if streak > 1:
-                streaks.append((exercise["exerciseName"], streak))
+                streaks.append((exercise["exercise_name"], streak))
 
         if len(streaks) == 1:
             report += f" Good work, {streaks[0][0]} has now been improving for {streaks[0][1]} straight sessions."
@@ -679,7 +679,7 @@ def home():
     )[-1] if exercises_for_last_program else None
 
     workout_incomplete = last and last_exercise_in_program and (
-            (last["exerciseName"] != last_exercise_in_program["exerciseName"]) or
+            (last["exercise_name"] != last_exercise_in_program["exercise_name"]) or
             (last["setNum"] != last_exercise_in_program["numSets"])
     ) and last["date"] == today
     quick_resume = session.get("settings", {}).get("quick_resume", 1)
@@ -765,8 +765,8 @@ def run():
         last = programLogs[-1] if programLogs else None
 
         if last and (today == last["date"]):
-            last_ex = last["exerciseName"]
-            match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
+            last_ex = last["exercise_name"]
+            match = next((e for e in exercises if e["exercise_name"] == last_ex), None)
             if match:
                 current_index = int(match["exercise_order"]) - 1
                 if int(last["setNum"]) >= int(match["numSets"]):
@@ -846,7 +846,7 @@ def run():
             )
 
             quick_index = session.get("settings", {}).get("quick_indexing", 1)
-            match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
+            match = next((e for e in exercises if e["exercise_name"] == exercise_name), None)
             if quick_index == 1:
                 if match:
                     current_index = int(match["exercise_order"]) - 1
@@ -863,7 +863,7 @@ def run():
         date_format = session.get('settings', {}).get('date_format', 1)
         exercise_name = request.form.get("exercise_name")
         selected = request.form.get("selected_program")
-        exercise = next((i for i in exercises if i["exerciseName"] == exercise_name), None)
+        exercise = next((i for i in exercises if i["exercise_name"] == exercise_name), None)
         lastSet = False
 
         if not exercise:
@@ -948,7 +948,7 @@ def run():
                 )
 
                 quick_index = session.get("settings", {}).get("quick_indexing", 1) # if only the first couple logs are logged, dont go to the next page
-                match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
+                match = next((e for e in exercises if e["exercise_name"] == exercise_name), None)
                 if quick_index == 1:
                     if match:
                         current_index = int(match["exercise_order"]) - 1
@@ -982,7 +982,7 @@ def run():
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
             date_format = session.get("settings", {}).get("date_format", 1)
-            last_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], s)
+            last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
             if last_entries[key]:
                 last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
             last = last_entries[key]
@@ -1027,8 +1027,8 @@ def run():
                 else:
                     streak_1rm = 0
 
-                occur_1rm = get_occurrences(user_data, selected, ex["exerciseName"], s, streak_1rm)
-                occur_weight = get_occurrences(user_data, selected, ex["exerciseName"], s, 2)
+                occur_1rm = get_occurrences(user_data, selected, ex["exercise_name"], s, streak_1rm)
+                occur_weight = get_occurrences(user_data, selected, ex["exercise_name"], s, 2)
 
                 if occur_1rm and (session.get("settings", {}).get("show_streak", 1) == 1):
                     streak_1rm_message = f"1RM Streak: {occur_1rm} session "
@@ -1076,7 +1076,7 @@ def run():
     prev_entries = {}
     for ex in exercises:
         key = f"{ex['exerciseName']}"
-        prev_entries[key] = get_last_entry(user_data, selected, ex["exerciseName"], -1)
+        prev_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], -1)
     # print("feionweoifnewoifnweoifnio")
     # print(session.get("settings", {}).get("show_link", 1))
 
@@ -1190,8 +1190,8 @@ def run_results():
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
 
-            last = get_date_entry(user_data, selected, ex["exerciseName"], s, date_last) if date_last else None
-            prev = get_date_entry(user_data, selected, ex["exerciseName"], s, date_prev) if date_prev else None
+            last = get_date_entry(user_data, selected, ex["exercise_name"], s, date_last) if date_last else None
+            prev = get_date_entry(user_data, selected, ex["exercise_name"], s, date_prev) if date_prev else None
 
             last_entries[key] = last
             # last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
@@ -1503,9 +1503,9 @@ def manage():
                     error_message = "Each set needs to have the max range to be more than or equal to the min range."
                 else:
 
-                    orig_order = next(e["exercise_order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    orig_order = next(e["exercise_order"] for e in edit_exercises if e["exercise_name"] == exercise_name)
                     for ex in edit_exercises:
-                        if ex["exerciseName"] == exercise_name:
+                        if ex["exercise_name"] == exercise_name:
                             continue
                         elif (int(ex["exercise_order"]) <= upd_order) and (int(ex["exercise_order"]) > orig_order):
                             updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] - 1})
@@ -1514,9 +1514,9 @@ def manage():
 
                     # swapped_name = None
                     # for ex in edit_exercises:
-                    #     if int(ex["exercise_order"]) == upd_order and ex["exerciseName"] != exercise_name:
-                    #         swapped_name = ex["exerciseName"]
-                    #         orig_order = next(e["exercise_order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    #     if int(ex["exercise_order"]) == upd_order and ex["exercise_name"] != exercise_name:
+                    #         swapped_name = ex["exercise_name"]
+                    #         orig_order = next(e["exercise_order"] for e in edit_exercises if e["exercise_name"] == exercise_name)
                     #         updateExercise(ex["id"], {"exercise_order": int(orig_order)})
                     #         break
 
@@ -1660,7 +1660,7 @@ def logs():
     if not selected_ex or selected_ex not in exercise_names:
         last_in_prog = getLastEnteredLog(session["user_id"], program=selected_prog)
         if last_in_prog:
-            selected_ex = last_in_prog["exerciseName"]
+            selected_ex = last_in_prog["exercise_name"]
         else:
             selected_ex = exercise_names[0] if exercise_names else None
 
