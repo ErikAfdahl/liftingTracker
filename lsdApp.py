@@ -619,19 +619,13 @@ def settings():
         success_message = "Settings saved!" if request.args.get("success") else None
 
     elif request.method == "POST" and request.form.get("action") == "save_password":
-        print(user)
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_password")
-        print(old_password)
-        print(new_password)
-        print(confirm_new_password)
-        print(session["settings"])
 
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
         elif not checkPassword(old_password, user["password"]):
-            print(checkPassword(old_password, user["password"]))
             error_message = "Incorrect password."
         elif new_password != confirm_new_password:
             error_message = "Passwords don't match."
@@ -649,21 +643,19 @@ def settings():
     elif request.method == "POST" and request.form.get("action") == "save_account":
         password = request.form.get("password")
         username = request.form.get("username")
-        print(session["user_id"])
 
         if not checkPassword(password, user["password"]):
             error_message = "Incorrect password."
         elif any(u["username"] == username for u in users):
             error_message = "Username already taken."
         else:
-            print(username)
-            # updateUser(session["user_id"], {
-            #     "username": username
-            # })
-            #
-            # session["settings"] = {
-            #     "username": username
-            # }
+            updateUser(session["user_id"], {
+                "username": username
+            })
+
+            session["settings"] = {
+                "username": username
+            }
 
         success_message = "Username Updated!" if request.args.get("success") else None
 
@@ -687,8 +679,6 @@ def settings():
         "improvement_coef": float(user.get("improvement_coef", 0.25)) if user else 0.25,
         "log_all_preference":int(user.get("log_all_preference", 2)) if user else 2
     }
-
-    print(f"Improvement coefficient: {settings['improvement_coef']}")
 
     return render_template("settings.html",
                            settings=settings,
