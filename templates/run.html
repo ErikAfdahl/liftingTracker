@@ -33,7 +33,7 @@
         <div class="row align-items-end g-3">
             <div class="col-md-4">
                 <label class="form-label text-secondary">Select Program</label>
-                <select name="program" class="form-select" onchange="this.form.submit()">
+                <select name="program_name" class="form-select" onchange="this.form.submit()">
                     {% for prog in my_programs %}
                         <option value="{{ prog }}" {% if prog == selected %}selected{% endif %}>{{ prog }}</option>
                     {% endfor %}
@@ -44,7 +44,7 @@
 
     <!-- Exercise jump dropdown -->
     <form method="GET" action="/run" class="mb-3">
-        <input type="hidden" name="program" value="{{ selected }}">
+        <input type="hidden" name="program_name" value="{{ selected }}">
         <div class="row align-items-end g-2">
             <div class="col-md-4">
                 <label class="form-label text-secondary small">Jump to Exercise</label>
@@ -269,22 +269,22 @@
 
         <!-- Back / Next navigation -->
         <div class="d-flex justify-content-between align-items-center">
-            <a href="/logs?program={{ selected | urlencode }}&exercise={{ ex.exercise_name | urlencode }}"
+            <a href="/logs?program_name={{ selected | urlencode }}&exercise={{ ex.exercise_name | urlencode }}"
                class="text-secondary small text-decoration-none">
                 View Logs
             </a>
 
             <div class="d-flex gap-2">
                 {% if ex_index > 0 %}
-                    <a href="/run?program={{ selected }}&ex_index={{ ex_index - 1 }}"
+                    <a href="/run?program_name={{ selected }}&ex_index={{ ex_index - 1 }}"
                        class="btn btn-secondary">Back</a>
                 {% endif %}
 
                 {% if ex_index < exercises | length - 1 %}
-                    <a href="/run?program={{ selected }}&ex_index={{ ex_index + 1 }}"
+                    <a href="/run?program_name={{ selected }}&ex_index={{ ex_index + 1 }}"
                        class="btn btn-primary">Next →</a>
                 {% else %}
-                    <a href="/run/results?program={{ selected }}" class="btn btn-success">Results</a>
+                    <a href="/run/results?program_name={{ selected }}" class="btn btn-success">Results</a>
                 {% endif %}
             </div>
         </div>
