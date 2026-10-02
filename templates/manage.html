@@ -130,7 +130,7 @@
 </div>
 
     <!-- Add Exercise -->
-{% if max_exercises > max_order %}
+{% if max_exercises + 1 > max_order %}
     <div class="card mb-4">
         <div class="card-header">
             <a class="text-decoration-none text-light" data-bs-toggle="collapse" href="#addExercise">+ Add Exercise</a>
@@ -200,7 +200,7 @@
         </div>
     </div>
 {% else %}
-    <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-danger alert-dismissible fade show">
         Max exercises added.
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>

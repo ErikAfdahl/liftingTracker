@@ -1495,6 +1495,7 @@ def manage():
             success_message = f"Deleted {exercise_name}!"
             ex_data = getAllExercises()
             user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
+            open_order -= 1
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
