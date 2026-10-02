@@ -549,6 +549,9 @@ def logout():
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
+    users = getAllUsers()
+    user = next((u for u in users if u["user_id"] == session["user_id"]), None)
+
     success_message = None
     error_message = None
 
@@ -616,6 +619,7 @@ def settings():
         success_message = "Settings saved!" if request.args.get("success") else None
 
     elif request.method == "POST" and request.form.get("action") == "save_password":
+        print(user)
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_new_password")
@@ -626,8 +630,8 @@ def settings():
 
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
-        elif not checkPassword(old_password, session["settings"]["password"]):
-            print(checkPassword(old_password, session["settings"]["password"]))
+        elif not checkPassword(old_password, user["password"]):
+            print(checkPassword(old_password, user["password"]))
             error_message = "Incorrect password."
         elif new_password != confirm_new_password:
             error_message = "Passwords don't match."
@@ -645,9 +649,9 @@ def settings():
     elif request.method == "POST" and request.form.get("action") == "save_account":
         password = request.form.get("password")
         user_name = request.form.get("user_name")
-        print(session["settings"])
+        print(session["user_id"])
 
-        if checkPassword(password, session["settings"]["password"]):
+        if checkPassword(password, user["password"]):
             error_message = "Incorrect password."
         else:
             updateUser(session["user_id"], {
