@@ -51,7 +51,7 @@
                 <select name="ex_index" class="form-select form-select-sm" onchange="this.form.submit()">
                     {% for i in range(exercises | length) %}
                         <option value="{{ i }}" {% if i == ex_index %}selected{% endif %}>
-                            {{ exercises[i].exerciseName }}
+                            {{ exercises[i].exercise_name }}
                         </option>
                     {% endfor %}
                 </select>

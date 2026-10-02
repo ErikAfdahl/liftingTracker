@@ -203,7 +203,7 @@
                     labels: Array.from(new Set(rawData.map(r => r.date))).sort(), // ISO sorts correctly as plain strings
                     datasets: [{
                         label: "Base Line: Estimated 1RM",
-                        data: rawData.map(r => ({ x: r.date, y: r["1rm"] })),
+                        data: rawData.map(r => ({ x: r.date, y: r["one_rm"] })),
                         borderColor: "#0d6efd",
                         backgroundColor: "#0d6efd",
                         tension: 0.3,
@@ -406,7 +406,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <span class="fw-bold">{{ log.date }}</span>
-                            <span class="text-secondary ms-2">{{ log.weight }} lbs · {{ log.reps }} {{ selected_unit | capitalize }}s · 1RM: {{ log["1rm"] }} · 1RM Diff: {{ log["diff"] }} · Weight Diff: {{ log["diff_weight"] }}</span>
+                            <span class="text-secondary ms-2">{{ log.weight }} lbs · {{ log.reps }} {{ selected_unit | capitalize }}s · 1RM: {{ log["one_rm"] }} · 1RM Diff: {{ log["diff"] }} · Weight Diff: {{ log["diff_weight"] }}</span>
                             {% if log.notes %}
                                 <br><small class="text-secondary fst-italic">"{{ log.notes }}"</small>
                             {% endif %}
