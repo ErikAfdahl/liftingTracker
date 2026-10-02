@@ -1297,6 +1297,7 @@ def manage():
     active = int(selected_prog["active"])
 
     for ex in edit_exercises:
+        # print(f"exercise {ex['exercise_name']} order {ex['exercise_order']}")
         if ex["exercise_order"] == open_order:
             open_order += 1
         else:
@@ -1436,6 +1437,8 @@ def manage():
                             if int(ex["exercise_order"]) >= new_order:
                                 # next_order = max(int(e["exercise_order"]) for e in edit_exercises) + 1
                                 updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] + 1})
+                    else:
+                        open_order += 1
 
                     appendExercise({
                         "user_id": int(session["user_id"]),
@@ -1467,7 +1470,6 @@ def manage():
                         key=lambda x: int(x["exercise_order"])
                     )
 
-                    open_order = 1
                     max_order = edit_exercises[-1]["exercise_order"] + 1
 
         elif action == "delete_exercise":
