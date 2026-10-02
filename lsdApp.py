@@ -622,7 +622,7 @@ def settings():
         print(user)
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
-        confirm_new_password = request.form.get("confirm_new_password")
+        confirm_new_password = request.form.get("confirm_password")
         print(old_password)
         print(new_password)
         print(confirm_new_password)
@@ -651,8 +651,10 @@ def settings():
         user_name = request.form.get("user_name")
         print(session["user_id"])
 
-        if checkPassword(password, user["password"]):
+        if not checkPassword(password, user["password"]):
             error_message = "Incorrect password."
+        elif any(u["username"] == user_name for u in users):
+            error_message = "Username already taken."
         else:
             updateUser(session["user_id"], {
                 "user_name": user_name
