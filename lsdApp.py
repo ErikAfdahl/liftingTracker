@@ -649,6 +649,7 @@ def settings():
         elif any(u["username"] == username for u in users):
             error_message = "Username already taken."
         else:
+            session['username'] = username
             updateUser(session["user_id"], {
                 "username": username
             })
