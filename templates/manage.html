@@ -212,7 +212,7 @@
                     <div>
                         <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span>
                         <span class="text-secondary small ms-2">
-                            {{ ex.numSets }} sets · {{ ex.min_reps }}–{{ ex.max_reps }} {{ ex.unit }}s · {{ ex.increment }} lb increments
+                            {{ ex.num_sets }} sets · {{ ex.min_reps }}–{{ ex.max_reps }} {{ ex.unit }}s · {{ ex.increment }} lb increments
                         </span>
                         {% if ex.notes %}
                             <br><small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
@@ -248,7 +248,7 @@
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Sets</label>
-                                <input type="number" name="upd_sets" class="form-control form-control-sm" value="{{ ex.numSets }}" min="1">
+                                <input type="number" name="upd_sets" class="form-control form-control-sm" value="{{ ex.num_sets }}" min="1">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">Increment</label>
