@@ -68,7 +68,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for s in range(1, ex.numSets | int + 1) %}
+                        {% for s in range(1, ex.num_sets | int + 1) %}
                             {% set key = ex.exerciseName ~ "_" ~ s %}
                             {% set today = last_entries.get(key) %}
                             {% set prev = prev_entries.get(key) %}
@@ -111,7 +111,7 @@
 
     <!--            set one did better than last time-->
                 {% if t1 > p1 %}
-                    {% if ex.numSets | int >= 2 %}
+                    {% if ex.num_sets | int >= 2 %}
                         {% set key2 = ex.exerciseName ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
                         {% set prev2 = prev_entries.get(key2) %}
@@ -201,7 +201,7 @@
     <!--            worse 1rm and the same weight-->
                     {% else %}
     <!--            if this exercise has more than 1 set-->
-                        {% if ex.numSets | int >= 2 %}
+                        {% if ex.num_sets | int >= 2 %}
                             {% set key2 = ex.exerciseName ~ "_2" %}
                             {% set today2 = last_entries.get(key2) %}
                             {% set prev2 = prev_entries.get(key2) %}
@@ -294,7 +294,7 @@
                             <span class="text-success">Increase in weight, set 1 matched.</span>
                         {% endif %}
     <!--                if there is more than one set-->
-                    {% elif ex.numSets | int >= 2 %}
+                    {% elif ex.num_sets | int >= 2 %}
                         {% set key2 = ex.exerciseName ~ "_2" %}
                         {% set today2 = last_entries.get(key2) %}
                         {% set prev2 = prev_entries.get(key2) %}
@@ -362,7 +362,7 @@
     <!-- Session summary -->
     {% set ns = namespace(total=0) %}
     {% for ex in exercises %}
-        {% for s in range(1, ex.numSets | int + 1) %}
+        {% for s in range(1, ex.num_sets | int + 1) %}
             {% set key = ex.exerciseName ~ "_" ~ s %}
             {% set entry = last_entries.get(key) %}
             {% if entry %}
