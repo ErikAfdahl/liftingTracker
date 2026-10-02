@@ -98,9 +98,9 @@ def deleteProgram(program_id):
     supabase.table("programs").delete().eq("id", program_id).execute()
 
 def renameLogsProgram(user_id, old_program, new_program):
-    supabase.table("logs").update({"program": new_program}) \
+    supabase.table("logs").update({"program_name": new_program}) \
         .eq("user_id", user_id) \
-        .eq("program", old_program) \
+        .eq("program_name", old_program) \
         .execute()
 
 # ── feedback ──────────────────────────────────────────────
