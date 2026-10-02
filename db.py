@@ -48,7 +48,7 @@ def getUserLogsByDates(user_id, program, date_last, date_prev):
     return (supabase.table("logs")
             .select("*")
             .eq("user_id", user_id)
-            .eq("program", program)
+            .eq("program_name", program)
             .in_("date", [date_last, date_prev])
             .execute().data)
 
