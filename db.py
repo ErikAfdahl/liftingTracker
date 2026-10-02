@@ -14,32 +14,32 @@ def appendUser(row: dict):
     supabase.table("accounts").insert(row).execute()
 
 def updateUser(user_id, updates: dict):
-    supabase.table("accounts").update(updates).eq("userId", user_id).execute()
+    supabase.table("accounts").update(updates).eq("user_id", user_id).execute()
 
 def getNextUserId():
     users = getAllUsers()
     if not users:
         return 1
-    return max(int(u["userId"]) for u in users) + 1
+    return max(int(u["user_id"]) for u in users) + 1
 
 # ── LOGS ──────────────────────────────────────────────────
 
 def getTemplateProgramData():
     prog_data = getAllExercises()
-    return [row for row in prog_data if str(row["userId"]) == str(TEMPLATE_USER_ID)]
+    return [row for row in prog_data if str(row["user_id"]) == str(TEMPLATE_USER_ID)]
 
 def getUserLogs(user_id):
-    data = supabase.table("logs").select("*").eq("userId", user_id) \
+    data = supabase.table("logs").select("*").eq("user_id", user_id) \
         .order("date", desc=True).order("id", desc=True).limit(1000).execute().data
     return list(reversed(data))
 
 def getUserLogsByExercise(user_id, program, exercise, set_num):
     return (supabase.table("logs")
             .select("*")
-            .eq("userId", user_id)
-            .eq("program", program)
-            .eq("exerciseName", exercise)
-            .eq("setNum", set_num)
+            .eq("user_id", user_id)
+            .eq("program_name", program)
+            .eq("exercise_name", exercise)
+            .eq("set_num", set_num)
             .order("date", desc=False)
             .order("id", desc=False)
             .execute().data)
@@ -47,7 +47,7 @@ def getUserLogsByExercise(user_id, program, exercise, set_num):
 def getUserLogsByDates(user_id, program, date_last, date_prev):
     return (supabase.table("logs")
             .select("*")
-            .eq("userId", user_id)
+            .eq("user_id", user_id)
             .eq("program", program)
             .in_("date", [date_last, date_prev])
             .execute().data)
@@ -55,7 +55,7 @@ def getUserLogsByDates(user_id, program, date_last, date_prev):
 def getUserLogsUnactive(user_id):
     return (supabase.table("logs")
             .select("*")
-            .eq("userId", user_id)
+            .eq("user_id", user_id)
             .eq("status", 0)
             .execute().data)
 
@@ -99,7 +99,7 @@ def deleteProgram(program_id):
 
 def renameLogsProgram(user_id, old_program, new_program):
     supabase.table("logs").update({"program": new_program}) \
-        .eq("userId", user_id) \
+        .eq("user_id", user_id) \
         .eq("program", old_program) \
         .execute()
 
@@ -108,7 +108,7 @@ def getAllFeedback():
     return supabase.table("feedback").select("*").execute().data
 
 def getUserFeedback(user_id):
-    data = supabase.table("feedback").select("*").eq("userId", user_id) \
+    data = supabase.table("feedback").select("*").eq("user_id", user_id) \
         .order("message_num", desc=True).order("id", desc=True).limit(1000).execute().data
     return list(reversed(data))
 
@@ -116,4 +116,4 @@ def appendFeedback(row: dict):
     supabase.table("feedback").insert(row).execute()
 
 def updateFeedback(user_id, updates: dict):
-    supabase.table("feedback").update(updates).eq("userId", user_id).execute()
+    supabase.table("feedback").update(updates).eq("user_id", user_id).execute()

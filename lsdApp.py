@@ -42,21 +42,21 @@ def isOpen(exercises, order):
 
 def calculate_diff(data, program, exercise, set_num, current, max=0):
     for row in reversed(data):
-        if (row["program"] == program and
-                row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num) and max == 0):
-            return round(current - float(row["1rm"]), 3)
-        elif (row["program"] == program and
-                row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num) and max == 1):
+        if (row["program_name"] == program and
+                row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and max == 0):
+            return round(current - float(row["one_rm"]), 3)
+        elif (row["program_name"] == program and
+                row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and max == 1):
             return round(current - float(row["weight"]), 3)
     return 0
 
 def get_last_entry(data, program, exercise, set_num, back = 0):
     acc = 0
     for row in reversed(data):
-        if row["program"] == program and row["exerciseName"] == exercise:
-            if set_num == -1 or int(row["setNum"]) == set_num:
+        if row["program_name"] == program and row["exercise_name"] == exercise:
+            if set_num == -1 or int(row["set_num"]) == set_num:
                 if acc == back:
                     return row
                 acc += 1
@@ -65,8 +65,8 @@ def get_last_entry(data, program, exercise, set_num, back = 0):
 
 def get_date_entry(data, program, exercise, set_num, date):
     for row in reversed(data):
-        if (row["program"] == program and row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num) and row["date"] == date):
+        if (row["program_name"] == program and row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and row["date"] == date):
             return row
 
     return None
@@ -127,10 +127,10 @@ def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
     for row in data:
-        if (row["program"] == program and row["exerciseName"] == exercise and
-                int(row["setNum"]) == int(set_num)):
-            if row["1rm"] > best_1rm:
-                best_1rm = row["1rm"]
+        if (row["program_name"] == program and row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num)):
+            if row["one_rm"] > best_1rm:
+                best_1rm = row["one_rm"]
 
     return best_1rm
 
@@ -143,8 +143,8 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
     if direction == 2:
         acc = 1
         for row in reversed(data):
-            if (row["program"] == program and row["exerciseName"] == exercise and
-                    int(row["setNum"]) == int(set_num)):
+            if (row["program_name"] == program and row["exercise_name"] == exercise and
+                    int(row["set_num"]) == int(set_num)):
                 if row["diff_weight"] == 0:
                     acc += 1
                 else:
@@ -153,8 +153,8 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
     else:
         acc = 0
         for row in reversed(data):
-            if (row["program"] == program and row["exerciseName"] == exercise and
-                    int(row["setNum"]) == int(set_num)):
+            if (row["program_name"] == program and row["exercise_name"] == exercise and
+                    int(row["set_num"]) == int(set_num)):
 
                 if direction == -1: # if 1rm is regressing
                     if row["diff"] < 0:
@@ -471,7 +471,7 @@ def parseRepRange(repRange, numSets):
         return []
 
 def getLastEnteredLog(user_id, program=None):
-    query = supabase.table("logs").select("*").eq("userId", user_id)
+    query = supabase.table("logs").select("*").eq("user_id", user_id)
     if program:
         query = query.eq("program", program)
     data = query.order("id", desc=True).limit(1).execute().data
@@ -493,7 +493,7 @@ def login():
             user = next((u for u in users if u["username"] == username), None)
             if user and checkPassword(password, user["password"]):
                 session.permanent = True
-                session["user_id"] = user["userId"]
+                session["user_id"] = user["user_id"]
                 session["username"] = user["username"]
                 session["settings"] = {
                     "narrator": user.get("narrator", "default"),
@@ -518,7 +518,7 @@ def login():
                 appendUser({
                     "username": new_username,
                     "password": hashPassword(new_password),
-                    "userId": new_id,
+                    "user_id": new_id,
                     "narrator": "default",
                     "quick_indexing": 1,
                     "quick_resume": 1,
@@ -613,7 +613,7 @@ def settings():
         success_message = "Settings saved!" if request.args.get("success") else None
 
     users = getAllUsers()
-    user = next((u for u in users if str(u["userId"]) == str(session["user_id"])), None)
+    user = next((u for u in users if str(u["user_id"]) == str(session["user_id"])), None)
 
     settings = {
         "narrator": user.get("narrator", "default") if user else "default",
@@ -643,10 +643,10 @@ def home():
         return redirect(url_for("login"))
 
     ex_data = getAllExercises()
-    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
     user_data = getUserLogs(session["user_id"])
     prog_data = getAllPrograms()
-    my_programs = [row["programName"] for row in prog_data if (str(row["userId"]) == str(session["user_id"])) and (row["active"] == 1)]
+    my_programs = [row["program_name"] for row in prog_data if (str(row["user_id"]) == str(session["user_id"])) and (row["active"] == 1)]
     num_prog = len(my_programs)
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -672,7 +672,7 @@ def home():
         welcome_message = f"Welcome back {session['username']}"
 
     last = user_data[-1] if user_data else None
-    exercises_for_last_program = [row for row in user_ex if last and row["programName"] == last["program"]]
+    exercises_for_last_program = [row for row in user_ex if last and row["program_name"] == last["program_name"]]
     last_exercise_in_program = sorted(
         exercises_for_last_program,
         key=lambda x: int(x["order"])
@@ -710,13 +710,13 @@ def run():
     today = now.strftime("%Y-%m-%d")
 
     ex_data = getAllExercises()
-    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
     program_data = getAllPrograms()
     user_programs = sorted(
-        [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+        [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
         key=lambda x: int(x["id"])
     )
-    my_programs = [row["programName"] for row in user_programs]
+    my_programs = [row["program_name"] for row in user_programs]
     # print(program_data)
 
     user_data = getUserLogs(session["user_id"])
@@ -733,13 +733,13 @@ def run():
 
     selected = request.args.get("program") or request.form.get("selected_program")
     if not selected or selected not in my_programs:
-        last_program = user_data[-1]["program"] if user_data else None
+        last_program = user_data[-1]["program_name"] if user_data else None
         selected = last_program if last_program in my_programs else my_programs[0]
 
-    selected_prog = [row for row in user_programs if row["programName"] == selected][0]
+    selected_prog = [row for row in user_programs if row["program_name"] == selected][0]
 
     exercises = sorted(
-        [row for row in user_ex if row["programName"] == selected],
+        [row for row in user_ex if row["program_name"] == selected],
         key=lambda x: int(x["order"])
     )
 
@@ -761,7 +761,7 @@ def run():
     ex_index = request.args.get("ex_index", type=int)
 
     if ex_index is None:
-        programLogs = [row for row in user_data if row["program"] == selected]
+        programLogs = [row for row in user_data if row["program_name"] == selected]
         last = programLogs[-1] if programLogs else None
 
         if last and (today == last["date"]):
@@ -812,15 +812,15 @@ def run():
             diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
             appendLog({
-                "userId": int(session["user_id"]),
+                "user_id": int(session["user_id"]),
                 "program": selected,
                 "status": 1,
                 "date": display_to_iso(workout_date, date_format),
-                "exerciseName": exercise_name,
-                "setNum": set_num,
+                "exercise_name": exercise_name,
+                "set_num": set_num,
                 "weight": weight,
                 "reps": reps,
-                "1rm": one_rm,
+                "one_rm": one_rm,
                 "diff": diff,
                 "notes": notes,
                 "diff_weight": diff_weight
@@ -841,7 +841,7 @@ def run():
                 success_message = f"Logged {exercise_name} Set {set_num} — 1RM: {one_rm} | Diff: {diff} — Weight: {weight} | Diff: {diff_weight}"
 
             exercises = sorted(
-                [row for row in user_ex if row["programName"] == selected],
+                [row for row in user_ex if row["program_name"] == selected],
                 key=lambda x: int(x["order"])
             )
 
@@ -916,15 +916,15 @@ def run():
                     # print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
 
                     appendLog({
-                        "userId": int(session["user_id"]),
+                        "user_id": int(session["user_id"]),
                         "program": selected,
                         "status": 1,
                         "date": display_to_iso(workout_date, date_format),
-                        "exerciseName": exercise_name,
-                        "setNum": i + 1,
+                        "exercise_name": exercise_name,
+                        "set_num": i + 1,
                         "weight": weight,
                         "reps": reps,
-                        "1rm": one_rm,
+                        "one_rm": one_rm,
                         "diff": diff,
                         "notes": notes,
                         "diff_weight": diff_weight
@@ -940,10 +940,10 @@ def run():
                 elif count == 1:
                     success_message = f"Successful mass log, {count} log added."
 
-                narrator = session.get("settings", {}).get("narrator", "default")
+                # narrator = session.get("settings", {}).get("narrator", "default")
 
                 exercises = sorted(
-                    [row for row in user_ex if row["programName"] == selected],
+                    [row for row in user_ex if row["program_name"] == selected],
                     key=lambda x: int(x["order"])
                 )
 
@@ -976,8 +976,8 @@ def run():
 
 
     for ex in exercises:
-        minRepRange = [int(x.strip()) for x in str(ex["minReps"]).split(",")]
-        maxRepRange = [int(x.strip()) for x in str(ex["maxReps"]).split(",")]
+        minRepRange = [int(x.strip()) for x in str(ex["min_reps"]).split(",")]
+        maxRepRange = [int(x.strip()) for x in str(ex["max_reps"]).split(",")]
 
         for s in range(1, int(ex["numSets"]) + 1):
             key = f"{ex['exerciseName']}_{s}"
@@ -1049,12 +1049,12 @@ def run():
                     recommendations[key] = None
                 elif int(last["reps"]) >= int(maxRepRange[s-1] * (1 + imprv_coef)):
                     # if last reps are significantly more than max or significantly less than min
-                    rec_weight = round((last["1rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
+                    rec_weight = round((last["one_rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
                     rec_weights[key] = float(rec_weight)
                     rec_reps[key] = int(minRepRange[s-1])
                 elif int(last["reps"]) < int((minRepRange[s-1] - 1) * (1 - imprv_coef)):
-                    rec_weight = round((last["1rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
+                    rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
                     recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
                     rec_weights[key] = float(rec_weight)
                     rec_reps[key] = int(maxRepRange[s-1])
@@ -1122,26 +1122,26 @@ def run_results():
         return redirect(url_for("login"))
 
     ex_data = getAllExercises()
-    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_ex if row["programName"] != " "))
+    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
+    my_programs = list(set(row["program_name"] for row in user_ex if row["program_name"] != " "))
     date_format = session.get("settings", {}).get("date_format", 1)
 
     user_data = getUserLogs(session["user_id"])
 
     selected = request.args.get("program")
     if not selected or selected not in my_programs:
-        selected = user_data[-1]["program"] if user_data else None
+        selected = user_data[-1]["program_name"] if user_data else None
     if not selected:
         return redirect(url_for("run"))
 
     exercises = sorted(
-        [row for row in user_ex if row["programName"] == selected],
+        [row for row in user_ex if row["program_name"] == selected],
         key=lambda x: int(x["order"])
     )
 
     # Get all unique dates for this program, sorted newest first
     program_dates = sorted(
-        list(set(row["date"] for row in user_data if row["program"] == selected)),
+        list(set(row["date"] for row in user_data if row["program_name"] == selected)),
         reverse=True
     )
 
@@ -1201,8 +1201,8 @@ def run_results():
             if not last or not prev:
                 continue
 
-            if last["1rm"] != 0:
-                newImprov = 1.0 - (prev["1rm"] / last["1rm"])
+            if last["one_rm"] != 0:
+                newImprov = 1.0 - (prev["one_rm"] / last["one_rm"])
             else:
                 newImprov = 0
 
@@ -1218,7 +1218,7 @@ def run_results():
 
             if s == 1:
                 all_time_best = get_best_entry(user_data, selected, ex['exerciseName'], 1)
-                if last["1rm"] >= all_time_best:
+                if last["one_rm"] >= all_time_best:
                     newPRs.append(ex['exerciseName'])
     narrator = session.get("settings", {}).get("narrator", "default")
     date_format = session.get("settings", {}).get("date_format", 1)
@@ -1254,14 +1254,14 @@ def manage():
         return redirect(url_for("login"))
 
     ex_data = getAllExercises()
-    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
 
     program_data = getAllPrograms()
     user_programs = sorted(
-        [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+        [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
         key=lambda x: int(x["id"])
     )
-    my_programs = [row["programName"] for row in user_programs]
+    my_programs = [row["program_name"] for row in user_programs]
 
     user_data = getUserLogs(session["user_id"])
     log_cap_warning = len(user_data) >= 1000
@@ -1278,12 +1278,12 @@ def manage():
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
-    selected_prog = [row for row in user_programs if row["programName"] == selected_edit][0]
+    selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
 
     action = request.form.get("action")
 
     edit_exercises = sorted(
-        [row for row in user_ex if row["programName"] == selected_edit],
+        [row for row in user_ex if row["program_name"] == selected_edit],
         key=lambda x: int(x["order"])
     )
 
@@ -1305,8 +1305,8 @@ def manage():
                 error_message = "A program with that name already exists."
             else:
                 appendProgram({
-                    "userId": int(session["user_id"]),
-                    "programName": new_program_name,
+                    "user_id": int(session["user_id"]),
+                    "program_name": new_program_name,
                     "notes": "",
                     "active": 1,
                     "show_links": 0
@@ -1318,17 +1318,17 @@ def manage():
 
         elif action == "delete_program":
             rows_to_delete = [row for row in user_ex
-                              if str(row["userId"]) == str(session["user_id"])
-                              and row["programName"] == selected_edit]
+                              if str(row["user_id"]) == str(session["user_id"])
+                              and row["program_name"] == selected_edit]
             for row in rows_to_delete:
                 deleteExercise(row["id"])
 
-            program_row = next((row for row in user_programs if row["programName"] == selected_edit), None)
+            program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
             if program_row:
                 deleteProgram(program_row["id"])
 
             logs_to_update = [row for row in user_data
-                              if row["program"] == selected_edit]
+                              if row["program_name"] == selected_edit]
             for row in logs_to_update:
                 updateLog(row["id"], {"status": 0})
 
@@ -1336,7 +1336,7 @@ def manage():
             my_programs = [p for p in my_programs if p != selected_edit]
             selected_edit = my_programs[0] if my_programs else None
             prog_ex = getAllExercises()
-            user_ex = [row for row in prog_ex if str(row["userId"]) == str(session["user_id"])]
+            user_ex = [row for row in prog_ex if str(row["user_id"]) == str(session["user_id"])]
 
         elif action == "edit_program":
             my_programs = [p for p in my_programs if p != selected_edit]
@@ -1354,30 +1354,30 @@ def manage():
                 error_message = "A program with that name already exists."
 
             else:
-                program_row = next((row for row in user_programs if row["programName"] == selected_edit), None)
+                program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
 
                 if program_row:
                     updateProgram(program_row["id"], {
-                        "programName": new_name,
+                        "program_name": new_name,
                         "notes": notes,
                         "active": active,
                         "show_links": show_links
                     })
-                exercises_to_update = [row for row in user_ex if row["programName"] == selected_edit]
+                exercises_to_update = [row for row in user_ex if row["program_name"] == selected_edit]
 
                 for row in exercises_to_update:
-                    updateExercise(row["id"], {"programName": new_name})
+                    updateExercise(row["id"], {"program_name": new_name})
 
                 renameLogsProgram(session["user_id"], selected_edit, new_name)
                 my_programs.append(new_name)
                 selected_edit = new_name
                 success_message = f"Updated '{new_name}'"
                 ex_data = getAllExercises()
-                user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+                user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
                 # program_data = getAllPrograms()
 
                 # user_programs = sorted(
-                #     [row for row in program_data if str(row["userId"]) == str(session["user_id"])],
+                #     [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
                 #     key=lambda x: int(x["id"])
                 # )
 
@@ -1417,56 +1417,56 @@ def manage():
                         for ex in edit_exercises:
                             if int(ex["order"]) >= new_order:
                                 # next_order = max(int(e["order"]) for e in edit_exercises) + 1
-                                updateExercise(ex["id"], {"order": ex["order"] + 1})
+                                updateExercise(ex["id"], {"exercise_order": ex["order"] + 1})
 
                     appendExercise({
-                        "userId": int(session["user_id"]),
-                        "programName": selected_edit,
-                        "exerciseName": new_exercise,
-                        "numSets": new_sets,
+                        "user_id": int(session["user_id"]),
+                        "program_name": selected_edit,
+                        "exercise_name": new_exercise,
+                        "num_sets": new_sets,
                         "increment": new_inc,
-                        "minReps": ",".join(str(x) for x in new_min),
-                        "maxReps": ",".join(str(x) for x in new_max),
-                        "order": new_order,
+                        "min_reps": ",".join(str(x) for x in new_min),
+                        "max_reps": ",".join(str(x) for x in new_max),
+                        "exercise_order": new_order,
                         "notes": new_notes,
                         "unit": new_unit,
                         "link": new_link
                     })
 
                     logs_to_update = [row for row in user_data
-                                      if row["program"] == selected_edit
-                                      and row["exerciseName"] == new_exercise
+                                      if row["program_name"] == selected_edit
+                                      and row["exercise_name"] == new_exercise
                                       and int(row["status"]) == 0]
                     for row in logs_to_update:
                         updateLog(row["id"], {"status": 1})
 
                     success_message = f"Added {new_exercise} to {selected_edit}!"
                     ex_data = getAllExercises()
-                    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+                    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
 
         elif action == "delete_exercise":
             exercise_name = request.form.get("exercise_name")
-            deleted_order = next((int(row["order"]) for row in edit_exercises
-                                  if row["exerciseName"] == exercise_name), None)
+            deleted_order = next((int(row["exercise_order"]) for row in edit_exercises
+                                  if row["exercise_name"] == exercise_name), None)
 
             for row in edit_exercises:
-                if row["exerciseName"] == exercise_name:
+                if row["exercise_name"] == exercise_name:
                     deleteExercise(row["id"])
 
             if deleted_order is not None:
                 for row in edit_exercises:
-                    if int(row["order"]) > deleted_order:
-                        updateExercise(row["id"], {"order": int(row["order"]) - 1})
+                    if int(row["exercise_order"]) > deleted_order:
+                        updateExercise(row["id"], {"exercise_order": int(row["exercise_order"]) - 1})
 
             logs_to_update = [row for row in user_data
-                              if row["program"] == selected_edit
-                              and row["exerciseName"] == exercise_name]
+                              if row["program_name"] == selected_edit
+                              and row["exercise_name"] == exercise_name]
             for row in logs_to_update:
                 updateLog(row["id"], {"status": 0})
 
             success_message = f"Deleted {exercise_name}!"
             ex_data = getAllExercises()
-            user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+            user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
 
         elif action == "save_exercise":
             exercise_name = request.form.get("exercise_name")
@@ -1479,7 +1479,7 @@ def manage():
             upd_order = request.form.get("upd_order").replace(" ", "")
             upd_unit = request.form.get("upd_unit")
             upd_link = request.form.get("upd_link")
-            edit_exercises = [row for row in user_ex if row["programName"] == selected_edit]
+            edit_exercises = [row for row in user_ex if row["program_name"] == selected_edit]
 
             if not upd_name:
                 error_message = "Please enter an exercise name."
@@ -1508,27 +1508,27 @@ def manage():
                         if ex["exerciseName"] == exercise_name:
                             continue
                         elif (int(ex["order"]) <= upd_order) and (int(ex["order"]) > orig_order):
-                            updateExercise(ex["id"], {"order": ex["order"] - 1})
+                            updateExercise(ex["id"], {"exercise_order": ex["order"] - 1})
                         elif (int(ex["order"]) >= upd_order) and (int(ex["order"]) < orig_order):
-                            updateExercise(ex["id"], {"order": ex["order"] + 1})
+                            updateExercise(ex["id"], {"exercise_order": ex["order"] + 1})
 
                     # swapped_name = None
                     # for ex in edit_exercises:
                     #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
                     #         swapped_name = ex["exerciseName"]
                     #         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
-                    #         updateExercise(ex["id"], {"order": int(orig_order)})
+                    #         updateExercise(ex["id"], {"exercise_order": int(orig_order)})
                     #         break
 
-                    target = next((row for row in edit_exercises if row["exerciseName"] == exercise_name), None)
+                    target = next((row for row in edit_exercises if row["exercise_name"] == exercise_name), None)
                     if target:
                         updateExercise(target["id"], {
-                            "exerciseName": upd_name,
-                            "numSets": upd_sets,
+                            "exercise_name": upd_name,
+                            "num_sets": upd_sets,
                             "increment": upd_inc,
-                            "minReps": ",".join(str(x) for x in upd_min),
-                            "maxReps": ",".join(str(x) for x in upd_max),
-                            "order": upd_order,
+                            "min_reps": ",".join(str(x) for x in upd_min),
+                            "max_reps": ",".join(str(x) for x in upd_max),
+                            "exercise_order": upd_order,
                             "notes": upd_notes,
                             "unit": upd_unit,
                             "link": upd_link
@@ -1536,14 +1536,14 @@ def manage():
 
                     if upd_name != exercise_name:
                         logs_to_update = [row for row in user_data
-                                          if row["program"] == selected_edit
-                                          and row["exerciseName"] == exercise_name]
+                                          if row["program_name"] == selected_edit
+                                          and row["exercise_name"] == exercise_name]
                         for row in logs_to_update:
-                            updateLog(row["id"], {"exerciseName": upd_name})
+                            updateLog(row["id"], {"exercise_name": upd_name})
 
                         logs_to_update = [row for row in user_data
-                                          if row["program"] == selected_edit
-                                          and row["exerciseName"] == upd_name
+                                          if row["program_name"] == selected_edit
+                                          and row["exercise_name"] == upd_name
                                           and int(row["status"]) == 0]
                         for row in logs_to_update:
                             updateLog(row["id"], {"status": 1})
@@ -1552,10 +1552,10 @@ def manage():
                     # if swapped_name:
                     #     success_message += f" Swapped order with '{swapped_name}'."
                     ex_data = getAllExercises()
-                    user_ex = [row for row in ex_data if str(row["userId"]) == str(session["user_id"])]
+                    user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
 
     edit_exercises = sorted(
-        [row for row in user_ex if row["programName"] == selected_edit],
+        [row for row in user_ex if row["program_name"] == selected_edit],
         key=lambda x: int(x["order"])
     ) if selected_edit else []
 
@@ -1582,11 +1582,11 @@ def templates():
         return redirect(url_for("login"))
 
     prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
-    my_programs = list(set(row["programName"] for row in user_prog if row["programName"] != " "))
+    user_prog = [row for row in prog_data if str(row["user_id"]) == str(session["user_id"])]
+    my_programs = list(set(row["program_name"] for row in user_prog if row["program_name"] != " "))
 
-    template_prog = [row for row in prog_data if str(row["userId"]) == str(TEMPLATE_USER_ID) and row["exerciseName"] != ""]
-    template_programs = list(set(row["programName"] for row in template_prog))
+    template_prog = [row for row in prog_data if str(row["user_id"]) == str(TEMPLATE_USER_ID) and row["exercise_name"] != ""]
+    template_programs = list(set(row["program_name"] for row in template_prog))
 
     success_message = None
     error_message = None
@@ -1597,17 +1597,17 @@ def templates():
         if prog_name in my_programs:
             error_message = f"You already have a program called '{prog_name}'."
         else:
-            rows_to_copy = [row for row in template_prog if row["programName"] == prog_name]
+            rows_to_copy = [row for row in template_prog if row["program_name"] == prog_name]
             for row in rows_to_copy:
                 appendExercise({
-                    "userId": int(session["user_id"]), # didnt register
-                    "programName": row["programName"],
-                    "exerciseName": row["exerciseName"],
-                    "numSets": row["numSets"],
+                    "user_id": int(session["user_id"]), # didnt register
+                    "program_name": row["program_name"],
+                    "exercise_name": row["exercise_name"],
+                    "num_sets": row["num_sets"],
                     "increment": row["increment"],
-                    "minReps": row["minReps"],
-                    "maxReps": row["maxReps"],
-                    "order": row["order"],
+                    "min_reps": row["min_reps"],
+                    "max_reps": row["max_reps"],
+                    "exercise_order": row["exercise_order"],
                     "notes": row["notes"],
                     "unit": row["unit"],
                     "link": row["link"]
@@ -1615,8 +1615,8 @@ def templates():
             success_message = f"'{prog_name}' added to your programs!"
             my_programs.append(prog_name)
             appendProgram({
-                "userId": int(session["user_id"]),
-                "programName": prog_name,
+                "user_id": int(session["user_id"]),
+                "program_name": prog_name,
                 "notes": "",
                 "active": 1,
                 "show_links": 1
@@ -1635,8 +1635,8 @@ def logs():
         return redirect(url_for("login"))
 
     prog_data = getAllExercises() # all the programs
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])] # only the users programs
-    my_programs = list(set(row["programName"] for row in user_prog)) # list of the names of the users programs
+    user_prog = [row for row in prog_data if str(row["user_id"]) == str(session["user_id"])] # only the users programs
+    my_programs = list(set(row["program_name"] for row in user_prog)) # list of the names of the users programs
     date_format = session.get("settings", {}).get("date_format", 1)
     last_overall = getLastEnteredLog(session["user_id"])
 
@@ -1650,13 +1650,13 @@ def logs():
     selected_prog = request.args.get("program") or request.form.get("selected_prog")# selected prog
     if not selected_prog or selected_prog not in my_programs:
         if last_overall:
-            selected_prog = last_overall["program"]
+            selected_prog = last_overall["program_name"]
         else:
             selected_prog = my_programs[0] if my_programs else None
 
     selected_ex = request.args.get("exercise") or request.form.get("selected_ex")
-    exercises = [row for row in user_prog if row["programName"] == selected_prog]
-    exercise_names = [row["exerciseName"] for row in exercises]
+    exercises = [row for row in user_prog if row["program_name"] == selected_prog]
+    exercise_names = [row["exercise_name"] for row in exercises]
     if not selected_ex or selected_ex not in exercise_names:
         last_in_prog = getLastEnteredLog(session["user_id"], program=selected_prog)
         if last_in_prog:
@@ -1664,7 +1664,7 @@ def logs():
         else:
             selected_ex = exercise_names[0] if exercise_names else None
 
-    exercise_data = next((row for row in exercises if row["exerciseName"] == selected_ex), None)
+    exercise_data = next((row for row in exercises if row["exercise_name"] == selected_ex), None)
     num_sets = int(exercise_data["numSets"]) if exercise_data else 1
     selected_unit  = exercise_data["unit"] if exercise_data else "rep"
     #print(selected_unit)
@@ -1691,10 +1691,10 @@ def logs():
             log_notes = request.form.get("log_notes")
 
             matching = [row for row in user_data_exercise
-                        if str(row["userId"]) == str(session["user_id"]) and
-                        row["program"] == selected_prog and
-                        row["exerciseName"] == selected_ex and
-                        int(row["setNum"]) == selected_set and
+                        if str(row["user_id"]) == str(session["user_id"]) and
+                        row["program_name"] == selected_prog and
+                        row["exercise_name"] == selected_ex and
+                        int(row["set_num"]) == selected_set and
                         row["date"] == log_date and
                         float(row["weight"]) == float(log_weight) and
                         int(row["reps"]) == int(log_reps) and
@@ -1717,10 +1717,10 @@ def logs():
 
 
             matching = next((row for row in user_data_exercise
-                             if str(row["userId"]) == str(session["user_id"]) and
-                             row["program"] == selected_prog and
-                             row["exerciseName"] == selected_ex and
-                             int(row["setNum"]) == selected_set and
+                             if str(row["user_id"]) == str(session["user_id"]) and
+                             row["program_name"] == selected_prog and
+                             row["exercise_name"] == selected_ex and
+                             int(row["set_num"]) == selected_set and
                              row["date"] == orig_date and
                              float(row["weight"]) == float(orig_weight) and
                              int(row["reps"]) == int(orig_reps) and
@@ -1744,16 +1744,16 @@ def logs():
                     new_1rm = upd_weight * upd_reps
                 before = find_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
                 after = find_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
-                new_diff = round(new_1rm - before["1rm"], 3) if before else 0
+                new_diff = round(new_1rm - before["one_rm"], 3) if before else 0
                 new_diff_weight = round(upd_weight - before["weight"], 3) if before else 0
 
                 updateLog(matching["id"], {
                     "date": upd_date,
-                    "exerciseName": selected_ex,
-                    "setNum": selected_set,
+                    "exercise_name": selected_ex,
+                    "set_num": selected_set,
                     "weight": upd_weight,
                     "reps": upd_reps,
-                    "1rm": new_1rm,
+                    "one_rm": new_1rm,
                     "diff": new_diff,
                     "diff_weight": new_diff_weight,
                     "notes": upd_notes
@@ -1765,7 +1765,7 @@ def logs():
                     # print("I love you king julian")
                     # print(after)
                     updateLog(after["id"], {
-                        "diff": round(after["1rm"] - new_1rm, 3),
+                        "diff": round(after["one_rm"] - new_1rm, 3),
                         "diff_weight": round(after["weight"] - upd_weight, 3)
                     })
 
@@ -1798,7 +1798,7 @@ def logs():
                 # print(f"Updated {log['1rm']} {log['diff']} {log['diff_weight']}")
 
                 updateLog(log["id"], {
-                    "1rm": new_1rm,
+                    "one_rm": new_1rm,
                     "diff": new_diff,
                     "diff_weight": new_diff_weight
                 })
@@ -1811,9 +1811,9 @@ def logs():
 
     exercise_logs = [
         row for row in user_data_exercise
-        if row["program"] == selected_prog
-           and row["exerciseName"] == selected_ex
-           and int(row["setNum"]) == selected_set
+        if row["program_name"] == selected_prog
+           and row["exercise_name"] == selected_ex
+           and int(row["set_num"]) == selected_set
     ]
     visual_exercise_logs = [
         {**row, "date": iso_to_display(row["date"], date_format)}
@@ -1827,20 +1827,20 @@ def logs():
         df = pd.DataFrame(exercise_logs)
         df["weight"] = pd.to_numeric(df["weight"])
         df["reps"] = pd.to_numeric(df["reps"])
-        df["1rm"] = pd.to_numeric(df["1rm"])
+        df["one_rm"] = pd.to_numeric(df["one_rm"])
         df["diff"] = pd.to_numeric(df["diff"])
         df["diff_weight"] = pd.to_numeric(df["diff_weight"])
         stats = {
-            "best_1rm": round(df["1rm"].max(), 1),
-            "avg_1rm": round(df["1rm"].mean(), 1),
+            "best_1rm": round(df["one_rm"].max(), 1),
+            "avg_1rm": round(df["one_rm"].mean(), 1),
             "best_weight": round(df["weight"].max(), 1),
             "avg_reps": round(df["reps"].mean(), 1),
             "count": len(df),
-            "table": df[["weight", "reps", "1rm", "diff", "diff_weight"]].agg(
+            "table": df[["weight", "reps", "one_rm", "diff", "diff_weight"]].agg(
                 ["mean", "std", "min", "max"]).round(2).to_dict(orient="index")
         }
         df["date_display"] = df["date"].apply(lambda d: iso_to_display(d, date_format))
-        chart_data = df[["date", "date_display", "weight", "reps", "1rm", "diff", "diff_weight"]] \
+        chart_data = df[["date", "date_display", "weight", "reps", "one_rm", "diff", "diff_weight"]] \
             .sort_values("date").to_dict(orient="records")
 
     log_cap_warning = len(user_data_exercise) >= 1000
@@ -1879,18 +1879,18 @@ def deleted_logs():
             set_num = request.form.get("log_set")
 
             matching = [row for row in all_logs
-                        if str(row["userId"]) == str(session["user_id"])
+                        if str(row["user_id"]) == str(session["user_id"])
                         and int(row["status"]) == 0
                         and row["date"] == date
-                        and row["program"] == program
-                        and row["exerciseName"] == exercise
-                        and str(row["setNum"]) == str(set_num)]
+                        and row["program_name"] == program
+                        and row["exercise_name"] == exercise
+                        and str(row["set_num"]) == str(set_num)]
             if matching:
                 deleteLog(matching[0]["id"])
 
         elif action == "clear_all":
             matching = [row for row in all_logs
-                        if str(row["userId"]) == str(session["user_id"])
+                        if str(row["user_id"]) == str(session["user_id"])
                         and int(row["status"]) == 0]
             for row in matching:
                 deleteLog(row["id"])
@@ -1903,7 +1903,7 @@ def deleted_logs():
     deleted = [
                 {**row, "date": iso_to_display(row["date"], date_format)}
                for row in all_logs
-               if str(row["userId"]) == str(session["user_id"])
+               if str(row["user_id"]) == str(session["user_id"])
                and int(row["status"]) == 0]
 
     return render_template("deleted_logs.html", deleted=deleted)
@@ -1914,17 +1914,17 @@ def program_manifest():
         return jsonify({}), 401
 
     prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["userId"]) == str(session["user_id"])]
+    user_prog = [row for row in prog_data if str(row["user_id"]) == str(session["user_id"])]
 
     # Structure: { "Push": { "Bench Press": 3, "Incline DB": 4 }, "Pull": { ... } }
     manifest = {}
     for row in user_prog:
-        p_name = row["programName"]
-        e_name = row["exerciseName"]
+        p_name = row["program_name"]
+        e_name = row["exercise_name"]
         if e_name.strip():  # Skip empty placeholder strings
             if p_name not in manifest:
                 manifest[p_name] = {}
-            manifest[p_name][e_name] = int(row["numSets"])
+            manifest[p_name][e_name] = int(row["num_sets"])
 
     return jsonify(manifest)
 
@@ -1945,14 +1945,14 @@ def get_comparison_data():
             "date": row["date"],
             "weight": float(row["weight"]),
             "reps": int(row["reps"]),
-            "1rm": float(row["1rm"]),
+            "one_rm": float(row["one_rm"]),
             "diff": float(row["diff"]),
             "diff_weight": float(row["diff_weight"])
         }
         for row in user_data
-        if row["program"] == prog
-           and row["exerciseName"] == ex
-           and int(row["setNum"]) == int(set_num)
+        if row["program_name"] == prog
+           and row["exercise_name"] == ex
+           and int(row["set_num"]) == int(set_num)
            and int(row.get("status", 1)) == 1
     ]
 
@@ -2005,7 +2005,7 @@ def feedback():
                         nextFeedback = userFeedback[-1]["message_num"] + 1
 
                 appendFeedback({
-                    "userId": user_id,
+                    "user_id": user_id,
                     "type": message_type,
                     "location": message_location,
                     "message": message,
@@ -2046,7 +2046,7 @@ def feedback():
                     error_message = "Please enter a response."
                 else:
                     appendFeedback({
-                        "userId": user_id,
+                        "user_id": user_id,
                         "type": message_type,
                         "location": message_location,
                         "message": message_admin,
@@ -2057,14 +2057,14 @@ def feedback():
                     })
 
                     allFeedback = getAllFeedback()
-                    userFeedback = [row for row in allFeedback if str(row["userId"]) != "1"]
+                    userFeedback = [row for row in allFeedback if str(row["user_id"]) != "1"]
 
         for i in range(len(userFeedback)):
             userFeedback[i]["date"] = iso_to_display(userFeedback[i]["date"], date_format)
 
         threads = {}
         for row in userFeedback + adminFeedback:
-            key = (str(row["userId"]), str(row["message_num"]))
+            key = (str(row["user_id"]), str(row["message_num"]))
             if key not in threads:
                 threads[key] = {"original": None, "replies": []}
             if int(row["admin"]) == 0:
