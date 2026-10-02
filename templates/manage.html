@@ -51,7 +51,7 @@
         <div class="row align-items-end g-2">
             <div class="col-md-4">
                 <label class="form-label text-secondary">Select Program to Edit</label>
-                <select name="program" class="form-select" onchange="this.form.submit()">
+                <select name="program_name" class="form-select" onchange="this.form.submit()">
                     {% for prog in my_programs %}
                         <option value="{{ prog }}" {% if prog == selected_edit %}selected{% endif %}>{{ prog }}</option>
                     {% endfor %}
