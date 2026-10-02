@@ -675,7 +675,7 @@ def home():
     exercises_for_last_program = [row for row in user_ex if last and row["program_name"] == last["program_name"]]
     last_exercise_in_program = sorted(
         exercises_for_last_program,
-        key=lambda x: int(x["order"])
+        key=lambda x: int(x["exercise_order"])
     )[-1] if exercises_for_last_program else None
 
     workout_incomplete = last and last_exercise_in_program and (
@@ -740,7 +740,7 @@ def run():
 
     exercises = sorted(
         [row for row in user_ex if row["program_name"] == selected],
-        key=lambda x: int(x["order"])
+        key=lambda x: int(x["exercise_order"])
     )
 
     if not exercises:
@@ -768,9 +768,9 @@ def run():
             last_ex = last["exerciseName"]
             match = next((e for e in exercises if e["exerciseName"] == last_ex), None)
             if match:
-                current_index = int(match["order"]) - 1
+                current_index = int(match["exercise_order"]) - 1
                 if int(last["setNum"]) >= int(match["numSets"]):
-                    if int(match["order"]) == int(exercises[-1]["order"]):
+                    if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                         ex_index = 0
                     else:
                         ex_index = current_index + 1
@@ -842,16 +842,16 @@ def run():
 
             exercises = sorted(
                 [row for row in user_ex if row["program_name"] == selected],
-                key=lambda x: int(x["order"])
+                key=lambda x: int(x["exercise_order"])
             )
 
             quick_index = session.get("settings", {}).get("quick_indexing", 1)
             match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
             if quick_index == 1:
                 if match:
-                    current_index = int(match["order"]) - 1
+                    current_index = int(match["exercise_order"]) - 1
                     if set_num >= int(match["numSets"]):
-                        if int(match["order"]) == int(exercises[-1]["order"]):
+                        if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                             ex_index = current_index
                         else:
                             ex_index = current_index + 1
@@ -944,16 +944,16 @@ def run():
 
                 exercises = sorted(
                     [row for row in user_ex if row["program_name"] == selected],
-                    key=lambda x: int(x["order"])
+                    key=lambda x: int(x["exercise_order"])
                 )
 
                 quick_index = session.get("settings", {}).get("quick_indexing", 1) # if only the first couple logs are logged, dont go to the next page
                 match = next((e for e in exercises if e["exerciseName"] == exercise_name), None)
                 if quick_index == 1:
                     if match:
-                        current_index = int(match["order"]) - 1
+                        current_index = int(match["exercise_order"]) - 1
                         if lastSet:
-                            if int(match["order"]) == int(exercises[-1]["order"]):
+                            if int(match["exercise_order"]) == int(exercises[-1]["exercise_order"]):
                                 ex_index = current_index
                             else:
                                 ex_index = current_index + 1
@@ -1136,7 +1136,7 @@ def run_results():
 
     exercises = sorted(
         [row for row in user_ex if row["program_name"] == selected],
-        key=lambda x: int(x["order"])
+        key=lambda x: int(x["exercise_order"])
     )
 
     # Get all unique dates for this program, sorted newest first
@@ -1284,13 +1284,13 @@ def manage():
 
     edit_exercises = sorted(
         [row for row in user_ex if row["program_name"] == selected_edit],
-        key=lambda x: int(x["order"])
+        key=lambda x: int(x["exercise_order"])
     )
 
     open_order = 1
 
     for ex in edit_exercises:
-        if ex["order"] == open_order:
+        if ex["exercise_order"] == open_order:
             open_order += 1
         else:
             break
@@ -1415,9 +1415,9 @@ def manage():
                 else:
                     if new_order != open_order:
                         for ex in edit_exercises:
-                            if int(ex["order"]) >= new_order:
-                                # next_order = max(int(e["order"]) for e in edit_exercises) + 1
-                                updateExercise(ex["id"], {"exercise_order": ex["order"] + 1})
+                            if int(ex["exercise_order"]) >= new_order:
+                                # next_order = max(int(e["exercise_order"]) for e in edit_exercises) + 1
+                                updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] + 1})
 
                     appendExercise({
                         "user_id": int(session["user_id"]),
@@ -1503,20 +1503,20 @@ def manage():
                     error_message = "Each set needs to have the max range to be more than or equal to the min range."
                 else:
 
-                    orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    orig_order = next(e["exercise_order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
                     for ex in edit_exercises:
                         if ex["exerciseName"] == exercise_name:
                             continue
-                        elif (int(ex["order"]) <= upd_order) and (int(ex["order"]) > orig_order):
-                            updateExercise(ex["id"], {"exercise_order": ex["order"] - 1})
-                        elif (int(ex["order"]) >= upd_order) and (int(ex["order"]) < orig_order):
-                            updateExercise(ex["id"], {"exercise_order": ex["order"] + 1})
+                        elif (int(ex["exercise_order"]) <= upd_order) and (int(ex["exercise_order"]) > orig_order):
+                            updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] - 1})
+                        elif (int(ex["exercise_order"]) >= upd_order) and (int(ex["exercise_order"]) < orig_order):
+                            updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] + 1})
 
                     # swapped_name = None
                     # for ex in edit_exercises:
-                    #     if int(ex["order"]) == upd_order and ex["exerciseName"] != exercise_name:
+                    #     if int(ex["exercise_order"]) == upd_order and ex["exerciseName"] != exercise_name:
                     #         swapped_name = ex["exerciseName"]
-                    #         orig_order = next(e["order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
+                    #         orig_order = next(e["exercise_order"] for e in edit_exercises if e["exerciseName"] == exercise_name)
                     #         updateExercise(ex["id"], {"exercise_order": int(orig_order)})
                     #         break
 
@@ -1556,10 +1556,10 @@ def manage():
 
     edit_exercises = sorted(
         [row for row in user_ex if row["program_name"] == selected_edit],
-        key=lambda x: int(x["order"])
+        key=lambda x: int(x["exercise_order"])
     ) if selected_edit else []
 
-    next_order = (max(int(e["order"]) for e in edit_exercises) + 1) if edit_exercises else 1
+    next_order = (max(int(e["exercise_order"]) for e in edit_exercises) + 1) if edit_exercises else 1
     # print(selected_prog["show_links"])
     # print(selected_prog)
     # print("fgewoihefwoifweo")
