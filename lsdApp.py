@@ -622,11 +622,12 @@ def settings():
         print(old_password)
         print(new_password)
         print(confirm_new_password)
+        print(session["settings"])
 
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
-        elif not checkPassword(old_password, session["password"]):
-            print(checkPassword(old_password, session["password"]))
+        elif not checkPassword(old_password, session["settings"]["password"]):
+            print(checkPassword(old_password, session["settings"]["password"]))
             error_message = "Incorrect password."
         elif new_password != confirm_new_password:
             error_message = "Passwords don't match."
@@ -644,8 +645,9 @@ def settings():
     elif request.method == "POST" and request.form.get("action") == "save_account":
         password = request.form.get("password")
         user_name = request.form.get("user_name")
+        print(session["settings"])
 
-        if checkPassword(password, session["password"]):
+        if checkPassword(password, session["settings"]["password"]):
             error_message = "Incorrect password."
         else:
             updateUser(session["user_id"], {
