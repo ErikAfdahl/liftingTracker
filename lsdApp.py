@@ -619,10 +619,14 @@ def settings():
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_new_password")
+        print(old_password)
+        print(new_password)
+        print(confirm_new_password)
 
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
-        elif checkPassword(old_password, session["password"]):
+        elif not checkPassword(old_password, session["password"]):
+            print(checkPassword(old_password, session["password"]))
             error_message = "Incorrect password."
         elif new_password != confirm_new_password:
             error_message = "Passwords don't match."
