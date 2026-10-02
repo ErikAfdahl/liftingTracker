@@ -615,6 +615,45 @@ def settings():
 
         success_message = "Settings saved!" if request.args.get("success") else None
 
+    elif request.method == "POST" and request.form.get("action") == "save_password":
+        old_password = request.form.get("old_password")
+        new_password = request.form.get("new_password")
+        confirm_new_password = request.form.get("confirm_new_password")
+
+        if not old_password or not new_password or not confirm_new_password:
+            error_message = "Please fill in all fields."
+        elif checkPassword(old_password, session["password"]):
+            error_message = "Incorrect password."
+        elif new_password != confirm_new_password:
+            error_message = "Passwords don't match."
+        else:
+            updateUser(session["user_id"], {
+                "password": hashPassword(new_password)
+            })
+
+            session["settings"] = {
+                "password": hashPassword(new_password)
+            }
+
+        success_message = "Password Updated!" if request.args.get("success") else None
+
+    elif request.method == "POST" and request.form.get("action") == "save_account":
+        password = request.form.get("password")
+        user_name = request.form.get("user_name")
+
+        if checkPassword(password, session["password"]):
+            error_message = "Incorrect password."
+        else:
+            updateUser(session["user_id"], {
+                "user_name": user_name
+            })
+
+            session["settings"] = {
+                "user_name": user_name
+            }
+
+        success_message = "Username Updated!" if request.args.get("success") else None
+
     users = getAllUsers()
     user = next((u for u in users if str(u["user_id"]) == str(session["user_id"])), None)
 
@@ -638,7 +677,10 @@ def settings():
 
     print(f"Improvement coefficient: {settings['improvement_coef']}")
 
-    return render_template("settings.html", settings=settings, success_message=success_message, error_message=error_message)
+    return render_template("settings.html",
+                           settings=settings,
+                           success_message=success_message,
+                           error_message=error_message)
 
 @app.route("/home")
 def home():

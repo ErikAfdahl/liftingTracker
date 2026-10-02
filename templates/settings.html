@@ -297,4 +297,66 @@
     </div>
 </form>
 
+<form method="POST">
+    <input type="hidden" name="action" value="save_account">
+
+    <div class="mb-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h5 class="fw-bold mb-0">Username</h5>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <span class="fw-bold d-block mb-3">Change Password</span>
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control"
+                           placeholder="Password" autocomplete="current-password">
+                </div>
+                <div class="mb-3">
+                    <input type="text" name="user_name" class="form-control"
+                           placeholder="New Username" autocomplete="new-username">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save Password</button>
+        <a href="/home" class="btn btn-secondary ms-2">Cancel</a>
+    </div>
+</form>
+
+<form method="POST">
+    <input type="hidden" name="action" value="save_password">
+
+    <div class="mb-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h5 class="fw-bold mb-0">Password</h5>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <span class="fw-bold d-block mb-3">Change Password</span>
+                <div class="mb-3">
+                    <input type="password" name="old_password" class="form-control"
+                           placeholder="Old Password" autocomplete="current-password">
+                </div>
+                <div class="mb-3">
+                    <input type="password" name="new_password" class="form-control"
+                           placeholder="New Password" autocomplete="new-password">
+                </div>
+                <div class="mb-0">
+                    <input type="password" name="confirm_password" class="form-control"
+                           placeholder="Confirm New Password" autocomplete="new-password">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save Password</button>
+        <a href="/home" class="btn btn-secondary ms-2">Cancel</a>
+    </div>
+</form>
+
 {% endblock %}
