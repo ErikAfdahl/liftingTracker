@@ -89,15 +89,15 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-baseline gap-2">
-                <span>{{ ex.exerciseName }}</span>
+                <span>{{ ex.exercise_name }}</span>
             </div>
         </div>
         <div class="card-body">
             {% for s in range(1, ex.num_sets | int + 1) %}
-                {% set key = ex.exerciseName ~ "_" ~ s %}
+                {% set key = ex.exercise_name ~ "_" ~ s %}
                 {% set last = last_entries.get(key) %}
                 {% set rec = recommendations.get(key) %}
-                {% set absolute_last = prev_entries.get(ex.exerciseName) %}
+                {% set absolute_last = prev_entries.get(ex.exercise_name) %}
 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-start mb-1">
@@ -141,7 +141,7 @@
                     <form method="POST" action="/run" class="mt-2">
                         <input type="hidden" name="action" value="log_set">
                         <input type="hidden" name="selected_program" value="{{ selected }}">
-                        <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                        <input type="hidden" name="exercise_name" value="{{ ex.exercise_name }}">
                         <input type="hidden" name="set_num" value="{{ s }}">
                         <input type="hidden" name="ex_index" value="{{ ex_index }}">
 
@@ -153,7 +153,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">Weight (lbs)</label>
-                                {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
+                                {% set current_max_reps = ex.max_reps.split(',')[s - 1] if ex.max_reps else '' %}
 
                                 {% set raw_weight = '' %}
                                 {% if current_max_reps|int == 0 %}
@@ -173,8 +173,8 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">{{ ex.unit | capitalize }}s</label>
-                                {% set current_max_reps = ex.maxReps.split(',')[s - 1] if ex.maxReps else '' %}
-                                {% set current_min_reps = ex.minReps.split(',')[s - 1] if ex.minReps else '' %}
+                                {% set current_max_reps = ex.max_reps.split(',')[s - 1] if ex.max_reps else '' %}
+                                {% set current_min_reps = ex.min_reps.split(',')[s - 1] if ex.min_reps else '' %}
 
                                 <input type="number" id="reps_{{ s }}" name="reps_{{ s }}" class="form-control form-control-sm" step="1" min="0"
                                        value="{% if current_max_reps|int == 0 %}{% if reps_autofill_absent == 1 and last %}{{ last.reps }}{% elif reps_autofill_absent == 2 and absolute_last %}{{ absolute_last.reps }}{% endif %}{% else %}{% if reps_autofill == 3 and rec_reps.get(key) %}{{ rec_reps.get(key) }}{% elif reps_autofill == 3 and last %}{{ last.reps }}{% elif reps_autofill == 1 and last %}{{ last.reps }}{% else %}{% endif %}{% endif %}" required>
@@ -208,7 +208,7 @@
             <form id="logAllForm" method="POST" action="/run">
                 <input type="hidden" name="action" value="log_all_sets">
                 <input type="hidden" name="selected_program" value="{{ selected }}">
-                <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                <input type="hidden" name="exercise_name" value="{{ ex.exercise_name }}">
                 <input type="hidden" name="ex_index" value="{{ ex_index }}">
             </form>
             <button type="button" id="logAllBtn" class="btn btn-success w-100 mt-3">Log All</button>
@@ -269,7 +269,7 @@
 
         <!-- Back / Next navigation -->
         <div class="d-flex justify-content-between align-items-center">
-            <a href="/logs?program={{ selected | urlencode }}&exercise={{ ex.exerciseName | urlencode }}"
+            <a href="/logs?program={{ selected | urlencode }}&exercise={{ ex.exercise_name | urlencode }}"
                class="text-secondary small text-decoration-none">
                 View Logs
             </a>

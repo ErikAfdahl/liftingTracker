@@ -52,10 +52,10 @@
                     {% set exercises = user_ex | selectattr("programName", "equalto", prog) | sort(attribute="order") | list %}
                     {% for ex in exercises %}
                     <div class="mb-2">
-                        <span class="fw-bold">{{ ex.order }}. {{ ex.exerciseName }}</span><br>
+                        <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span><br>
                         <small class="text-secondary">
-                            {{ ex.numSets }} sets &nbsp;·&nbsp;
-                            {{ ex.minReps }}–{{ ex.maxReps }} {{ ex.unit }}s &nbsp;·&nbsp;
+                            {{ ex.num_sets }} sets &nbsp;·&nbsp;
+                            {{ ex.min_reps }}–{{ ex.max_reps }} {{ ex.unit }}s &nbsp;·&nbsp;
                             {{ ex.increment }} lb increments
                         </small><br>
                         {% if ex.notes %}

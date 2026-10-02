@@ -647,7 +647,7 @@ def home():
     user_data = getUserLogs(session["user_id"])
     prog_data = getAllPrograms()
     my_programs = [row["program_name"] for row in prog_data if (str(row["user_id"]) == str(session["user_id"])) and (row["active"] == 1)]
-    num_prog = len(my_programs)
+    # num_prog = len(my_programs)
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
     today = now.strftime("%Y-%m-%d")
