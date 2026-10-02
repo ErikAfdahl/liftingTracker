@@ -1,3 +1,6 @@
+# For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish
+# but have eternal life.
+
 from flask import Flask, render_template, request, redirect, url_for, session, make_response, jsonify
 from datetime import *
 import pytz
@@ -1288,6 +1291,7 @@ def manage():
     )
 
     open_order = 1
+    max_order = edit_exercises[-1]["exercise_order"] + 1
 
     for ex in edit_exercises:
         if ex["exercise_order"] == open_order:
@@ -1559,7 +1563,7 @@ def manage():
         key=lambda x: int(x["exercise_order"])
     ) if selected_edit else []
 
-    next_order = (max(int(e["exercise_order"]) for e in edit_exercises) + 1) if edit_exercises else 1
+    # next_order = (max(int(e["exercise_order"]) for e in edit_exercises) + 1) if edit_exercises else 1
     selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
 
     return render_template("manage.html",
@@ -1567,6 +1571,7 @@ def manage():
                            selected_edit=selected_edit,
                            edit_exercises=edit_exercises,
                            next_order=open_order,
+                           max_order=max_order,
                            show_link=int(selected_prog["show_links"]),
                            active=int(selected_prog["active"]),
                            max_exercises=max_exercises,

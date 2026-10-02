@@ -130,6 +130,7 @@
 </div>
 
     <!-- Add Exercise -->
+{% if max_exercises > max_order %}
     <div class="card mb-4">
         <div class="card-header">
             <a class="text-decoration-none text-light" data-bs-toggle="collapse" href="#addExercise">+ Add Exercise</a>
@@ -176,7 +177,7 @@
                         </div>
                         <div class="col-md-1">
                             <label class="form-label text-secondary small">Order</label>
-                            <input type="number" name="new_order" class="form-control form-control-sm" value="{{ next_order }}" min="1" max="{{ max_exercises }}">
+                            <input type="number" name="new_order" class="form-control form-control-sm" value="{{ next_order }}" min="1" max="{{ max_order }}">
                         </div>
                     </div>
                     <div class="row g-2 align-items-end">
@@ -198,6 +199,12 @@
             </div>
         </div>
     </div>
+{% else %}
+    <div class="alert alert-success alert-dismissible fade show">
+        Max exercises added.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
 
     <hr>
 
@@ -278,7 +285,7 @@
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Order</label>
-                                <input type="number" name="upd_order" class="form-control form-control-sm" value="{{ ex.exercise_order }}" min="1" max="{{ max_exercises }}">
+                                <input type="number" name="upd_order" class="form-control form-control-sm" value="{{ ex.exercise_order }}" min="1" max="{{ max_order }}">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label text-secondary small">Notes</label>
