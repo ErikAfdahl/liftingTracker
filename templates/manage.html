@@ -210,9 +210,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <span class="fw-bold">{{ ex.order }}. {{ ex.exerciseName }}</span>
+                        <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span>
                         <span class="text-secondary small ms-2">
-                            {{ ex.numSets }} sets · {{ ex.minReps }}–{{ ex.maxReps }} {{ ex.unit }}s · {{ ex.increment }} lb increments
+                            {{ ex.numSets }} sets · {{ ex.min_reps }}–{{ ex.max_reps }} {{ ex.unit }}s · {{ ex.increment }} lb increments
                         </span>
                         {% if ex.notes %}
                             <br><small class="text-secondary fst-italic">"{{ ex.notes }}"</small>
@@ -225,10 +225,10 @@
                         <button class="btn btn-secondary btn-sm"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#edit_{{ loop.index }}">Edit</button>
-                        <form method="POST" onsubmit="return confirm('Delete {{ ex.exerciseName }}?')">
+                        <form method="POST" onsubmit="return confirm('Delete {{ ex.exercise_name }}?')">
                             <input type="hidden" name="action" value="delete_exercise">
                             <input type="hidden" name="selected_program" value="{{ selected_edit }}">
-                            <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                            <input type="hidden" name="exercise_name" value="{{ ex.exercise_name }}">
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     </div>
@@ -240,11 +240,11 @@
                     <form method="POST">
                         <input type="hidden" name="action" value="save_exercise">
                         <input type="hidden" name="selected_program" value="{{ selected_edit }}">
-                        <input type="hidden" name="exercise_name" value="{{ ex.exerciseName }}">
+                        <input type="hidden" name="exercise_name" value="{{ ex.exercise_name }}">
                         <div class="row g-2 mb-2">
                             <div class="col-md-3">
                                 <label class="form-label text-secondary small">Exercise Name</label>
-                                <input type="text" name="upd_name" class="form-control form-control-sm" value="{{ ex.exerciseName }}">
+                                <input type="text" name="upd_name" class="form-control form-control-sm" value="{{ ex.exercise_name }}">
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Sets</label>
@@ -256,11 +256,11 @@
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Min {{ ex.unit }}s</label>
-                                <input type="text" name="upd_min" class="form-control form-control-sm" value="{{ ex.minReps }}" min="0">
+                                <input type="text" name="upd_min" class="form-control form-control-sm" value="{{ ex.min_reps }}" min="0">
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Max {{ ex.unit }}s</label>
-                                <input type="text" name="upd_max" class="form-control form-control-sm" value="{{ ex.maxReps }}" min="0">
+                                <input type="text" name="upd_max" class="form-control form-control-sm" value="{{ ex.max_reps }}" min="0">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-secondary small">Unit</label>
@@ -278,7 +278,7 @@
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Order</label>
-                                <input type="number" name="upd_order" class="form-control form-control-sm" value="{{ ex.order }}" min="1" max="{{ max_exercises }}">
+                                <input type="number" name="upd_order" class="form-control form-control-sm" value="{{ ex.exercise_order }}" min="1" max="{{ max_exercises }}">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label text-secondary small">Notes</label>
