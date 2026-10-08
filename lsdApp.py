@@ -744,9 +744,14 @@ def home():
     for prog in my_programs:
         print(f"Pprogram {prog}")
         last_log = getLastEnteredLog(session["user_id"], prog)
-        last_entered.append(last_log)
         print(f"Last log {last_log}")
-    last_entered.sort(key=lambda x: x["date"])
+        today = datetime.strptime(today, "%Y-%m-%d")
+        last_date = datetime.strptime(last_log["date"], "%Y-%m-%d")
+        print((today - last_date).days)
+        last_log["reps"] = (today - last_date).days
+        print(f"reps {last_log['reps']}")
+        last_entered.append(last_log)
+    last_entered.sort(key=lambda x: x["reps"])
     print(f" final list {last_entered}")
 
     return render_template("home.html",
