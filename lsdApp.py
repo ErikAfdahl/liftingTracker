@@ -745,7 +745,7 @@ def home():
         print(f"Pprogram {prog}")
         last_log = getLastEnteredLog(session["user_id"], prog)
         print(f"Last log {last_log}")
-        today = datetime.strptime(today, "%Y-%m-%d")
+        today = datetime.strptime(str(today), "%Y-%m-%d")
         last_date = datetime.strptime(last_log["date"], "%Y-%m-%d")
         print((today - last_date).days)
         print(f"dates {today} {last_date}")
