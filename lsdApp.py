@@ -739,17 +739,19 @@ def home():
         return redirect(url_for("run"))
     date = iso_to_display(last["date"], session.get("settings", {}).get("date_format", 1)) if last else None
 
-    # last_entered = []
-    #
-    # for prog in my_programs:
-    #     last_log = getLastEnteredLog(session["user_id"], prog["program_name"])
-    #     last_entered.append(last_log)
-    # last_entered = sorted(last_entered, key=lambda x: x[1], reverse=True)
+    last_entered = []
+
+    for prog in my_programs:
+        last_log = getLastEnteredLog(session["user_id"], prog["program_name"])
+        last_entered.append((last_log["date"], last_log["program_name"]))
+    last_entered.sort(key=lambda x: x[0])
+    print(last_entered)
 
     return render_template("home.html",
                            username=session["username"],
                            user_ex=user_ex,
                            my_programs=my_programs,
+                           programs_sorted=last_entered,
                            user_data=user_data,
                            log_cap_warning=log_cap_warning,
                            welcome_message=welcome_message,
