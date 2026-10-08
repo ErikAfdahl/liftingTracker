@@ -744,7 +744,8 @@ def home():
     for prog in my_programs:
         print(prog)
         last_log = getLastEnteredLog(session["user_id"], prog)
-        last_entered.append((last_log["date"], last_log["program_name"]))
+        last_entered.append(last_log)
+        print(last_log)
     last_entered.sort(key=lambda x: x[0])
     print(last_entered)
 
