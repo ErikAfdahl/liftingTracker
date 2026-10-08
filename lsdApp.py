@@ -748,6 +748,7 @@ def home():
         today = datetime.strptime(today, "%Y-%m-%d")
         last_date = datetime.strptime(last_log["date"], "%Y-%m-%d")
         print((today - last_date).days)
+        print(f"dates {today} {last_date}")
         last_log["reps"] = (today - last_date).days
         print(f"reps {last_log['reps']}")
         last_entered.append(last_log)
