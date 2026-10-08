@@ -696,6 +696,7 @@ def home():
     user_data = getUserLogs(session["user_id"])
     prog_data = getAllPrograms()
     my_programs = [row["program_name"] for row in prog_data if (str(row["user_id"]) == str(session["user_id"])) and (row["active"] == 1)]
+    # my_programs.sort(key=lambda row: row["exercise_order"])
     # num_prog = len(my_programs)
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -737,6 +738,13 @@ def home():
     if workout_incomplete and not forced_home and quick_resume == 1:
         return redirect(url_for("run"))
     date = iso_to_display(last["date"], session.get("settings", {}).get("date_format", 1)) if last else None
+
+    # last_entered = []
+    #
+    # for prog in my_programs:
+    #     last_log = getLastEnteredLog(session["user_id"], prog["program_name"])
+    #     last_entered.append(last_log)
+    # last_entered = sorted(last_entered, key=lambda x: x[1], reverse=True)
 
     return render_template("home.html",
                            username=session["username"],
@@ -1363,7 +1371,8 @@ def manage():
                     "program_name": new_program_name,
                     "notes": "",
                     "active": 1,
-                    "show_links": 0
+                    "show_links": 0,
+                    "repeats": 0
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
