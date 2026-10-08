@@ -746,7 +746,7 @@ def home():
         last_log = getLastEnteredLog(session["user_id"], prog)
         last_entered.append(last_log)
         print(f"Last log {last_log}")
-    last_entered.sort(key=lambda x: x[0])
+    last_entered.sort(key=lambda x: x["date"])
     print(f" final list {last_entered}")
 
     return render_template("home.html",
