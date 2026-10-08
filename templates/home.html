@@ -47,10 +47,10 @@
         {% for prog in programs_sorted %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <div class="card-header">{{ prog }}</div>
+                <div class="card-header">{{ prog["program_name"] }}</div>
                 <div class="card-body">
-                    {% set prog_data = user_programs | selectattr("program_name", "equalto", prog) | first %}
-                    {% set exercises = user_ex | selectattr("program_name", "equalto", prog[1]) | sort(attribute="order") | list %}
+                    {% set prog_data = user_programs | selectattr("program_name", "equalto", prog["program_name"]) | first %}
+                    {% set exercises = user_ex | selectattr("program_name", "equalto", prog["program_name"]) | sort(attribute="order") | list %}
                     {% for ex in exercises %}
                     <div class="mb-2">
                         <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span><br>
@@ -76,8 +76,8 @@
                     {% endfor %}
                 </div>
                 <div class="card-footer d-flex gap-2">
-                    <a href="/run?program={{ prog }}" class="btn btn-primary btn-sm w-100">Run</a>
-                    <a href="/manage?program={{ prog }}" class="btn btn-secondary btn-sm w-100">Edit</a>
+                    <a href="/run?program={{ prog['program_name'] }}" class="btn btn-primary btn-sm w-100">Run</a>
+                    <a href="/manage?program={{ prog['program_name'] }}" class="btn btn-secondary btn-sm w-100">Edit</a>
                 </div>
             </div>
         </div>
