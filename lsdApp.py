@@ -1348,7 +1348,9 @@ def manage():
     )
 
     open_order = 1
-    max_order = edit_exercises[-1]["exercise_order"] + 1
+    max_order = 0
+    if edit_exercises:
+        max_order = edit_exercises[-1]["exercise_order"] + 1
 
     show_link = int(selected_prog["show_links"])
     active = int(selected_prog["active"])
