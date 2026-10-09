@@ -742,18 +742,15 @@ def home():
     last_entered = []
 
     for prog in my_programs:
-        # print(f"Pprogram {prog}")
         last_log = getLastEnteredLog(session["user_id"], prog)
-        # print(f"Last log {last_log}")
-        # today = datetime.strptime(str(today), "%Y-%m-%d")
-        # last_date = datetime.strptime(last_log["date"], "%Y-%m-%d")
-        # print((today - last_date).days)
-        # print(f"dates {today} {last_date}")
-        # last_log["reps"] = (today - last_date).days
-        # print(f"reps {last_log['reps']}")
-        last_entered.append(last_log)
-    last_entered.sort(key=lambda x: x["date"])
-    # print(f" final list {last_entered}")
+        if last_log:
+            last_entered.append(last_log)
+        else:
+            last_entered.append({"program_name": prog, "date": None})
+
+    # Never-logged programs first, then oldest -> newest
+    last_entered.sort(key=lambda x: (x["date"] is not None, x["date"] or ""))
+    print(f" final list {last_entered}")
 
     return render_template("home.html",
                            username=session["username"],
@@ -819,12 +816,8 @@ def run():
                                selected=None,
                                today=""
                                )
-
-
     success_message = None
     error_message = ""
-
-
     ex_index = request.args.get("ex_index", type=int)
 
     if ex_index is None:
