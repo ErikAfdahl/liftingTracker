@@ -1348,7 +1348,7 @@ def manage():
     )
 
     open_order = 1
-    max_order = 0
+    max_order = 1
     if edit_exercises:
         max_order = edit_exercises[-1]["exercise_order"] + 1
 
