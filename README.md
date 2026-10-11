@@ -8,7 +8,7 @@ A full-stack web app for logging workouts, tracking progress with estimated 1RM,
 getting data-driven recommendations for your next session. Built and maintained solo since
 March 2026, and used regularly by about a dozen lifters.
 
-![Run Program screen](Screenshot%202026-10-02%20134126.png)
+![Run Program screen showing last result, streaks, and recommendation](screenshots/run-program.png)
 
 ## Why I built it
 
@@ -30,8 +30,16 @@ and the ability to add any feature I wanted. So I rebuilt it as a web app.
   weight increments.
 - **Settings:** Choose what appears on screen, date format, autofill source, and default
   state of the "include" switches.
+- **Accounts:** Registration and login with hashed passwords, plus in-app username and
+  password changes.
 - **Quality-of-life:** Quick indexing (jump to the next exercise after the last set) and
   quick resume (return to where you left off).
+
+## Screenshots
+
+<img src="screenshots/results.png" width="32%"> <img src="screenshots/logs-chart.png" width="32%"> <img src="screenshots/manage-programs.png" width="32%">
+
+*Left to right: session comparison, analytics with overlayable charts, program management.*
 
 ## Why estimated 1RM instead of volume?
 
@@ -43,18 +51,18 @@ itself) and tracks progress on that instead.
 ## How recommendations work
 
 Each exercise has a rep range (min and max), a weight increment, and an "improvement
-coefficient" (default 0.25) that defines what counts as a *significant* miss or overshoot.
+coefficient" (e.g., 0.25) that defines what counts as a *significant* miss or overshoot.
 The recommendation depends on the reps from your last session:
 
 | Case | Condition (example: 6–8 range) | Recommendation |
 |------|-------------------------------|----------------|
-| 1 | Reps far above the max (> max × (1 + coefficient)) | Solve Epley for weight using last 1RM and **min** reps; round to increment |
-| 2 | Reps far below the min (< min × (1 − coefficient)) | Same, using **max** reps |
+| 1 | Reps far above the max (at or above max × (1 + coefficient)) | Solve Epley for weight using last 1RM and **min** reps; round to increment |
+| 2 | Reps far below the min (below min × (1 − coefficient)) | Same, using **max** reps |
 | 3 | Reps at or above max | Same weight + one increment, min reps |
 | 4 | Reps below min − 1 | Same weight − one increment, max reps |
 | 5 | Reps from min − 1 to max − 1 | Same weight, one more rep |
 
-Cases 1 and 2 are checked first, so large jumps are handled before the single-increment
+The significant over/undershoot cases (1 and 2) are checked before the single-step
 adjustments. Setting min and max to 0 disables recommendations, and setting them equal
 shows a target without recommending.
 
@@ -66,29 +74,52 @@ shows a target without recommending.
   exercise can have its own range without a separate table.
 - **User preferences live alongside account data**, so settings follow the user across
   devices.
-- **Passwords are hashed**, and a built-in feedback form lets users report problems
-  without needing to contact me directly.
+- **Passwords are hashed with bcrypt**, and a built-in feedback form lets users report
+  problems without needing to contact me directly.
 
 ## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Python, Flask |
-| Frontend | HTML, CSS, JavaScript, [chart library] |
-| Database | Supabase (PostgreSQL) |
+| Backend | Python, Flask, bcrypt |
+| Frontend | HTML, CSS, JavaScript (charting code adapted from an online example) |
+| Database | Supabase (PostgreSQL) with Row Level Security |
 | Hosting / deploy | Render, deployed from GitHub |
+
+## Project structure
+
+```
+lsdApp.py          Flask routes and application logic
+db.py              Supabase data-access layer
+templates/         HTML templates
+requirements.txt   Python dependencies
+.env.example       Environment variables the app expects
+```
+
+The app reads `SUPABASE_URL`, `SUPABASE_KEY`, and `SECRET_KEY` from environment
+variables. The database schema is not included in this repository, so the app can't be
+run locally from the code alone.
+
+## Known limitations
+
+- Rep ranges are stored as delimited strings. A normalized per-set table would be the
+  better design at larger scale.
+- The Epley estimate is less reliable at very high rep counts.
+- The backend is two modules. As the app grows, it would be split into separate modules
+  for routes, recommendations, and data access.
+- There is no automated test suite yet.
 
 ## Status and roadmap
 
-Current version: 3.3.1. Planned work:
+Active development. The in-app Updates list tracks the version history. Planned work:
 
-- [ ] Per-exercise choice of 1RM formula (the Epley estimate is less reliable at very high reps)
+- [ ] Per-exercise choice of 1RM formula
 - [ ] Unit tests for the recommendation engine
-- [ ] Allow users to share programs by sharing a unique 6-digit alphanumerical code corresponding to each program
-- [ ] Allow users to select an interval of time to display on charts
+- [ ] Share programs with a unique 6-character alphanumeric code
+- [ ] Select a time interval to display on charts
 
 ## About
 
 Built by [Erik Afdahl](https://www.linkedin.com/in/erik-afdahl-5a071b3a7), a Computer
-Science and Statistics student at Gustavus Adolphus College. The source is private; I'm
-happy to walk through the code or demo the app.
+Science and Statistics student at Gustavus Adolphus College. The source is viewable for
+evaluation under a view-only license (see [LICENSE](LICENSE)).

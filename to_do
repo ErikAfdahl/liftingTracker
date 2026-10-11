@@ -3,6 +3,6 @@ add a timer potentially (probably not)
 add a least squares regression line to charts
 add an option to change time zone
 add an option to only display an interval of time in the graph
-in feedback, users do not need to see the feedback number, date might be helpful to display
-finish feedback stuff
+in feedback date might be helpful to display
+allow admins to respond to user feedback
 allow users to input codes to copy programs
