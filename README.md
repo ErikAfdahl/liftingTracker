@@ -102,8 +102,7 @@ run locally from the code alone.
 
 ## Known limitations
 
-- Rep ranges are stored as delimited strings. A normalized per-set table would be the
-  better design at larger scale.
+- Rep ranges are stored as delimited strings (to allow users to make rep-ranges set independent).
 - The Epley estimate is less reliable at very high rep counts.
 - The backend is two modules. As the app grows, it would be split into separate modules
   for routes, recommendations, and data access.
