@@ -36,7 +36,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label text-secondary small">Exercise</label>
-                <select name="exercise" class="form-select" onchange="this.form.submit()">
+                <select name="exercise_name" class="form-select" onchange="this.form.submit()">
                     {% for ex in exercise_names %}
                         <option value="{{ ex }}" {% if ex == selected_ex %}selected{% endif %}>{{ ex }}</option>
                     {% endfor %}
