@@ -750,7 +750,7 @@ def home():
 
     # Never-logged programs first, then oldest -> newest
     last_entered.sort(key=lambda x: (x["date"] is not None, x["date"] or ""))
-    print(f" final list {last_entered}")
+    # print(f" final list {last_entered}")
 
     return render_template("home.html",
                            username=session["username"],
@@ -1033,7 +1033,6 @@ def run():
     rec_weights = {}
     rec_reps = {}
     log_all_toggle = {}
-
 
     for ex in exercises:
         minRepRange = [int(x.strip()) for x in str(ex["min_reps"]).split(",")]
@@ -1338,7 +1337,13 @@ def manage():
     if not selected_edit or selected_edit not in my_programs:
         selected_edit = my_programs[0] if my_programs else None
 
-    selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
+    if user_programs:
+        selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
+        show_link = int(selected_prog["show_links"])
+        active = int(selected_prog["active"])
+    else:
+        show_link = 1
+        active = 1
 
     action = request.form.get("action")
 
@@ -1352,8 +1357,7 @@ def manage():
     if edit_exercises:
         max_order = edit_exercises[-1]["exercise_order"] + 1
 
-    show_link = int(selected_prog["show_links"])
-    active = int(selected_prog["active"])
+
 
     for ex in edit_exercises:
         # print(f"exercise {ex['exercise_name']} order {ex['exercise_order']}")
