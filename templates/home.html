@@ -50,7 +50,7 @@
                 <div class="card-header">{{ prog["program_name"] }}</div>
                 <div class="card-body">
                     {% set prog_data = user_programs | selectattr("program_name", "equalto", prog["program_name"]) | first %}
-                    {% set exercises = user_ex | selectattr("program_name", "equalto", prog["program_name"]) | sort(attribute="order") | list %}
+                    {% set exercises = user_ex | selectattr("program_name", "equalto", prog["program_name"]) | sort(attribute="exercise_order") | list %}
                     {% for ex in exercises %}
                     <div class="mb-2">
                         <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span><br>
