@@ -750,6 +750,11 @@ def home():
 
     # Never-logged programs first, then oldest -> newest
     last_entered.sort(key=lambda x: (x["date"] is not None, x["date"] or ""))
+
+    print("this is to test")
+    for i in last_entered:
+        print(i)
+
     # print(f" final list {last_entered}")
 
     return render_template("home.html",
