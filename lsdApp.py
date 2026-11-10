@@ -1700,7 +1700,7 @@ def templates():
     ex_data = getAllExercises()
     program_data = getAllPrograms()
     user_prog = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
-    my_programs = list(set(("Copy of " + str(row["program_name"])) for row in user_prog if row["program_name"] != " "))
+    my_programs = list({row["program_name"] for row in user_prog if row["program_name"] != " "})
 
     template_ex = [row for row in ex_data if str(row["user_id"]) == str(TEMPLATE_USER_ID) and row["exercise_name"] != ""]
     template_programs = list(set(row["program_name"] for row in template_ex))

@@ -51,7 +51,7 @@
                     {% endfor %}
                 </div>
                 <div class="card-footer">
-                    {% if prog in my_programs %}
+                    {% if ("Copy of " ~ prog) in my_programs %}
                         <button class="btn btn-secondary btn-sm w-100" disabled>Already Added</button>
                     {% else %}
                         <form method="POST" action="/templates">
