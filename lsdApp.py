@@ -1744,6 +1744,8 @@ def templates():
                 "program_name": prog_name,
                 "notes": "",
                 "active": 1,
+                "repeats": 0,
+                "repeats_duration": None,
                 "show_links": 1,
                 "code": code
             })
