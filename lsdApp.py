@@ -43,6 +43,16 @@ def isOpen(exercises, order):
             return False
     return True
 
+def generateCode(id: int) -> str:
+    characters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                  'u', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    code = str(id)
+
+    for i in range(6):
+        code += random.choice(characters)
+
+    return code
+
 def calculate_diff(data, program, exercise, set_num, current, max=0):
     for row in reversed(data):
         if (row["program_name"] == program and
@@ -458,8 +468,6 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     # Closing
 
-
-
     return reports
 
 def parseRepRange(repRange, numSets):
@@ -472,6 +480,17 @@ def parseRepRange(repRange, numSets):
             return parts + [parts[-1]] * (numSets - len(parts))
     except ValueError:
         return []
+
+def findOpenId(data):
+    id = 1
+
+    for i in data:
+        if i["id"] == id:
+            id += 1
+        else:
+            break
+
+    return id
 
 def getLastEnteredLog(user_id, program=None):
     query = supabase.table("logs").select("*").eq("user_id", user_id)
@@ -1311,7 +1330,6 @@ def run_results():
                            message=None,
                            narrator=narrator)
 
-
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
     if "user_id" not in session:
@@ -1362,8 +1380,6 @@ def manage():
     if edit_exercises:
         max_order = edit_exercises[-1]["exercise_order"] + 1
 
-
-
     for ex in edit_exercises:
         # print(f"exercise {ex['exercise_name']} order {ex['exercise_order']}")
         if ex["exercise_order"] == open_order:
@@ -1380,13 +1396,17 @@ def manage():
             elif new_program_name in my_programs:
                 error_message = "A program with that name already exists."
             else:
+                id = findOpenId(program_data)
+                code = generateCode(id)
                 appendProgram({
+                    "id": id,
                     "user_id": int(session["user_id"]),
                     "program_name": new_program_name,
                     "notes": "",
                     "active": 1,
                     "show_links": 0,
-                    "repeats": 0
+                    "repeats": 0,
+                    "code": code
                 })
                 my_programs.append(new_program_name)
                 selected_edit = new_program_name
