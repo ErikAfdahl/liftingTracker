@@ -86,7 +86,7 @@ def deleteExercise(program_id):
 
 # ── PROGRAMS ──────────────────────────────────────────────
 def getAllPrograms():
-    return supabase.table("programs").select("*").execute().data
+    return supabase.table("programs").select("*").order("id", desc=False).execute().data
 
 def appendProgram(row: dict):
     supabase.table("programs").insert(row).execute()
