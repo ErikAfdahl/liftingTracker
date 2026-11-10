@@ -1735,6 +1735,9 @@ def templates():
             my_programs.append(prog_name)
             id = findOpenId(program_data)
             code = generateCode(id)
+            print("gwoiweof")
+            print(id)
+            print(code)
             appendProgram({
                 "id": id,
                 "user_id": int(session["user_id"]),
