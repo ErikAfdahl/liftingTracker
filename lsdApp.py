@@ -46,8 +46,9 @@ def isOpen(exercises, order):
     return True
 
 def generateCode(id):
-    suffix = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
-    return f"{id:x}-{suffix}"
+    suffix1 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
+    suffix2 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
+    return f"{id:x}-{suffix1}-{suffix2}"
 
 def calculate_diff(data, program, exercise, set_num, current, max=0):
     for row in reversed(data):
