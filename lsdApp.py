@@ -1397,7 +1397,10 @@ def manage():
                 error_message = "A program with that name already exists."
             else:
                 id = findOpenId(program_data)
+                print("sofiwfeoiewf")
+                print(id)
                 code = generateCode(id)
+                print(code)
                 appendProgram({
                     "id": id,
                     "user_id": int(session["user_id"]),
