@@ -1712,7 +1712,7 @@ def templates():
         if prog_name in my_programs:
             error_message = f"You already have a program called '{prog_name}'."
         else:
-            rows_to_copy = [row for row in template_ex if row["program_name"] == prog_name]
+            rows_to_copy = [row for row in template_ex if ("Copy of " + str(row["program_name"])) == prog_name]
             for row in rows_to_copy:
                 appendExercise({
                     "user_id": int(session["user_id"]), # didnt register
