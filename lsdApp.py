@@ -482,13 +482,14 @@ def parseRepRange(repRange, numSets):
         return []
 
 def findOpenId(data):
-    id = 1
+    # id = 1
+    id = data[-1]["id"] + 1
 
-    for i in data:
-        if i["id"] == id:
-            id += 1
-        else:
-            break
+    # for i in data:
+    #     if i["id"] == id:
+    #         id += 1
+    #     else:
+    #         break
 
     return id
 
