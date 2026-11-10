@@ -46,7 +46,7 @@ def isOpen(exercises, order):
 def generateCode(id: int) -> str:
     characters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                   'u', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    code = str(id)
+    code = str(id) + "-"
 
     for i in range(6):
         code += random.choice(characters)
@@ -484,7 +484,11 @@ def parseRepRange(repRange, numSets):
 def findOpenId(data):
     id = 1
 
+    print("feiowefiowhnf")
+    print(data)
+    print("owefiowhnf")
     for i in data:
+        print(i)
         if i["id"] == id:
             id += 1
         else:
