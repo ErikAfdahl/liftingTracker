@@ -1683,6 +1683,7 @@ def manage():
                            next_order=open_order,
                            max_order=max_order,
                            show_link=show_link,
+                           code=selected_prog["code"],
                            active=active,
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
