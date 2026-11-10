@@ -484,11 +484,7 @@ def parseRepRange(repRange, numSets):
 def findOpenId(data):
     id = 1
 
-    print("feiowefiowhnf")
-    print(data)
-    print("owefiowhnf")
     for i in data:
-        print(i)
         if i["id"] == id:
             id += 1
         else:
@@ -1401,10 +1397,7 @@ def manage():
                 error_message = "A program with that name already exists."
             else:
                 id = findOpenId(program_data)
-                print("sofiwfeoiewf")
-                print(id)
                 code = generateCode(id)
-                print(code)
                 appendProgram({
                     "id": id,
                     "user_id": int(session["user_id"]),
@@ -1705,12 +1698,13 @@ def templates():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    prog_data = getAllExercises()
-    user_prog = [row for row in prog_data if str(row["user_id"]) == str(session["user_id"])]
+    ex_data = getAllExercises()
+    program_data = getAllPrograms()
+    user_prog = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
     my_programs = list(set(row["program_name"] for row in user_prog if row["program_name"] != " "))
 
-    template_prog = [row for row in prog_data if str(row["user_id"]) == str(TEMPLATE_USER_ID) and row["exercise_name"] != ""]
-    template_programs = list(set(row["program_name"] for row in template_prog))
+    template_ex = [row for row in ex_data if str(row["user_id"]) == str(TEMPLATE_USER_ID) and row["exercise_name"] != ""]
+    template_programs = list(set(row["program_name"] for row in template_ex))
 
     success_message = None
     error_message = None
@@ -1721,7 +1715,7 @@ def templates():
         if prog_name in my_programs:
             error_message = f"You already have a program called '{prog_name}'."
         else:
-            rows_to_copy = [row for row in template_prog if row["program_name"] == prog_name]
+            rows_to_copy = [row for row in template_ex if row["program_name"] == prog_name]
             for row in rows_to_copy:
                 appendExercise({
                     "user_id": int(session["user_id"]), # didnt register
@@ -1738,16 +1732,20 @@ def templates():
                 })
             success_message = f"'{prog_name}' added to your programs!"
             my_programs.append(prog_name)
+            id = findOpenId(program_data)
+            code = generateCode(id)
             appendProgram({
+                "id": id,
                 "user_id": int(session["user_id"]),
                 "program_name": prog_name,
                 "notes": "",
                 "active": 1,
-                "show_links": 1
+                "show_links": 1,
+                "code": code
             })
 
     return render_template("templates.html",
-                           template_prog=template_prog,
+                           template_ex=template_ex,
                            template_programs=sorted(template_programs),
                            my_programs=my_programs,
                            success_message=success_message,
