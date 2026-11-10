@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Find a Program</h2>
+        <p class="text-secondary fst-italic mb-0">Enter a share code to preview and copy someone's program.</p>
+    </div>
+    <a href="/manage" class="btn btn-secondary btn-sm">Back to Manage</a>
+</div>
+
+{% if success_message %}
+<div class="alert alert-success">{{ success_message }}</div>
+{% endif %}
+{% if error_message %}
+<div class="alert alert-danger">{{ error_message }}</div>
+{% endif %}
+
+<hr>
+
+<form method="POST" action="/findProg" class="row g-2 mb-4">
+    <input type="hidden" name="action" value="find_program">
+    <div class="col-sm-8 col-md-6">
+        <input type="text"
+               name="prog_code"
+               class="form-control"
+               placeholder="e.g. 44-gxq7cl"
+               value="{{ prog_code }}"
+               maxlength="40"
+               autocomplete="off"
+               autocapitalize="none"
+               spellcheck="false"
+               required>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
+{% if found_name %}
+<div class="row">
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">{{ found_name }}</div>
+            <div class="card-body">
+                {% if found_exercises %}
+                    {% for ex in found_exercises | sort(attribute="exercise_order") %}
+                    <div class="mb-2">
+                        <span class="fw-bold">{{ ex.exercise_order }}. {{ ex.exercise_name }}</span><br>
+                        <small class="text-secondary">
+                            {{ ex.num_sets }} sets &nbsp;·&nbsp;
+                            {{ ex.min_reps }}–{{ ex.max_reps }} {{ ex.unit }}s &nbsp;·&nbsp;
+                            {{ ex.increment }} lb increments
+                        </small><br>
+                        {% if ex.notes %}
+                            <small class="text-secondary">"{{ ex.notes }}"</small><br>
+                        {% endif %}
+                        {% if ex.link and ex.link.startswith(("http://", "https://")) %}
+                            <small class="text-secondary">
+                                <a href="{{ ex.link }}" target="_blank" rel="noopener noreferrer">{{ ex.link }}</a>
+                            </small><br>
+                        {% endif %}
+                    </div>
+                    {% if not loop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-secondary mb-0">This program has no exercises.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <form method="POST" action="/findProg">
+                    <input type="hidden" name="action" value="copy_program">
+                    <input type="hidden" name="prog_code" value="{{ prog_code }}">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Copy to My Programs</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

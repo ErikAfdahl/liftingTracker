@@ -75,6 +75,11 @@ def deleteLog(log_id):
 def getAllExercises():
     return supabase.table("exercises").select("*").execute().data
 
+def getUserExercises(user_id):
+    data = supabase.table("exercises").select("*").eq("user_id", user_id) \
+        .order("id", desc=False).limit(1000).execute().data
+    return list(reversed(data))
+
 def appendExercise(row: dict):
     supabase.table("exercises").insert(row).execute()
 
@@ -102,6 +107,17 @@ def renameLogsProgram(user_id, old_program, new_program):
         .eq("user_id", user_id) \
         .eq("program_name", old_program) \
         .execute()
+
+def findProgram(code):
+    code = (code or "").strip().lower()
+    if not code:
+        return None
+    res = (supabase.table("programs")
+           .select("id, user_id, program_name, code")
+           .eq("code", code)
+           .limit(1)
+           .execute())
+    return res.data[0] if res.data else None
 
 # ── feedback ──────────────────────────────────────────────
 def getAllFeedback():

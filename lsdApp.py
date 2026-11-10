@@ -7,6 +7,8 @@ import pytz
 import bcrypt
 import uuid
 import random
+import secrets
+import string
 from db import *
 
 # python liftingTracker/lsdapp.py
@@ -43,15 +45,9 @@ def isOpen(exercises, order):
             return False
     return True
 
-def generateCode(id: int) -> str:
-    characters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                  'u', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    code = str(id) + "-"
-
-    for i in range(6):
-        code += random.choice(characters)
-
-    return code
+def generateCode(id):
+    suffix = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    return f"{id:x}-{suffix}"
 
 def calculate_diff(data, program, exercise, set_num, current, max=0):
     for row in reversed(data):
@@ -1711,7 +1707,7 @@ def templates():
     error_message = None
 
     if request.method == "POST" and request.form.get("action") == "copy_program":
-        prog_name = request.form.get("program_name")
+        prog_name = "Copy of " + str(request.form.get("program_name"))
 
         if prog_name in my_programs:
             error_message = f"You already have a program called '{prog_name}'."
@@ -1720,7 +1716,7 @@ def templates():
             for row in rows_to_copy:
                 appendExercise({
                     "user_id": int(session["user_id"]), # didnt register
-                    "program_name": row["program_name"],
+                    "program_name": prog_name,
                     "exercise_name": row["exercise_name"],
                     "num_sets": row["num_sets"],
                     "increment": row["increment"],
@@ -1754,6 +1750,84 @@ def templates():
                            template_ex=template_ex,
                            template_programs=sorted(template_programs),
                            my_programs=my_programs,
+                           success_message=success_message,
+                           error_message=error_message)
+
+@app.route("/findProg", methods=["GET", "POST"])
+def findProg():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = int(session["user_id"])
+    ex_data = getAllExercises()
+    program_data = getAllPrograms()
+
+    my_programs = {
+        row["program_name"] for row in ex_data
+        if str(row["user_id"]) == str(user_id) and row["program_name"] != " "
+    }
+
+    success_message = None
+    error_message = None
+    found_name = None
+    found_exercises = None
+    prog_code = ""
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        prog_code = (request.form.get("prog_code") or "").strip().lower()
+        prog = findProgram(prog_code) if prog_code else None
+
+        if not prog:
+            error_message = "No program with that code exists."
+        else:
+            source_ex = [
+                r for r in getUserExercises(prog["user_id"])
+                if r["program_name"] == prog["program_name"]
+            ]
+
+            if action == "find_program":
+                found_name = prog["program_name"]
+                found_exercises = source_ex
+
+            elif action == "copy_program":
+                new_name = "Copy of " + str(prog["program_name"])
+                if new_name in my_programs:
+                    error_message = f"You already have a program called '{new_name}'."
+                else:
+                    new_id = findOpenId(program_data)
+                    appendProgram({
+                        "id": new_id,
+                        "user_id": user_id,
+                        "program_name": new_name,
+                        "notes": "",
+                        "active": 1,
+                        "repeats": 0,
+                        "repeats_duration": None,
+                        "show_links": 1,
+                        "code": generateCode(new_id),
+                    })
+                    for row in source_ex:
+                        appendExercise({
+                            "user_id": user_id,
+                            "program_name": new_name,
+                            "exercise_name": row["exercise_name"],
+                            "num_sets": row["num_sets"],
+                            "increment": row["increment"],
+                            "min_reps": row["min_reps"],
+                            "max_reps": row["max_reps"],
+                            "exercise_order": row["exercise_order"],
+                            "notes": row["notes"],
+                            "unit": row["unit"],
+                            "link": row["link"],
+                        })
+                    success_message = f"'{new_name}' added to your programs!"
+                    prog_code = ""
+
+    return render_template("findProg.html",
+                           found_name=found_name,
+                           found_exercises=found_exercises,
+                           prog_code=prog_code,
                            success_message=success_message,
                            error_message=error_message)
 
