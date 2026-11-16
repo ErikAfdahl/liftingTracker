@@ -1530,7 +1530,7 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
-            elif not is_valid_text(new_exercise) or not is_valid_text(new_notes):
+            elif not is_valid_text(new_exercise) or not is_valid_text(new_notes) or not is_valid_text(new_link):
                 error_message = "Invalid character(s) in input."
             else:
                 new_sets = int(new_sets)
@@ -1631,7 +1631,7 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
-            elif not is_valid_text(upd_name) or not is_valid_text(upd_notes):
+            elif not is_valid_text(upd_name) or not is_valid_text(upd_notes) or not is_valid_text(upd_link):
                 error_message = "Invalid character(s) in input."
             else:
                 upd_sets = int(upd_sets)
