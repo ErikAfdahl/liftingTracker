@@ -27,7 +27,7 @@ DATE_FORMATS = {
     5: "%Y/%m/%d",
 }
 
-ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-]+")
+ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-=+&]+")
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
     d = datetime.strptime(iso_str, "%Y-%m-%d")
