@@ -3,6 +3,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for, session, make_response, jsonify
 from datetime import *
+from dataclasses import dataclass
 import pytz
 import bcrypt
 import uuid
@@ -143,11 +144,6 @@ def get_best_entry(data, program, exercise, set_num):
                 best_1rm = row["one_rm"]
 
     return best_1rm
-
-# for each list, regressed, stagnant, progressed, for each exercise, run to check it in this function,
-# it will basically check to see if the previous log has a difference positive, negative, or 0. And based on what
-# direction is valued at (either being a -1 to represent checking if diff has been regressing, 1 to represent if diff
-# has been progressing, and 0 if it has been stagnating) and then count how many occurances of that there are
 
 def get_occurrences(data, program, exercise, set_num, direction=0):
     if direction == 2:
@@ -467,17 +463,6 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     return reports
 
-def parseRepRange(repRange, numSets):
-    try:
-        parts = [int(x.strip()) for x in str(repRange).split(",")]
-
-        if len(parts) >= numSets:
-            return parts[:numSets]
-        else:
-            return parts + [parts[-1]] * (numSets - len(parts))
-    except ValueError:
-        return []
-
 def findOpenId(data):
     # id = 1
     id = data[-1]["id"] + 1
@@ -786,6 +771,134 @@ def home():
                            show_link=show_link
                            )
 
+@dataclass
+class WorkoutAnalysis:
+    rep_ranges: dict
+    last_entries: dict
+    recommendations: dict
+    streaks_1rm: dict
+    streaks_weight: dict
+    rec_weights: dict
+    rec_reps: dict
+    prev_entries: dict
+    log_all_toggle: dict
+
+def parse_logs(user_data, exercises, selected, today, log_all_preference):
+    rep_ranges = {}
+    last_entries = {}
+    recommendations = {}
+    streaks_1rm = {}
+    streaks_weight = {}
+    rec_weights = {}
+    rec_reps = {}
+    log_all_toggle = {}
+
+    for ex in exercises:
+        minRepRange = [int(x.strip()) for x in str(ex["min_reps"]).split(",")]
+        maxRepRange = [int(x.strip()) for x in str(ex["max_reps"]).split(",")]
+
+        for s in range(1, int(ex["num_sets"]) + 1):
+            key = f"{ex['exercise_name']}_{s}"
+            date_format = session.get("settings", {}).get("date_format", 1)
+            last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
+            if last_entries[key]:
+                last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
+            last = last_entries[key]
+
+            if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
+                rep_ranges[key] = None
+            elif minRepRange[s - 1] == maxRepRange[s - 1]:
+                rep_ranges[key] = f"Target for set {s} is {minRepRange[s - 1]} {ex['unit']}s."
+            else:
+                rep_ranges[
+                    key] = f"Range for set {s} is {minRepRange[s - 1]}-{maxRepRange[s - 1]} {ex['unit']}s."  # here
+
+            if log_all_preference == 0:
+                log_all_toggle[key] = False
+            elif log_all_preference == 1:
+                log_all_toggle[key] = True
+
+            if last:
+                if log_all_preference == 2:
+                    if last["date"] == iso_to_display(today, date_format):
+                        log_all_toggle[key] = False
+                    else:
+                        log_all_toggle[key] = True
+
+                if last["diff"] > 0:
+                    streak_1rm = 1
+                elif last["diff"] < 0:
+                    streak_1rm = -1
+                else:
+                    streak_1rm = 0
+
+                occur_1rm = get_occurrences(user_data, selected, ex["exercise_name"], s, streak_1rm)
+                occur_weight = get_occurrences(user_data, selected, ex["exercise_name"], s, 2)
+
+                if occur_1rm and (session.get("settings", {}).get("show_streak", 1) == 1):
+                    streak_1rm_message = f"1RM Streak: {occur_1rm} session "
+                    if streak_1rm == -1:
+                        streak_1rm_message += f"regression streak."
+                    elif streak_1rm == 0:
+                        streak_1rm_message += f"stagnation streak."
+                    elif streak_1rm == 1:
+                        streak_1rm_message += f"improvement streak."
+                    streaks_1rm[key] = streak_1rm_message
+
+                if occur_weight and (session.get("settings", {}).get("show_streak_weight", 1) == 1):
+                    streaks_weight[
+                        key] = f"Weight Streak: {last_entries[key]['weight']} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
+
+                imprv_coef = session.get('settings', {}).get('improvement_coef', 0.25)
+
+                if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
+                    recommendations[key] = None
+                elif int(last["reps"]) >= int(maxRepRange[s - 1] * (1 + imprv_coef)):
+                    # if last reps are significantly more than max or significantly less than min
+                    rec_weight = round((last["one_rm"] / (1 + (minRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                        "increment"]
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(minRepRange[s - 1])
+                elif int(last["reps"]) < int((minRepRange[s - 1] - 1) * (1 - imprv_coef)):
+                    rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                        "increment"]
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(maxRepRange[s - 1])
+                elif int(last["reps"]) >= maxRepRange[s - 1]:  # if last reps are more than max
+                    rec_weight = float(last["weight"]) + float(ex["increment"])
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(minRepRange[s - 1])
+                elif int(last["reps"]) < minRepRange[s - 1] - 1:  # if last reps are less than min
+                    rec_weight = float(last["weight"]) - float(ex["increment"])
+                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
+                    rec_weights[key] = float(rec_weight)
+                    rec_reps[key] = int(maxRepRange[s - 1])
+                else:  # if last reps are between max and min
+                    recommendations[
+                        key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
+                    rec_weights[key] = float(last['weight'])
+                    rec_reps[key] = int(last['reps']) + 1
+
+    prev_entries = {}
+    for ex in exercises:
+        key = f"{ex['exercise_name']}"
+        prev_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], -1)
+
+    return WorkoutAnalysis(
+        rep_ranges=rep_ranges,
+        last_entries=last_entries,
+        recommendations=recommendations,
+        streaks_1rm=streaks_1rm,
+        streaks_weight=streaks_weight,
+        rec_weights=rec_weights,
+        rec_reps=rec_reps,
+        prev_entries=prev_entries,
+        log_all_toggle=log_all_toggle
+    )
+
 @app.route("/run", methods=["GET", "POST"])
 def run():
     if "user_id" not in session:
@@ -1047,122 +1160,8 @@ def run():
     ex_index = max(0, min(ex_index, len(exercises) - 1))
     log_all_preference = session.get("settings", {}).get("log_all_preference", 2)
 
-    rep_ranges = {}
-    last_entries = {}
-    recommendations = {}
-    streaks_1rm = {}
-    streaks_weight = {}
-    rec_weights = {}
-    rec_reps = {}
-    log_all_toggle = {}
+    result = parse_logs(user_data, exercises, selected, today, log_all_preference)
 
-    for ex in exercises:
-        minRepRange = [int(x.strip()) for x in str(ex["min_reps"]).split(",")]
-        maxRepRange = [int(x.strip()) for x in str(ex["max_reps"]).split(",")]
-
-        for s in range(1, int(ex["num_sets"]) + 1):
-            key = f"{ex['exercise_name']}_{s}"
-            date_format = session.get("settings", {}).get("date_format", 1)
-            last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
-            if last_entries[key]:
-                last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
-            last = last_entries[key]
-
-
-            # print(key)
-
-            # units[key] = ex["unit"]
-
-            if (maxRepRange[s-1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
-                rep_ranges[key] = None
-            elif minRepRange[s-1] == maxRepRange[s-1]:
-                rep_ranges[key] = f"Target for set {s} is {minRepRange[s-1]} {ex['unit']}s."
-            else:
-                rep_ranges[key] = f"Range for set {s} is {minRepRange[s-1]}-{maxRepRange[s-1]} {ex['unit']}s." # here
-
-            # print(log_all_preference)
-
-            if log_all_preference == 0:
-                # print("set to false")
-                log_all_toggle[key] = False
-            elif log_all_preference == 1:
-                # print("set to true")
-                log_all_toggle[key] = True
-
-
-            if last:
-                if log_all_preference == 2:
-                    # print(last["date"])
-                    # print(today)"date"])
-                    # print(today)
-                    if last["date"] == iso_to_display(today, date_format):
-                        log_all_toggle[key] = False
-                    else:
-                        log_all_toggle[key] = True
-
-
-                if last["diff"] > 0:
-                    streak_1rm = 1
-                elif last["diff"] < 0:
-                    streak_1rm = -1
-                else:
-                    streak_1rm = 0
-
-                occur_1rm = get_occurrences(user_data, selected, ex["exercise_name"], s, streak_1rm)
-                occur_weight = get_occurrences(user_data, selected, ex["exercise_name"], s, 2)
-
-                if occur_1rm and (session.get("settings", {}).get("show_streak", 1) == 1):
-                    streak_1rm_message = f"1RM Streak: {occur_1rm} session "
-                    if streak_1rm == -1:
-                        streak_1rm_message += f"regression streak."
-                    elif streak_1rm == 0:
-                        streak_1rm_message += f"stagnation streak."
-                    elif streak_1rm == 1:
-                        streak_1rm_message += f"improvement streak."
-                    streaks_1rm[key] = streak_1rm_message
-
-                if occur_weight and (session.get("settings", {}).get("show_streak_weight", 1) == 1):
-                    streaks_weight[key] = f"Weight Streak: {last_entries[key]['weight']} lbs for {occur_weight} {'sessions' if occur_weight != 1 else 'session'}."
-
-                imprv_coef = session.get('settings', {}).get('improvement_coef', 0.25)
-
-                if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
-                    recommendations[key] = None
-                elif int(last["reps"]) >= int(maxRepRange[s-1] * (1 + imprv_coef)):
-                    # if last reps are significantly more than max or significantly less than min
-                    rec_weight = round((last["one_rm"] / (1 + (minRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(minRepRange[s-1])
-                elif int(last["reps"]) < int((minRepRange[s-1] - 1) * (1 - imprv_coef)):
-                    rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s-1] / 30))) / ex["increment"]) * ex["increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(maxRepRange[s-1])
-                elif int(last["reps"]) >= maxRepRange[s-1]: # if last reps are more than max
-                    rec_weight = float(last["weight"]) + float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(minRepRange[s-1])
-                elif int(last["reps"]) < minRepRange[s-1] - 1: # if last reps are less than min
-                    rec_weight = float(last["weight"]) - float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s-1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(maxRepRange[s-1])
-                else: # if last reps are between max and min
-                    recommendations[key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
-                    rec_weights[key] = float(last['weight'])
-                    rec_reps[key] = int(last['reps']) + 1
-
-    prev_entries = {}
-    for ex in exercises:
-        key = f"{ex['exercise_name']}"
-        prev_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], -1)
-    # print("feionweoifnewoifnweoifnio")
-    # print(session.get("settings", {}).get("show_link", 1))
-
-    # print(f"rec_weights: {rec_weights}")
-    # print(f"rec_reps: {rec_reps}")
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
                                              my_programs=my_programs, # program data (data)
@@ -1170,15 +1169,15 @@ def run():
                                              exercises=exercises,# list of exercises (data)
                                              ex_index=ex_index, # what exercise the user is on
                                              today=formated_date, # date
-                                             last_entries=last_entries, # data from previous session
-                                             prev_entries=prev_entries, # for last log only
-                                             recommendations=recommendations, # recommendations (dict of strings)
-                                             streaks_1rm=streaks_1rm, # streaks (dict of strings)
-                                             streaks_weight=streaks_weight,
-                                             rep_ranges=rep_ranges, # rep ranges for the sets (dict of strings)
-                                             rec_weights=rec_weights, # recommended weight (dict of floats)
-                                             rec_reps=rec_reps, # recommended rep amounts (dict of ints)
-                                             log_all_toggle=log_all_toggle,
+                                             last_entries=result.last_entries, # data from previous session
+                                             prev_entries=result.prev_entries, # for last log only
+                                             recommendations=result.recommendations, # recommendations (dict of strings)
+                                             streaks_1rm=result.streaks_1rm, # streaks (dict of strings)
+                                             streaks_weight=result.streaks_weight,
+                                             rep_ranges=result.rep_ranges, # rep ranges for the sets (dict of strings)
+                                             rec_weights=result.rec_weights, # recommended weight (dict of floats)
+                                             rec_reps=result.rec_reps, # recommended rep amounts (dict of ints)
+                                             log_all_toggle=result.log_all_toggle,
                                              user_data=user_data, # user logs (data)
                                              log_cap_warning=log_cap_warning,
                                              error_message=error_message,

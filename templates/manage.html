@@ -151,17 +151,13 @@
                     <input type="hidden" name="action" value="add_exercise">
                     <input type="hidden" name="selected_program" value="{{ selected_edit }}">
                     <div class="row g-2 mb-2">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-secondary small">Exercise Name</label>
                             <input type="text" name="new_exercise" class="form-control form-control-sm" value="Exercise" required>
                         </div>
                         <div class="col-md-1">
                             <label class="form-label text-secondary small">Sets</label>
                             <input type="number" name="new_sets" class="form-control form-control-sm" value="2" min="1" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label text-secondary small">Increment</label>
-                            <input type="number" name="new_inc" class="form-control form-control-sm" value="5.0" min="0.5" step="0.5">
                         </div>
                         <div class="col-md-1">
                             <label class="form-label text-secondary small">Min</label>
@@ -171,7 +167,15 @@
                             <label class="form-label text-secondary small">Max</label>
                             <input type="text" name="new_max" class="form-control form-control-sm" value="8" min="0">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
+                            <label class="form-label text-secondary small">Increment</label>
+                            <input type="number" name="new_inc" class="form-control form-control-sm" value="5.0" min="0">
+                        </div>
+<!--                        <div class="col-md-1">-->
+<!--                            <label class="form-label text-secondary small">Base</label>-->
+<!--                            <input type="number" name="new_base" class="form-control form-control-sm" value=0" min="0">-->
+<!--                        </div>-->
+                        <div class="col-md-1">
                             <label class="form-label text-secondary small">Unit</label>
                             <select name="new_unit" class="form-select form-select-sm">
                                 <option value="rep">Rep</option>
@@ -191,12 +195,12 @@
                         </div>
                     </div>
                     <div class="row g-2 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-secondary small">Notes (optional)</label>
                             <input type="text" name="new_notes" class="form-control form-control-sm">
                         </div>
                         {% if show_link == 1 %}
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label text-secondary small">Link (optional)</label>
                                 <input type="text" name="new_link" class="form-control form-control-sm">
                             </div>
@@ -259,17 +263,13 @@
                         <input type="hidden" name="selected_program" value="{{ selected_edit }}">
                         <input type="hidden" name="exercise_name" value="{{ ex.exercise_name }}">
                         <div class="row g-2 mb-2">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label text-secondary small">Exercise Name</label>
                                 <input type="text" name="upd_name" class="form-control form-control-sm" value="{{ ex.exercise_name }}">
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Sets</label>
                                 <input type="number" name="upd_sets" class="form-control form-control-sm" value="{{ ex.num_sets }}" min="1">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label text-secondary small">Increment</label>
-                                <input type="number" name="upd_inc" class="form-control form-control-sm" value="{{ ex.increment }}" min="0.5" step="0.5">
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label text-secondary small">Min {{ ex.unit }}s</label>
@@ -279,7 +279,15 @@
                                 <label class="form-label text-secondary small">Max {{ ex.unit }}s</label>
                                 <input type="text" name="upd_max" class="form-control form-control-sm" value="{{ ex.max_reps }}" min="0">
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-1">
+                                <label class="form-label text-secondary small">Increment</label>
+                                <input type="number" name="upd_inc" class="form-control form-control-sm" value="{{ ex.increment }}" min="0">
+                            </div>
+<!--                            <div class="col-md-1">-->
+<!--                                <label class="form-label text-secondary small">Base</label>-->
+<!--                                <input type="number" name="upd_base" class="form-control form-control-sm" value="{{ ex.base }}" min="0">-->
+<!--                            </div>-->
+                            <div class="col-md-1">
                                 <label class="form-label text-secondary small">Unit</label>
                                 <select name="upd_unit" class="form-select form-select-sm">
                                     <option value="rep" {% if ex.unit == "rep" %}selected{% endif %}>Rep</option>
@@ -302,7 +310,7 @@
                                 <input type="text" name="upd_notes" class="form-control form-control-sm" value="{{ ex.notes }}">
                             </div>
                             {% if show_link == 1 %}
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label text-secondary small">Link (optional)</label>
                                     <input type="text" name="upd_link" class="form-control form-control-sm" value="{{ ex.link }}">
                                 </div>
