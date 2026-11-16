@@ -10,6 +10,7 @@ import uuid
 import random
 import secrets
 import string
+import re
 from db import *
 
 # python liftingTracker/lsdapp.py
@@ -25,6 +26,8 @@ DATE_FORMATS = {
     4: "%Y-%m-%d", # Year-Month-Day   -> 2026-07-29 (same as ISO)
     5: "%Y/%m/%d",
 }
+
+ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-]+")
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
     d = datetime.strptime(iso_str, "%Y-%m-%d")
@@ -134,6 +137,15 @@ def check_ranges2(min, max):
                 return False
     return True
 
+def is_valid_text(text, max_length=100):
+    """Return True if text is non-empty, short enough, and uses only allowed characters."""
+    if not isinstance(text, str):
+        return False
+    text = text.strip()
+    if not text or len(text) > max_length:
+        return False
+    return ALLOWED_TEXT.fullmatch(text) is not None
+
 def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
@@ -196,6 +208,18 @@ def find_date(data, updated_id, direction=1):
             if row["id"] == updated_id:
                 acc += 1
         return None
+
+def findOpenId(data):
+    # id = 1
+    id = data[-1]["id"] + 1
+
+    # for i in data:
+    #     if i["id"] == id:
+    #         id += 1
+    #     else:
+    #         break
+
+    return id
 
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
@@ -463,18 +487,6 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     return reports
 
-def findOpenId(data):
-    # id = 1
-    id = data[-1]["id"] + 1
-
-    # for i in data:
-    #     if i["id"] == id:
-    #         id += 1
-    #     else:
-    #         break
-
-    return id
-
 def getLastEnteredLog(user_id, program=None):
     query = supabase.table("logs").select("*").eq("user_id", user_id)
     if program:
@@ -495,6 +507,10 @@ def login():
         if action == "login":
             username = request.form.get("username")
             password = request.form.get("password")
+
+            if not is_valid_text(username) or not is_valid_text(password):
+                return render_template("login.html", error="Invalid character(s) in input.")
+
             user = next((u for u in users if u["username"] == username), None)
             if user and checkPassword(password, user["password"]):
                 session.permanent = True
@@ -512,6 +528,10 @@ def login():
             new_username = request.form.get("new_username")
             new_password = request.form.get("new_password")
             confirm = request.form.get("confirm_password")
+
+            if not is_valid_text(new_username) or not is_valid_text(new_password) or not is_valid_text(confirm):
+                return render_template("login.html", error="Invalid character(s) in input.")
+
             if not new_username or not new_password:
                 error = "Please fill in all fields."
             elif new_password != confirm:
@@ -625,6 +645,10 @@ def settings():
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_password")
 
+        if not is_valid_text(old_password) or not is_valid_text(new_password) or not is_valid_text(confirm_new_password):
+            return render_template("settings.html",
+                                   error_message="Invalid character(s) in input.")
+
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
         elif not checkPassword(old_password, user["password"]):
@@ -645,6 +669,10 @@ def settings():
     elif request.method == "POST" and request.form.get("action") == "save_account":
         password = request.form.get("password")
         username = request.form.get("username")
+
+        if not is_valid_text(password) or not is_valid_text(username):
+            return render_template("settings.html",
+                                   error_message="Invalid character(s) in input.")
 
         if not checkPassword(password, user["password"]):
             error_message = "Incorrect password."
@@ -990,6 +1018,8 @@ def run():
         if not check_date(workout_date, date_format):
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
+        elif not is_valid_text(notes):
+            return render_template("run.html", error_message="Invalid character(s) in input.")
         elif not weight:
             error_message = "Missing value for weight."
         elif not reps:
@@ -1069,11 +1099,6 @@ def run():
 
             for i in range(num_sets):
                 confirm_log = request.form.get(f"confirm_{i + 1}", "")
-                # print(f"confirming log here {confirm_log}, set number {i + 1}")
-                # key = f"{exercise_name}_{i + 1}"
-                # print("fwefoew")
-                # print(f"key {key}")
-
 
                 if not confirm_log:
                     continue
@@ -1090,6 +1115,8 @@ def run():
                     error_message = (f"Invalid date format for set {i + 1} "
                                      f"(e.g., {iso_to_display(today, date_format)}).")
                     break
+                elif not is_valid_text(notes):
+                    return render_template("run.html", error_message="Invalid character(s) in input.")
                 elif not weight:
                     error_message = f"Missing value for weight for set {i + 1}."
                     break
@@ -1392,6 +1419,8 @@ def manage():
                 error_message = "Please enter a program name."
             elif new_program_name in my_programs:
                 error_message = "A program with that name already exists."
+            elif not is_valid_text(new_program_name):
+                error_message = "Invalid character(s) in input."
             else:
                 id = findOpenId(program_data)
                 code = generateCode(id)
@@ -1438,14 +1467,15 @@ def manage():
             notes = request.form.get("new_program_notes", "").strip()
             active = 1 if request.form.get("new_program_active") == "1" else 0
             show_links = 1 if request.form.get("new_show_links") == "1" else 0
-            # print(show_links)
-            # print(type(show_links))
 
             if not new_name:
                 error_message = "Please enter a program name."
 
             elif new_name in my_programs:
                 error_message = "A program with that name already exists."
+
+            elif not is_valid_text(new_name) or not is_valid_text(notes):
+                error_message = "Invalid character(s) in input."
 
             else:
                 program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
@@ -1479,13 +1509,6 @@ def manage():
                 show_link = int(selected_prog["show_links"])
                 active = int(selected_prog["active"])
 
-
-
-                # user_programs = sorted(
-                #     [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
-                #     key=lambda x: int(x["id"])
-                # )
-
         elif action == "add_exercise":
             new_exercise = request.form.get("new_exercise", "Exercise")
             new_sets = request.form.get("new_sets", 1).replace(" ", "")
@@ -1507,6 +1530,8 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
+            elif not is_valid_text(new_exercise) or not is_valid_text(new_notes):
+                error_message = "Invalid character(s) in input."
             else:
                 new_sets = int(new_sets)
                 new_inc = float(new_inc)
@@ -1606,6 +1631,8 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
+            elif not is_valid_text(upd_name) or not is_valid_text(upd_notes):
+                error_message = "Invalid character(s) in input."
             else:
                 upd_sets = int(upd_sets)
                 upd_inc = float(upd_inc)
@@ -1626,14 +1653,6 @@ def manage():
                             updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] - 1})
                         elif (int(ex["exercise_order"]) >= upd_order) and (int(ex["exercise_order"]) < orig_order):
                             updateExercise(ex["id"], {"exercise_order": ex["exercise_order"] + 1})
-
-                    # swapped_name = None
-                    # for ex in edit_exercises:
-                    #     if int(ex["exercise_order"]) == upd_order and ex["exercise_name"] != exercise_name:
-                    #         swapped_name = ex["exercise_name"]
-                    #         orig_order = next(e["exercise_order"] for e in edit_exercises if e["exercise_name"] == exercise_name)
-                    #         updateExercise(ex["id"], {"exercise_order": int(orig_order)})
-                    #         break
 
                     target = next((row for row in edit_exercises if row["exercise_name"] == exercise_name), None)
                     if target:
@@ -1777,9 +1796,16 @@ def findProg():
     if request.method == "POST":
         action = request.form.get("action")
         prog_code = (request.form.get("prog_code") or "").strip().lower()
-        prog = findProgram(prog_code) if prog_code else None
+        clear = False
+        prog = None
 
-        if not prog:
+        if not is_valid_text(prog_code):
+            error_message = "Invalid character(s) in input."
+        else:
+            clear = True
+            prog = findProgram(prog_code) if prog_code else None
+
+        if (not prog) and clear:
             error_message = "No program with that code exists."
         else:
             source_ex = [
@@ -1936,6 +1962,8 @@ def logs():
                 error_message = "Missing value from weight."
             elif not upd_reps:
                 error_message = "Missing value from reps."
+            if not is_valid_text(upd_notes):
+                error_message = "Invalid character(s) in input."
             elif matching:
                 upd_date = display_to_iso(upd_date, date_format)
                 upd_weight = float(upd_weight)
