@@ -1420,7 +1420,7 @@ def manage():
             elif new_program_name in my_programs:
                 error_message = "A program with that name already exists."
             elif not is_valid_text(new_program_name):
-                print(f"The program name '{new_program_name}' is not valid.")
+                # print(f"The program name '{new_program_name}' is not valid.")
                 error_message = "Invalid character(s) in input."
             else:
                 id = findOpenId(program_data)
