@@ -1591,7 +1591,7 @@ def manage():
             new_exercise = request.form.get("new_exercise", "Exercise")
             new_sets = request.form.get("new_sets", 1).replace(" ", "")
             new_inc = request.form.get("new_inc", 5.0).replace(" ", "")
-            new_base = request.form.get("new_base", 45.0).replace(" ", "")
+            new_base = request.form.get("new_base", 0.0).replace(" ", "")
             new_min = request.form.get("new_min", "6,2").replace(" ", "")
             new_max = request.form.get("new_max", "8,4").replace(" ", "")
             new_notes = request.form.get("new_notes", "")
