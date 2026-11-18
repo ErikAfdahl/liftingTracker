@@ -1264,8 +1264,10 @@ def run():
                                              ex_index=ex_index, # what exercise the user is on
                                              today=formated_date, # date
                                              last_entries=result.last_entries, # data from previous session
+                                             last_entries_breakdown=result.last_entries_breakdown,
                                              prev_entries=result.prev_entries, # for last log only
                                              recommendations=result.recommendations, # recommendations (dict of strings)
+                                             recommendations_breakdown=result.recommendations_breakdown,
                                              streaks_1rm=result.streaks_1rm, # streaks (dict of strings)
                                              streaks_weight=result.streaks_weight,
                                              rep_ranges=result.rep_ranges, # rep ranges for the sets (dict of strings)
