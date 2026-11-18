@@ -2051,8 +2051,8 @@ def logs():
                 error_message = "Missing value from weight."
             elif not upd_reps:
                 error_message = "Missing value from reps."
-            if not check_text(upd_notes):
-                error_message = "Invalid character(s) in input."
+            # if not check_text(upd_notes):
+            #     error_message = "Invalid character(s) in input."
             elif matching:
                 upd_date = display_to_iso(upd_date, date_format)
                 upd_weight = float(upd_weight)
