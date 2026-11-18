@@ -509,7 +509,7 @@ def generate_weight_breakdown(weight, base):
         for i in range(len(plates)):
             count = weight // plates[i]
             if count > 0:
-                acc.append(f'{int(weight // plates[i])} {plates[i]} lb {"plates" if count > 1 else "plate"}')
+                acc.append(f'{int(weight // plates[i])} x {plates[i]}')
                 if (count * plates[i]) == weight:
                     break
                 else:
@@ -530,7 +530,7 @@ def generate_weight_breakdown(weight, base):
 
         acc.append(" on each side.")
 
-        return "".join(acc)
+        return f"{base} lb bar " + "".join(acc)
 
 def generate_code(id):
     suffix1 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
@@ -920,7 +920,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, show_r
                         log_all_toggle[key] = True
 
                 if last_breakdown:
-                    last_entries_breakdown[key] = generate_weight_breakdown(last["weight"], ex["base"])
+                    last_entries_breakdown[key] = "Last time: " + generate_weight_breakdown(last["weight"], ex["base"])
                 else:
                     last_entries_breakdown[key] = None
 
@@ -984,7 +984,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, show_r
                         rec_reps[key] = int(last['reps']) + 1
 
                     if rec_breakdown:
-                        recommendations_breakdown[key] = generate_weight_breakdown(rec_weights[key], ex['base'])
+                        recommendations_breakdown[key] = "Recommended: " + generate_weight_breakdown(rec_weights[key], ex['base'])
                     else:
                         recommendations_breakdown[key] = None
 
