@@ -553,6 +553,10 @@ def login():
             if not check_text(username) or not check_text(password):
                 return render_template("login.html", error="Invalid character(s) in input.")
 
+            print("testing valid characters")
+            print(check_text(username))
+            print(check_text(password))
+
             user = next((u for u in users if u["username"] == username), None)
             if user and check_password(password, user["password"]):
                 session.permanent = True
