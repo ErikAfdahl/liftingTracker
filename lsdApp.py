@@ -1253,8 +1253,10 @@ def run():
 
     ex_index = max(0, min(ex_index, len(exercises) - 1))
     log_all_preference = session.get("settings", {}).get("log_all_preference", 2)
+    rec_breakdown_preference = session.get("settings", {}).get("show_rec_breakdown", 2)
+    last_breakdown_preference = session.get("settings", {}).get("show_last_breakdown", 2)
 
-    result = parse_logs(user_data, exercises, selected, today, log_all_preference)
+    result = parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown_preference, rec_breakdown_preference)
     print("fewoinfew")
     print(result.last_entries_breakdown)
     print(result.recommendations_breakdown)
