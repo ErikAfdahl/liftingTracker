@@ -27,7 +27,7 @@ DATE_FORMATS = {
     5: "%Y/%m/%d",
 }
 
-ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-=+&]+")
+ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-=+&]*")
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
     d = datetime.strptime(iso_str, "%Y-%m-%d")
@@ -102,7 +102,7 @@ def check_ranges2(min, max):
 
 def check_text(text, max_length=100):
     """Return True if text is non-empty, short enough, and uses only allowed characters."""
-    print(f"Text fewoife {text}")
+    print(f"Text fewoife '{text}'")
     if not isinstance(text, str):
         return False
     text = text.strip()
