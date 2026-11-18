@@ -1255,6 +1255,9 @@ def run():
     log_all_preference = session.get("settings", {}).get("log_all_preference", 2)
 
     result = parse_logs(user_data, exercises, selected, today, log_all_preference)
+    print("fewoinfew")
+    print(result.last_entries_breakdown)
+    print(result.recommendations_breakdown)
 
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
