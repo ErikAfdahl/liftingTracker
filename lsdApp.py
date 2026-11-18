@@ -979,7 +979,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, show_r
                     else:
                         recommendations_breakdown[key] = None
 
-                    if show_rec:
+                    if not show_rec:
                         recommendations[key] = None
 
 
