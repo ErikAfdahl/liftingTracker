@@ -40,50 +40,13 @@ def display_to_iso(display_str: str, fmt: int) -> str:
 def hashPassword(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-def checkPassword(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
-
 def isOpen(exercises, order):
     for i in range(len(exercises)):
         if exercises[i]['order'] == order:
             return False
     return True
 
-def generateCode(id):
-    suffix1 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
-    suffix2 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
-    return f"{id:x}-{suffix1}-{suffix2}"
-
-def calculate_diff(data, program, exercise, set_num, current, max=0):
-    for row in reversed(data):
-        if (row["program_name"] == program and
-                row["exercise_name"] == exercise and
-                int(row["set_num"]) == int(set_num) and max == 0):
-            return round(current - float(row["one_rm"]), 3)
-        elif (row["program_name"] == program and
-                row["exercise_name"] == exercise and
-                int(row["set_num"]) == int(set_num) and max == 1):
-            return round(current - float(row["weight"]), 3)
-    return 0
-
-def get_last_entry(data, program, exercise, set_num, back = 0):
-    acc = 0
-    for row in reversed(data):
-        if row["program_name"] == program and row["exercise_name"] == exercise:
-            if set_num == -1 or int(row["set_num"]) == set_num:
-                if acc == back:
-                    return row
-                acc += 1
-
-    return None
-
-def get_date_entry(data, program, exercise, set_num, date):
-    for row in reversed(data):
-        if (row["program_name"] == program and row["exercise_name"] == exercise and
-                int(row["set_num"]) == int(set_num) and row["date"] == date):
-            return row
-
-    return None
+# check helper functions
 
 def check_date(date_string, fmt):
     # print("foiewiewioew")
@@ -146,6 +109,11 @@ def check_text(text, max_length=100):
         return False
     return ALLOWED_TEXT.fullmatch(text) is not None
 
+def check_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+
+# get helper functions
+
 def get_best_entry(data, program, exercise, set_num):
     best_1rm = 0
 
@@ -192,7 +160,33 @@ def get_occurrences(data, program, exercise, set_num, direction=0):
 
     return acc
 
-def find_date(data, updated_id, direction=1):
+def get_last_entry(data, program, exercise, set_num, back = 0):
+    acc = 0
+    for row in reversed(data):
+        if row["program_name"] == program and row["exercise_name"] == exercise:
+            if set_num == -1 or int(row["set_num"]) == set_num:
+                if acc == back:
+                    return row
+                acc += 1
+
+    return None
+
+def get_date_entry(data, program, exercise, set_num, date):
+    for row in reversed(data):
+        if (row["program_name"] == program and row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and row["date"] == date):
+            return row
+
+    return None
+
+def get_last_entered_log(user_id, program=None):
+    query = supabase.table("logs").select("*").eq("user_id", user_id)
+    if program:
+        query = query.eq("program_name", program)
+    data = query.order("id", desc=True).limit(1).execute().data
+    return data[0] if data else None
+
+def get_date(data, updated_id, direction=1):
     if direction == 1: # gets the row made after id call
         prev = None
         for row in reversed(data):
@@ -209,7 +203,7 @@ def find_date(data, updated_id, direction=1):
                 acc += 1
         return None
 
-def findOpenId(data):
+def get_open_id(data):
     # id = 1
     id = data[-1]["id"] + 1
 
@@ -220,6 +214,20 @@ def findOpenId(data):
     #         break
 
     return id
+
+def get_diff(data, program, exercise, set_num, current, max=0):
+    for row in reversed(data):
+        if (row["program_name"] == program and
+                row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and max == 0):
+            return round(current - float(row["one_rm"]), 3)
+        elif (row["program_name"] == program and
+                row["exercise_name"] == exercise and
+                int(row["set_num"]) == int(set_num) and max == 1):
+            return round(current - float(row["weight"]), 3)
+    return 0
+
+# generate helper functions
 
 def generate_report(user_data, exercises, selected, last_entries, prev_entries, newPRs, highlight, highlight_per, heaviest, date_last, date_format, narrator):
     import random
@@ -523,12 +531,10 @@ def generate_weight_breakdown(weight, base):
 
         return "".join(acc)
 
-def getLastEnteredLog(user_id, program=None):
-    query = supabase.table("logs").select("*").eq("user_id", user_id)
-    if program:
-        query = query.eq("program_name", program)
-    data = query.order("id", desc=True).limit(1).execute().data
-    return data[0] if data else None
+def generate_code(id):
+    suffix1 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
+    suffix2 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
+    return f"{id:x}-{suffix1}-{suffix2}"
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -548,7 +554,7 @@ def login():
                 return render_template("login.html", error="Invalid character(s) in input.")
 
             user = next((u for u in users if u["username"] == username), None)
-            if user and checkPassword(password, user["password"]):
+            if user and check_password(password, user["password"]):
                 session.permanent = True
                 session["user_id"] = user["user_id"]
                 session["username"] = user["username"]
@@ -695,7 +701,7 @@ def settings():
 
         if not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
-        elif not checkPassword(old_password, user["password"]):
+        elif not check_password(old_password, user["password"]):
             error_message = "Incorrect password."
         elif new_password != confirm_new_password:
             error_message = "Passwords don't match."
@@ -718,7 +724,7 @@ def settings():
             return render_template("settings.html",
                                    error_message="Invalid character(s) in input.")
 
-        if not checkPassword(password, user["password"]):
+        if not check_password(password, user["password"]):
             error_message = "Incorrect password."
         elif any(u["username"] == username for u in users):
             error_message = "Username already taken."
@@ -818,7 +824,7 @@ def home():
     last_entered = []
 
     for prog in my_programs:
-        last_log = getLastEnteredLog(session["user_id"], prog)
+        last_log = get_last_entered_log(session["user_id"], prog)
         if last_log:
             last_entered.append(last_log)
         else:
@@ -1081,19 +1087,14 @@ def run():
         notes = request.form.get(f"notes_{set_num}", "")
         selected = request.form.get("selected_program")
 
-        print("efwionweofinweoinfwoin")
-
         if not check_date(workout_date, date_format):
-            print("date check")
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
         # elif not check_text(notes):
         #     return render_template("run.html", error_message="Invalid character(s) in input.")
         elif not weight:
-            print("weight check")
             error_message = "Missing value for weight."
         elif not reps:
-            print("reps check")
             error_message = "Missing value for reps."
         else:
             weight = float(weight)
@@ -1104,10 +1105,8 @@ def run():
             else:
                 one_rm = weight * reps
 
-            diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
-            diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
-
-            print(f'This is what should be added: userid {int(session["user_id"])}, program: {selected} exercise {exercise_name}, weight: {weight}, reps {reps}, 1rm: {one_rm}, diff: {diff}')
+            diff = get_diff(user_data, selected, exercise_name, set_num, one_rm)
+            diff_weight = get_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
             appendLog({
                 "user_id": int(session["user_id"]),
@@ -1205,8 +1204,8 @@ def run():
                     else:
                         one_rm = weight * reps
 
-                    diff = calculate_diff(user_data, selected, exercise_name, i + 1, one_rm)
-                    diff_weight = calculate_diff(user_data, selected, exercise_name, i + 1, weight, 1)
+                    diff = get_diff(user_data, selected, exercise_name, i + 1, one_rm)
+                    diff_weight = get_diff(user_data, selected, exercise_name, i + 1, weight, 1)
 
                     # print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
 
@@ -1263,9 +1262,6 @@ def run():
     last_breakdown_preference = session.get("settings", {}).get("show_last_breakdown", 2)
 
     result = parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown_preference, rec_breakdown_preference)
-    # print("fewoinfew")
-    # print(result.last_entries_breakdown)
-    # print(result.recommendations_breakdown)
 
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
@@ -1506,8 +1502,8 @@ def manage():
                 # print(f"The program name '{new_program_name}' is not valid.")
                 error_message = "Invalid character(s) in input."
             else:
-                id = findOpenId(program_data)
-                code = generateCode(id)
+                id = get_open_id(program_data)
+                code = generate_code(id)
                 appendProgram({
                     "id": id,
                     "user_id": int(session["user_id"]),
@@ -1840,8 +1836,8 @@ def templates():
                 })
             success_message = f"'{prog_name}' added to your programs!"
             my_programs.append(prog_name)
-            id = findOpenId(program_data)
-            code = generateCode(id)
+            id = get_open_id(program_data)
+            code = generate_code(id)
             appendProgram({
                 "id": id,
                 "user_id": int(session["user_id"]),
@@ -1910,7 +1906,7 @@ def findProg():
                 if new_name in my_programs:
                     error_message = f"You already have a program called '{new_name}'."
                 else:
-                    new_id = findOpenId(program_data)
+                    new_id = get_open_id(program_data)
                     appendProgram({
                         "id": new_id,
                         "user_id": user_id,
@@ -1920,7 +1916,7 @@ def findProg():
                         "repeats": 0,
                         "repeats_duration": None,
                         "show_links": 1,
-                        "code": generateCode(new_id),
+                        "code": generate_code(new_id),
                     })
                     for row in source_ex:
                         appendExercise({
@@ -1956,7 +1952,7 @@ def logs():
     user_prog = [row for row in prog_data if str(row["user_id"]) == str(session["user_id"])] # only the users programs
     my_programs = list(set(row["program_name"] for row in user_prog)) # list of the names of the users programs
     date_format = session.get("settings", {}).get("date_format", 1)
-    last_overall = getLastEnteredLog(session["user_id"])
+    last_overall = get_last_entered_log(session["user_id"])
 
     timezone = pytz.timezone("America/Chicago")
     now = datetime.now(timezone)
@@ -1976,7 +1972,7 @@ def logs():
     exercises = [row for row in user_prog if row["program_name"] == selected_prog]
     exercise_names = [row["exercise_name"] for row in exercises]
     if not selected_ex or selected_ex not in exercise_names:
-        last_in_prog = getLastEnteredLog(session["user_id"], program=selected_prog)
+        last_in_prog = get_last_entered_log(session["user_id"], program=selected_prog)
         if last_in_prog:
             selected_ex = last_in_prog["exercise_name"]
         else:
@@ -2062,8 +2058,8 @@ def logs():
                     new_1rm = round(upd_weight * (1 + float(upd_reps) / 30), 3)
                 else:
                     new_1rm = upd_weight * upd_reps
-                before = find_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
-                after = find_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
+                before = get_date(user_data_exercise, matching["id"], direction=-1)  # chronologically earlier
+                after = get_date(user_data_exercise, matching["id"], direction=1)  # chronologically later
                 new_diff = round(new_1rm - before["one_rm"], 3) if before else 0
                 new_diff_weight = round(upd_weight - before["weight"], 3) if before else 0
 
