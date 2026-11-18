@@ -530,7 +530,7 @@ def generate_weight_breakdown(weight, base):
 
         acc.append(" on each side.")
 
-        return f"{base} lb bar " + "".join(acc)
+        return f"{base} lb bar + " + "".join(acc)
 
 def generate_code(id):
     suffix1 = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(3))
@@ -920,7 +920,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, show_r
                         log_all_toggle[key] = True
 
                 if last_breakdown:
-                    last_entries_breakdown[key] = "Last time: " + generate_weight_breakdown(last["weight"], ex["base"])
+                    last_entries_breakdown[key] = "Last Load: " + generate_weight_breakdown(last["weight"], ex["base"])
                 else:
                     last_entries_breakdown[key] = None
 
@@ -956,35 +956,26 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, show_r
                 else:
                     if int(last["reps"]) >= int(maxRepRange[s - 1] * (1 + imprv_coef)):
                         # if last reps are significantly more than max or significantly less than min
-                        rec_weight = round((last["one_rm"] / (1 + (minRepRange[s - 1] / 30))) / ex["increment"]) * ex[
-                            "increment"]
-                        recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
-                        rec_weights[key] = float(rec_weight)
+                        rec_weights[key] = max(round((last["one_rm"] / (1 + (minRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                            "increment"], ex["base"])
                         rec_reps[key] = int(minRepRange[s - 1])
                     elif int(last["reps"]) < int((minRepRange[s - 1] - 1) * (1 - imprv_coef)):
-                        rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s - 1] / 30))) / ex["increment"]) * ex[
-                            "increment"]
-                        recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
-                        rec_weights[key] = float(rec_weight)
+                        rec_weights[key] = max(round((last["one_rm"] / (1 + (maxRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                            "increment"], ex["base"])
                         rec_reps[key] = int(maxRepRange[s - 1])
                     elif int(last["reps"]) >= maxRepRange[s - 1]:  # if last reps are more than max
-                        rec_weight = float(last["weight"]) + float(ex["increment"])
-                        recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
-                        rec_weights[key] = float(rec_weight)
+                        rec_weights[key] = max(float(last["weight"]) + float(ex["increment"]), ex["base"])
                         rec_reps[key] = int(minRepRange[s - 1])
                     elif int(last["reps"]) < minRepRange[s - 1] - 1:  # if last reps are less than min
-                        rec_weight = float(last["weight"]) - float(ex["increment"])
-                        recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
-                        rec_weights[key] = float(rec_weight)
+                        rec_weights[key] = max(float(last["weight"]) - float(ex["increment"]), ex["base"])
                         rec_reps[key] = int(maxRepRange[s - 1])
                     else:  # if last reps are between max and min
-                        recommendations[
-                            key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
-                        rec_weights[key] = float(last['weight'])
+                        rec_weights[key] = max(float(last['weight']), ex["base"])
                         rec_reps[key] = int(last['reps']) + 1
+                    recommendations[key] = f"Recommended: {rec_weights[key]} lbs for {rec_reps[key]} {ex['unit']}s"
 
                     if rec_breakdown:
-                        recommendations_breakdown[key] = "Recommended: " + generate_weight_breakdown(rec_weights[key], ex['base'])
+                        recommendations_breakdown[key] = "Rec Load: " + generate_weight_breakdown(rec_weights[key], ex['base'])
                     else:
                         recommendations_breakdown[key] = None
 
