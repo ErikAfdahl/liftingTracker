@@ -1103,7 +1103,7 @@ def run():
             diff = calculate_diff(user_data, selected, exercise_name, set_num, one_rm)
             diff_weight = calculate_diff(user_data, selected, exercise_name, set_num, weight, 1)
 
-            print(f"This is what should be added: userid {int(session["user_id"])}, program: {selected} exercise {exercise_name}, weight: {weight}, reps {reps}, 1rm: {one_rm}, diff: {diff}")
+            print(f'This is what should be added: userid {int(session["user_id"])}, program: {selected} exercise {exercise_name}, weight: {weight}, reps {reps}, 1rm: {one_rm}, diff: {diff}')
 
             appendLog({
                 "user_id": int(session["user_id"]),
