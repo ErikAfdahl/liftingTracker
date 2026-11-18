@@ -106,7 +106,7 @@ def check_text(text, max_length=100):
     if not isinstance(text, str):
         return False
     text = text.strip()
-    if not text or len(text) > max_length:
+    if len(text) > max_length:
         return False
     return ALLOWED_TEXT.fullmatch(text) is not None
 
