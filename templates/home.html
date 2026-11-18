@@ -5,7 +5,7 @@
     <div>
         <h2 class="fw-bold mb-0">{{ welcome_message }}</h2>
         <p class="text-secondary fst-italic mb-0">For lifters who want to see everything.</p>
-        <p class="text-secondary small mb-0">Version: 4.0.0</p>
+        <p class="text-secondary small mb-0">Version: 4.1.2</p>
         {% if user_data %}
             <p class="text-secondary small mb-0">Last session: <span class="text-light">{{ user_data[-1]["program"] }}</span> on {{ date }}</p>
         {% endif %}
@@ -24,6 +24,8 @@
     <div class="collapse mt-2" id="updateSection">
         <div class="card card-body text-secondary small">
             <p><strong>11-10-2026</strong> — Users can now share programs via the search program button.</p>
+            <p><strong>11-17-2026</strong> — Security updates around user inputs.</p>
+            <p><strong>11-18-2026</strong> — Rec/last weight breakdowns.</p>
         </div>
     </div>
 </div>
