@@ -541,7 +541,9 @@ def login():
     if "user_id" in session:
         return redirect(url_for("home"))
 
-    error = None
+    error_message = None
+    success_message = None
+
     if request.method == "POST":
         action = request.form.get("action")
         users = getAllUsers()
@@ -550,18 +552,11 @@ def login():
             username = request.form.get("username")
             password = request.form.get("password")
 
-            if not check_text(username) or not check_text(password):
-                return render_template("login.html", error="Invalid character(s) in input.")
-
-            print("testing valid characters")
-            print(check_text(username))
-            print(check_text(password))
-
             user = next((u for u in users if u["username"] == username), None)
             if not check_text(username):
-                error = "Invalid character(s) in username input."
+                error_message = "Invalid character(s) in username input."
             elif not check_text(password):
-                error = "Invalid character(s) in password input."
+                error_message = "Invalid character(s) in password input."
             elif user and check_password(password, user["password"]):
                 session.permanent = True
                 session["user_id"] = user["user_id"]
@@ -572,22 +567,25 @@ def login():
                 }
                 return redirect(url_for("home"))
             else:
-                error = "Invalid username or password."
+                error_message = "Invalid username or password."
 
         elif action == "register":
             new_username = request.form.get("new_username")
             new_password = request.form.get("new_password")
             confirm = request.form.get("confirm_password")
 
-            if not check_text(new_username) or not check_text(new_password) or not check_text(confirm):
-                return render_template("login.html", error="Invalid character(s) in input.")
-
-            if not new_username or not new_password:
-                error = "Please fill in all fields."
+            if not check_text(new_username):
+                error_message = "Invalid character(s) in username input."
+            elif not check_text(new_password):
+                error_message = "Invalid character(s) in password input."
+            elif not check_text(confirm):
+                error_message = "Invalid character(s) in confirm password input."
+            elif not new_username or not new_password:
+                error_message = "Please fill in all fields."
             elif new_password != confirm:
-                error = "Passwords don't match."
+                error_message = "Passwords don't match."
             elif any(u["username"] == new_username for u in users):
-                error = "Username already taken."
+                error_message = "Username already taken."
             else:
                 new_id = getNextUserId()
                 appendUser({
@@ -612,9 +610,9 @@ def login():
                     "improvement_coef":0.25,
                     "log_all_preference":2
                 })
-                error = "Account created! You can now log in."
+                success_message = "Account created! You can now log in."
 
-    return render_template("login.html", error=error)
+    return render_template("login.html", error_message=error_message, success_message=success_message)
 
 @app.route("/logout")
 def logout():
@@ -703,11 +701,13 @@ def settings():
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_password")
 
-        if not check_text(old_password) or not check_text(new_password) or not check_text(confirm_new_password):
-            return render_template("settings.html",
-                                   error_message="Invalid character(s) in input.")
-
-        if not old_password or not new_password or not confirm_new_password:
+        if not check_text(old_password):
+            error_message="Invalid character(s) in old password input."
+        elif not check_text(new_password):
+            error_message = "Invalid character(s) in new password input."
+        elif not check_text(confirm_new_password):
+            error_message = "Invalid character(s) in confirm new password input."
+        elif not old_password or not new_password or not confirm_new_password:
             error_message = "Please fill in all fields."
         elif not check_password(old_password, user["password"]):
             error_message = "Incorrect password."
@@ -728,11 +728,11 @@ def settings():
         password = request.form.get("password")
         username = request.form.get("username")
 
-        if not check_text(password) or not check_text(username):
-            return render_template("settings.html",
-                                   error_message="Invalid character(s) in input.")
-
-        if not check_password(password, user["password"]):
+        if not check_text(username):
+            error_message="Invalid character(s) in username input."
+        elif not check_text(password):
+            error_message = "Invalid character(s) in password input."
+        elif not check_password(password, user["password"]):
             error_message = "Incorrect password."
         elif any(u["username"] == username for u in users):
             error_message = "Username already taken."
@@ -1035,7 +1035,7 @@ def run():
 
     if not my_programs:
         return render_template("run.html",
-                               my_programs=[],
+                               my_programs=None,
                                exercises=[],
                                user_data=[],
                                selected=None,
@@ -1101,8 +1101,8 @@ def run():
         if not check_date(workout_date, date_format):
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
-        # elif not check_text(notes):
-        #     return render_template("run.html", error_message="Invalid character(s) in input.")
+        elif not check_text(notes):
+            error_message = "Invalid character(s) in notes."
         elif not weight:
             error_message = "Missing value for weight."
         elif not reps:
@@ -1199,7 +1199,7 @@ def run():
                                      f"(e.g., {iso_to_display(today, date_format)}).")
                     break
                 elif not check_text(notes):
-                    return render_template("run.html", error_message="Invalid character(s) in input.")
+                    error_message = "Invalid character(s) in notes."
                 elif not weight:
                     error_message = f"Missing value for weight for set {i + 1}."
                     break
@@ -1218,7 +1218,6 @@ def run():
                     diff = get_diff(user_data, selected, exercise_name, i + 1, one_rm)
                     diff_weight = get_diff(user_data, selected, exercise_name, i + 1, weight, 1)
 
-                    # print(f"weight {weight} reps {reps} diff {diff} diff {diff_weight}")
 
                     appendLog({
                         "user_id": int(session["user_id"]),
@@ -1244,8 +1243,6 @@ def run():
                     success_message = f"Successful mass log, {count} logs added." #add count that displays number of lgos updates
                 elif count == 1:
                     success_message = f"Successful mass log, {count} log added."
-
-                # narrator = session.get("settings", {}).get("narrator", "default")
 
                 exercises = sorted(
                     [row for row in user_ex if row["program_name"] == selected],
@@ -1560,15 +1557,16 @@ def manage():
             active = 1 if request.form.get("new_program_active") == "1" else 0
             show_links = 1 if request.form.get("new_show_links") == "1" else 0
 
-            if not new_name:
+            if not check_text(new_name):
+                error_message = "Invalid character(s) in program name input."
+            elif not check_text(notes):
+                error_message = "Invalid character(s) in notes input."
+            elif not new_name:
                 error_message = "Please enter a program name."
-
             elif new_name in my_programs:
                 error_message = "A program with that name already exists."
-
-            # elif not check_text(new_name) or not check_text(notes):
-            #     error_message = "Invalid character(s) in input."
-
+            elif not check_text(new_name) or not check_text(notes):
+                error_message = "Invalid character(s) in input."
             else:
                 program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
 
@@ -1590,7 +1588,6 @@ def manage():
                 success_message = f"Updated '{new_name}'"
                 ex_data = getAllExercises()
                 user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
-                # program_data = getAllPrograms()
                 program_data = getAllPrograms()
                 user_programs = sorted(
                     [row for row in program_data if str(row["user_id"]) == str(session["user_id"])],
@@ -1613,7 +1610,13 @@ def manage():
             new_unit = request.form.get("new_unit", "rep")
             new_link = request.form.get("new_link", "")
 
-            if not new_exercise:
+            if not check_text(new_exercise):
+                error_message = "Invalid character(s) in exercise name input."
+            elif not check_text(new_notes):
+                error_message = "Invalid character(s) in notes input."
+            elif not check_text(new_link):
+                error_message = "Invalid character(s) in link input."
+            elif not new_exercise:
                 error_message = "Please enter an exercise name."
             elif not new_sets:
                 error_message = "Missing value for number of sets."
@@ -1623,8 +1626,6 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
-            # elif not check_text(new_exercise) or not check_text(new_notes) or not check_text(new_link):
-            #     error_message = "Invalid character(s) in input."
             else:
                 new_sets = int(new_sets)
                 new_inc = float(new_inc)
@@ -1717,7 +1718,13 @@ def manage():
             upd_link = request.form.get("upd_link")
             edit_exercises = [row for row in user_ex if row["program_name"] == selected_edit]
 
-            if not upd_name:
+            if not check_text(upd_name):
+                error_message = "Invalid character(s) in exercise name input."
+            elif not check_text(upd_notes):
+                error_message = "Invalid character(s) in notes input."
+            elif not check_text(upd_link):
+                error_message = "Invalid character(s) in link input."
+            elif not upd_name:
                 error_message = "Please enter an exercise name."
             elif not upd_sets:
                 error_message = "Missing value for number of sets."
@@ -1727,8 +1734,6 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
-            # elif not check_text(upd_name) or not check_text(upd_notes) or not check_text(upd_link):
-            #     error_message = "Invalid character(s) in input."
             else:
                 upd_sets = int(upd_sets)
                 upd_inc = float(upd_inc)
@@ -1781,8 +1786,6 @@ def manage():
                             updateLog(row["id"], {"status": 1})
 
                     success_message = f"Saved changes to {upd_name}!"
-                    # if swapped_name:
-                    #     success_message += f" Swapped order with '{swapped_name}'."
                     ex_data = getAllExercises()
                     user_ex = [row for row in ex_data if str(row["user_id"]) == str(session["user_id"])]
 
@@ -1790,8 +1793,6 @@ def manage():
         [row for row in user_ex if row["program_name"] == selected_edit],
         key=lambda x: int(x["exercise_order"])
     ) if selected_edit else []
-
-    # next_order = (max(int(e["exercise_order"]) for e in edit_exercises) + 1) if edit_exercises else 1
 
     return render_template("manage.html",
                            my_programs=my_programs,
@@ -1869,8 +1870,8 @@ def templates():
                            success_message=success_message,
                            error_message=error_message)
 
-@app.route("/findProg", methods=["GET", "POST"])
-def findProg():
+@app.route("/find_prog", methods=["GET", "POST"])
+def find_prog():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -1948,7 +1949,7 @@ def findProg():
                     success_message = f"'{new_name}' added to your programs!"
                     prog_code = ""
 
-    return render_template("findProg.html",
+    return render_template("find_prog.html",
                            found_name=found_name,
                            found_exercises=found_exercises,
                            prog_code=prog_code,
@@ -1993,7 +1994,6 @@ def logs():
     exercise_data = next((row for row in exercises if row["exercise_name"] == selected_ex), None)
     num_sets = int(exercise_data["num_sets"]) if exercise_data else 1
     selected_unit  = exercise_data["unit"] if exercise_data else "rep"
-    #print(selected_unit)
 
     selected_set = int(request.args.get("set_num") or request.form.get("selected_set") or 1)
     if selected_set < 1:
@@ -2002,12 +2002,8 @@ def logs():
         selected_set = num_sets
 
     user_data_exercise = getUserLogsByExercise(session["user_id"], selected_prog, selected_ex, selected_set)
-
     programLogs = [row for row in user_data_exercise]
-    last = programLogs[-1] if programLogs else None
-
     action = request.form.get("action")
-    # unit = exercises[selected_ex]["unit"]
 
     if request.method == "POST":
         if action == "delete_log":
@@ -2052,15 +2048,15 @@ def logs():
                              int(row["reps"]) == int(orig_reps) and
                              str(row["notes"]) == str(orig_notes)), None)
 
-            if not check_date(upd_date, date_format):
+            if not check_text(upd_notes):
+                error_message = "Invalid character(s) in notes input."
+            elif not check_date(upd_date, date_format):
                 error_message = (f"Invalid date format! Please use MM-DD-YYYY (e.g., "
                                  f"{iso_to_display(today, date_format)}).")
             elif not upd_weight:
                 error_message = "Missing value from weight."
             elif not upd_reps:
                 error_message = "Missing value from reps."
-            # if not check_text(upd_notes):
-            #     error_message = "Invalid character(s) in input."
             elif matching:
                 upd_date = display_to_iso(upd_date, date_format)
                 upd_weight = float(upd_weight)
@@ -2087,11 +2083,7 @@ def logs():
                     "notes": upd_notes
                 })
 
-                # print(before)
-
                 if after:
-                    # print("I love you king julian")
-                    # print(after)
                     updateLog(after["id"], {
                         "diff": round(after["one_rm"] - new_1rm, 3),
                         "diff_weight": round(after["weight"] - upd_weight, 3)
@@ -2105,10 +2097,8 @@ def logs():
             prev_weight = None
 
             for log in programLogs:
-                # print(f"Program {log['exercise_name']} set {log['setNum']}")
                 reps = float(log["reps"])
                 weight = float(log["weight"])
-                # print(f"Pre update {log['1rm']} {log['diff']} {log['diff_weight']}")
                 if reps >= 2:
                     new_1rm = round(weight * (1 + reps / 30), 3)
                 elif reps == 1:
@@ -2122,8 +2112,6 @@ def logs():
                 else:
                     new_diff = 0
                     new_diff_weight = 0
-
-                # print(f"Updated {log['1rm']} {log['diff']} {log['diff_weight']}")
 
                 updateLog(log["id"], {
                     "one_rm": new_1rm,
@@ -2408,7 +2396,6 @@ def feedback():
                            thread_list=thread_list,
                            success_message=success_message,
                            error_message=error_message)
-
 
 @app.route("/about")
 def about():

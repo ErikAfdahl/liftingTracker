@@ -18,7 +18,7 @@
 
 <hr>
 
-<form method="POST" action="/findProg" class="row g-2 mb-4">
+<form method="POST" action="/find_prog" class="row g-2 mb-4">
     <input type="hidden" name="action" value="find_program">
     <div class="col-sm-8 col-md-6">
         <input type="text"
@@ -68,7 +68,7 @@
                 {% endif %}
             </div>
             <div class="card-footer">
-                <form method="POST" action="/findProg">
+                <form method="POST" action="/find_prog">
                     <input type="hidden" name="action" value="copy_program">
                     <input type="hidden" name="prog_code" value="{{ prog_code }}">
                     <button type="submit" class="btn btn-primary btn-sm w-100">Copy to My Programs</button>
