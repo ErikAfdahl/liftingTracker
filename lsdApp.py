@@ -865,7 +865,7 @@ class WorkoutAnalysis:
     prev_entries: dict
     log_all_toggle: dict
 
-def parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown=False, rec_breakdown=False):
+def parse_logs(user_data, exercises, selected, today, log_all_preference, show_rec=True, last_breakdown=False, rec_breakdown=False):
     rep_ranges = {}
     last_entries = {}
     last_entries_breakdown = {}
@@ -941,7 +941,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, last_b
 
                 imprv_coef = session.get('settings', {}).get('improvement_coef', 0.25)
 
-                if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
+                if (maxRepRange[s - 1] == 0):
                     recommendations[key] = None
                     recommendations_breakdown[key] = None
                 else:
@@ -978,6 +978,9 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference, last_b
                         recommendations_breakdown[key] = generate_weight_breakdown(rec_weights[key], ex['base'])
                     else:
                         recommendations_breakdown[key] = None
+
+                    if show_rec:
+                        recommendations[key] = None
 
 
 
@@ -1260,8 +1263,9 @@ def run():
     log_all_preference = session.get("settings", {}).get("log_all_preference", 2)
     rec_breakdown_preference = session.get("settings", {}).get("show_rec_breakdown", 2)
     last_breakdown_preference = session.get("settings", {}).get("show_last_breakdown", 2)
+    show_rec = session.get("settings", {}).get("show_rec", 2)
 
-    result = parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown_preference, rec_breakdown_preference)
+    result = parse_logs(user_data, exercises, selected, today, log_all_preference, show_rec, last_breakdown_preference, rec_breakdown_preference)
 
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
