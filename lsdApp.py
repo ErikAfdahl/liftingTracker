@@ -558,7 +558,11 @@ def login():
             print(check_text(password))
 
             user = next((u for u in users if u["username"] == username), None)
-            if user and check_password(password, user["password"]):
+            if not check_text(username):
+                error = "Invalid character(s) in username input."
+            elif not check_text(password):
+                error = "Invalid character(s) in password input."
+            elif user and check_password(password, user["password"]):
                 session.permanent = True
                 session["user_id"] = user["user_id"]
                 session["username"] = user["username"]
