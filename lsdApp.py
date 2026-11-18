@@ -102,6 +102,7 @@ def check_ranges2(min, max):
 
 def check_text(text, max_length=100):
     """Return True if text is non-empty, short enough, and uses only allowed characters."""
+    print(f"Text fewoife {text}")
     if not isinstance(text, str):
         return False
     text = text.strip()
