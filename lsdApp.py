@@ -1081,15 +1081,19 @@ def run():
         notes = request.form.get(f"notes_{set_num}", "")
         selected = request.form.get("selected_program")
 
+        print("efwionweofinweoinfwoin")
 
         if not check_date(workout_date, date_format):
+            print("date check")
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
-        elif not check_text(notes):
-            return render_template("run.html", error_message="Invalid character(s) in input.")
+        # elif not check_text(notes):
+        #     return render_template("run.html", error_message="Invalid character(s) in input.")
         elif not weight:
+            print("weight check")
             error_message = "Missing value for weight."
         elif not reps:
+            print("reps check")
             error_message = "Missing value for reps."
         else:
             weight = float(weight)
@@ -1259,9 +1263,9 @@ def run():
     last_breakdown_preference = session.get("settings", {}).get("show_last_breakdown", 2)
 
     result = parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown_preference, rec_breakdown_preference)
-    print("fewoinfew")
-    print(result.last_entries_breakdown)
-    print(result.recommendations_breakdown)
+    # print("fewoinfew")
+    # print(result.last_entries_breakdown)
+    # print(result.recommendations_breakdown)
 
     formated_date = iso_to_display(today, session.get('settings', {}).get('date_format', 1))
     response = make_response(render_template("run.html",
