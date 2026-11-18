@@ -96,9 +96,9 @@
             {% for s in range(1, ex.num_sets | int + 1) %}
                 {% set key = ex.exercise_name ~ "_" ~ s %}
                 {% set last = last_entries.get(key) %}
-<!--                {% set last_entries_breakdown = last_entries_breakdown.get(key) %}-->
+                {% set last_entries_breakdown = last_entries_breakdown.get(key) %}
                 {% set rec = recommendations.get(key) %}
-<!--                {% set recommendations_breakdown = recommendations_breakdown.get(key) %}-->
+                {% set recommendations_breakdown = recommendations_breakdown.get(key) %}
                 {% set absolute_last = prev_entries.get(ex.exercise_name) %}
 
                 <div class="mb-4">
