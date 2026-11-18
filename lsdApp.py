@@ -623,8 +623,10 @@ def settings():
         show_rep = 1 if request.form.get("show_rep") else 0
         show_last = 1 if request.form.get("show_last") else 0
         show_last_breakdown = 1 if request.form.get("show_last_breakdown") else 0
+        print(f"rec show_last_breakdown = {show_last_breakdown}")
         show_rec = 1 if request.form.get("show_rec") else 0
         show_rec_breakdown = 1 if request.form.get("show_rec_breakdown") else 0
+        print(f"rec breakdown = {show_rec_breakdown}")
         show_streak = 1 if request.form.get("show_streak") else 0
         show_streak_weight = 1 if request.form.get("show_streak_weight") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
