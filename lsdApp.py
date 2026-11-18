@@ -1552,8 +1552,8 @@ def manage():
             elif new_name in my_programs:
                 error_message = "A program with that name already exists."
 
-            elif not check_text(new_name) or not check_text(notes):
-                error_message = "Invalid character(s) in input."
+            # elif not check_text(new_name) or not check_text(notes):
+            #     error_message = "Invalid character(s) in input."
 
             else:
                 program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
@@ -1609,8 +1609,8 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
-            elif not check_text(new_exercise) or not check_text(new_notes) or not check_text(new_link):
-                error_message = "Invalid character(s) in input."
+            # elif not check_text(new_exercise) or not check_text(new_notes) or not check_text(new_link):
+            #     error_message = "Invalid character(s) in input."
             else:
                 new_sets = int(new_sets)
                 new_inc = float(new_inc)
@@ -1713,8 +1713,8 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
-            elif not check_text(upd_name) or not check_text(upd_notes) or not check_text(upd_link):
-                error_message = "Invalid character(s) in input."
+            # elif not check_text(upd_name) or not check_text(upd_notes) or not check_text(upd_link):
+            #     error_message = "Invalid character(s) in input."
             else:
                 upd_sets = int(upd_sets)
                 upd_inc = float(upd_inc)
