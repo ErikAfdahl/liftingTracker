@@ -137,7 +137,7 @@ def check_ranges2(min, max):
                 return False
     return True
 
-def is_valid_text(text, max_length=100):
+def check_text(text, max_length=100):
     """Return True if text is non-empty, short enough, and uses only allowed characters."""
     if not isinstance(text, str):
         return False
@@ -487,6 +487,42 @@ def generate_report(user_data, exercises, selected, last_entries, prev_entries, 
 
     return reports
 
+def generate_weight_breakdown(weight, base):
+    if base == 0:
+        return f"{weight / 2} lbs on each side."
+    elif (weight - base) == 0:
+        return "Only the bar."
+    else:
+        plates = [45.0, 25.0, 10.0, 5.0, 2.5]
+        acc = []
+        weight = (weight - base) / 2
+
+        for i in range(len(plates)):
+            count = weight // plates[i]
+            if count > 0:
+                acc.append(f"{int(weight // plates[i])} {plates[i]} lb {"plates" if count > 1 else "plate"}")
+                if (count * plates[i]) == weight:
+                    break
+                else:
+                    weight = weight % plates[i]
+
+        if len(acc) == 2:
+            acc.append(None)
+            acc[1], acc[2] = " and ", acc[1]
+
+        elif len(acc) > 1:
+            for i in range(len(acc)):
+                if i != len(acc) - 1:
+                    acc[i] = acc[i] + ", "
+                else:
+                    acc[i] = "and " + acc[i]
+        else:
+            return "Weight too small."
+
+        acc.append(" on each side.")
+
+        return "".join(acc)
+
 def getLastEnteredLog(user_id, program=None):
     query = supabase.table("logs").select("*").eq("user_id", user_id)
     if program:
@@ -508,7 +544,7 @@ def login():
             username = request.form.get("username")
             password = request.form.get("password")
 
-            if not is_valid_text(username) or not is_valid_text(password):
+            if not check_text(username) or not check_text(password):
                 return render_template("login.html", error="Invalid character(s) in input.")
 
             user = next((u for u in users if u["username"] == username), None)
@@ -529,7 +565,7 @@ def login():
             new_password = request.form.get("new_password")
             confirm = request.form.get("confirm_password")
 
-            if not is_valid_text(new_username) or not is_valid_text(new_password) or not is_valid_text(confirm):
+            if not check_text(new_username) or not check_text(new_password) or not check_text(confirm):
                 return render_template("login.html", error="Invalid character(s) in input.")
 
             if not new_username or not new_password:
@@ -550,9 +586,11 @@ def login():
                     "date_format": 1,
                     "show_rep": 1,
                     "show_last": 1,
-                    "show_streak": 1,
-                    "show_streak_weight": 1,
+                    "show_last_breakdown": 0,
                     "show_rec": 1,
+                    "show_rec_breakdown": 0,
+                    "show_streak": 1,
+                    "show_streak_weight": 0,
                     "weight_autofill": 1,
                     "reps_autofill": 1,
                     "weight_autofill_absent": 1,
@@ -584,9 +622,11 @@ def settings():
         narrator = request.form.get("narrator", "default")
         show_rep = 1 if request.form.get("show_rep") else 0
         show_last = 1 if request.form.get("show_last") else 0
+        show_last_breakdown = 1 if request.form.get("show_last_breakdown") else 0
+        show_rec = 1 if request.form.get("show_rec") else 0
+        show_rec_breakdown = 1 if request.form.get("show_rec_breakdown") else 0
         show_streak = 1 if request.form.get("show_streak") else 0
         show_streak_weight = 1 if request.form.get("show_streak_weight") else 0
-        show_rec = 1 if request.form.get("show_rec") else 0
         quick_indexing = 1 if request.form.get("quick_indexing") else 0
         quick_resume = 1 if request.form.get("quick_resume") else 0
         date_format = request.form.get("date_format", 1)
@@ -607,9 +647,11 @@ def settings():
                 "date_format": date_format,
                 "show_rep": show_rep,
                 "show_last": show_last,
+                "show_last_breakdown": show_last_breakdown,
+                "show_rec": show_rec,
+                "show_rec_breakdown": show_rec_breakdown,
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
-                "show_rec": show_rec,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -625,9 +667,11 @@ def settings():
                 "date_format": date_format,
                 "show_rep": show_rep,
                 "show_last": show_last,
+                "show_last_breakdown": show_last_breakdown,
+                "show_rec": show_rec,
+                "show_rec_breakdown": show_rec_breakdown,
                 "show_streak": show_streak,
                 "show_streak_weight":show_streak_weight,
-                "show_rec": show_rec,
                 "weight_autofill": int(weight_autofill),
                 "reps_autofill": int(reps_autofill),
                 "weight_autofill_absent": int(weight_autofill_absent),
@@ -645,7 +689,7 @@ def settings():
         new_password = request.form.get("new_password")
         confirm_new_password = request.form.get("confirm_password")
 
-        if not is_valid_text(old_password) or not is_valid_text(new_password) or not is_valid_text(confirm_new_password):
+        if not check_text(old_password) or not check_text(new_password) or not check_text(confirm_new_password):
             return render_template("settings.html",
                                    error_message="Invalid character(s) in input.")
 
@@ -670,7 +714,7 @@ def settings():
         password = request.form.get("password")
         username = request.form.get("username")
 
-        if not is_valid_text(password) or not is_valid_text(username):
+        if not check_text(password) or not check_text(username):
             return render_template("settings.html",
                                    error_message="Invalid character(s) in input.")
 
@@ -699,10 +743,12 @@ def settings():
         "quick_resume": bool(int(user.get("quick_resume", 1))) if user else True,
         "date_format": user.get("date_format", 1) if user else 1,
         "show_rep": bool(int(user.get("show_rep", 1))) if user else True,
+        "show_rep_breakdown": bool(int(user.get("show_rep_breakdown", 1))) if user else True,
         "show_last": bool(int(user.get("show_last", 1))) if user else True,
+        "show_last_breakdown": bool(int(user.get("show_last_breakdown", 1))) if user else True,
+        "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
         "show_streak": bool(int(user.get("show_streak", 1))) if user else True,
         "show_streak_weight": bool(int(user.get("show_streak_weight", 1))) if user else True,
-        "show_rec": bool(int(user.get("show_rec", 1))) if user else True,
         "weight_autofill": user.get("weight_autofill", 1) if user else 1,
         "reps_autofill": user.get("reps_autofill", 1) if user else 1,
         "weight_autofill_absent": user.get("weight_autofill_absent", 1) if user else 1,
@@ -803,7 +849,9 @@ def home():
 class WorkoutAnalysis:
     rep_ranges: dict
     last_entries: dict
+    last_entries_breakdown: dict
     recommendations: dict
+    recommendations_breakdown: dict
     streaks_1rm: dict
     streaks_weight: dict
     rec_weights: dict
@@ -811,10 +859,12 @@ class WorkoutAnalysis:
     prev_entries: dict
     log_all_toggle: dict
 
-def parse_logs(user_data, exercises, selected, today, log_all_preference):
+def parse_logs(user_data, exercises, selected, today, log_all_preference, last_breakdown=False, rec_breakdown=False):
     rep_ranges = {}
     last_entries = {}
+    last_entries_breakdown = {}
     recommendations = {}
+    recommendations_breakdown = {}
     streaks_1rm = {}
     streaks_weight = {}
     rec_weights = {}
@@ -831,6 +881,7 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference):
             last_entries[key] = get_last_entry(user_data, selected, ex["exercise_name"], s)
             if last_entries[key]:
                 last_entries[key]["date"] = iso_to_display(last_entries[key]["date"], date_format)
+
             last = last_entries[key]
 
             if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rep", 1) == 0):
@@ -852,6 +903,11 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference):
                         log_all_toggle[key] = False
                     else:
                         log_all_toggle[key] = True
+
+                if last_breakdown:
+                    last_entries_breakdown[key] = generate_weight_breakdown(last["weight"], ex["base"])
+                else:
+                    last_entries_breakdown[key] = None
 
                 if last["diff"] > 0:
                     streak_1rm = 1
@@ -881,34 +937,43 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference):
 
                 if (maxRepRange[s - 1] == 0) or (session.get("settings", {}).get("show_rec", 1) == 0):
                     recommendations[key] = None
-                elif int(last["reps"]) >= int(maxRepRange[s - 1] * (1 + imprv_coef)):
-                    # if last reps are significantly more than max or significantly less than min
-                    rec_weight = round((last["one_rm"] / (1 + (minRepRange[s - 1] / 30))) / ex["increment"]) * ex[
-                        "increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(minRepRange[s - 1])
-                elif int(last["reps"]) < int((minRepRange[s - 1] - 1) * (1 - imprv_coef)):
-                    rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s - 1] / 30))) / ex["increment"]) * ex[
-                        "increment"]
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(maxRepRange[s - 1])
-                elif int(last["reps"]) >= maxRepRange[s - 1]:  # if last reps are more than max
-                    rec_weight = float(last["weight"]) + float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(minRepRange[s - 1])
-                elif int(last["reps"]) < minRepRange[s - 1] - 1:  # if last reps are less than min
-                    rec_weight = float(last["weight"]) - float(ex["increment"])
-                    recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
-                    rec_weights[key] = float(rec_weight)
-                    rec_reps[key] = int(maxRepRange[s - 1])
-                else:  # if last reps are between max and min
-                    recommendations[
-                        key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
-                    rec_weights[key] = float(last['weight'])
-                    rec_reps[key] = int(last['reps']) + 1
+                    recommendations_breakdown[key] = None
+                else:
+                    if int(last["reps"]) >= int(maxRepRange[s - 1] * (1 + imprv_coef)):
+                        # if last reps are significantly more than max or significantly less than min
+                        rec_weight = round((last["one_rm"] / (1 + (minRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                            "increment"]
+                        recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
+                        rec_weights[key] = float(rec_weight)
+                        rec_reps[key] = int(minRepRange[s - 1])
+                    elif int(last["reps"]) < int((minRepRange[s - 1] - 1) * (1 - imprv_coef)):
+                        rec_weight = round((last["one_rm"] / (1 + (maxRepRange[s - 1] / 30))) / ex["increment"]) * ex[
+                            "increment"]
+                        recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
+                        rec_weights[key] = float(rec_weight)
+                        rec_reps[key] = int(maxRepRange[s - 1])
+                    elif int(last["reps"]) >= maxRepRange[s - 1]:  # if last reps are more than max
+                        rec_weight = float(last["weight"]) + float(ex["increment"])
+                        recommendations[key] = f"Recommended: {rec_weight} lbs for {minRepRange[s - 1]} {ex['unit']}s"
+                        rec_weights[key] = float(rec_weight)
+                        rec_reps[key] = int(minRepRange[s - 1])
+                    elif int(last["reps"]) < minRepRange[s - 1] - 1:  # if last reps are less than min
+                        rec_weight = float(last["weight"]) - float(ex["increment"])
+                        recommendations[key] = f"Recommended: {rec_weight} lbs for {maxRepRange[s - 1]} {ex['unit']}s"
+                        rec_weights[key] = float(rec_weight)
+                        rec_reps[key] = int(maxRepRange[s - 1])
+                    else:  # if last reps are between max and min
+                        recommendations[
+                            key] = f"Recommended: {last['weight']} lbs for {int(last['reps']) + 1} {ex['unit']}s"
+                        rec_weights[key] = float(last['weight'])
+                        rec_reps[key] = int(last['reps']) + 1
+
+                    if rec_breakdown:
+                        recommendations_breakdown[key] = generate_weight_breakdown(rec_weights[key], ex['base'])
+                    else:
+                        recommendations_breakdown[key] = None
+
+
 
     prev_entries = {}
     for ex in exercises:
@@ -918,7 +983,9 @@ def parse_logs(user_data, exercises, selected, today, log_all_preference):
     return WorkoutAnalysis(
         rep_ranges=rep_ranges,
         last_entries=last_entries,
+        last_entries_breakdown=last_entries_breakdown,
         recommendations=recommendations,
+        recommendations_breakdown=recommendations_breakdown,
         streaks_1rm=streaks_1rm,
         streaks_weight=streaks_weight,
         rec_weights=rec_weights,
@@ -1018,7 +1085,7 @@ def run():
         if not check_date(workout_date, date_format):
             error_message = (f"Invalid date format! Please use the format matching your settings "
                              f"(e.g., {iso_to_display(today, date_format)}).")
-        elif not is_valid_text(notes):
+        elif not check_text(notes):
             return render_template("run.html", error_message="Invalid character(s) in input.")
         elif not weight:
             error_message = "Missing value for weight."
@@ -1115,7 +1182,7 @@ def run():
                     error_message = (f"Invalid date format for set {i + 1} "
                                      f"(e.g., {iso_to_display(today, date_format)}).")
                     break
-                elif not is_valid_text(notes):
+                elif not check_text(notes):
                     return render_template("run.html", error_message="Invalid character(s) in input.")
                 elif not weight:
                     error_message = f"Missing value for weight for set {i + 1}."
@@ -1388,9 +1455,11 @@ def manage():
         selected_prog = [row for row in user_programs if row["program_name"] == selected_edit][0]
         show_link = int(selected_prog["show_links"])
         active = int(selected_prog["active"])
+        code = selected_prog["code"]
     else:
         show_link = 1
         active = 1
+        code = None
 
     action = request.form.get("action")
 
@@ -1412,6 +1481,7 @@ def manage():
             break
 
 
+
     if request.method == "POST":
         if action == "create_program":
             new_program_name = request.form.get("new_program_name", "").strip()
@@ -1419,7 +1489,7 @@ def manage():
                 error_message = "Please enter a program name."
             elif new_program_name in my_programs:
                 error_message = "A program with that name already exists."
-            elif not is_valid_text(new_program_name):
+            elif not check_text(new_program_name):
                 # print(f"The program name '{new_program_name}' is not valid.")
                 error_message = "Invalid character(s) in input."
             else:
@@ -1475,7 +1545,7 @@ def manage():
             elif new_name in my_programs:
                 error_message = "A program with that name already exists."
 
-            elif not is_valid_text(new_name) or not is_valid_text(notes):
+            elif not check_text(new_name) or not check_text(notes):
                 error_message = "Invalid character(s) in input."
 
             else:
@@ -1514,6 +1584,7 @@ def manage():
             new_exercise = request.form.get("new_exercise", "Exercise")
             new_sets = request.form.get("new_sets", 1).replace(" ", "")
             new_inc = request.form.get("new_inc", 5.0).replace(" ", "")
+            new_base = request.form.get("new_base", 45.0).replace(" ", "")
             new_min = request.form.get("new_min", "6,2").replace(" ", "")
             new_max = request.form.get("new_max", "8,4").replace(" ", "")
             new_notes = request.form.get("new_notes", "")
@@ -1531,11 +1602,12 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(new_min, new_max):
                 error_message = "Invalid rep range format."
-            elif not is_valid_text(new_exercise) or not is_valid_text(new_notes) or not is_valid_text(new_link):
+            elif not check_text(new_exercise) or not check_text(new_notes) or not check_text(new_link):
                 error_message = "Invalid character(s) in input."
             else:
                 new_sets = int(new_sets)
                 new_inc = float(new_inc)
+                new_base = float(new_base)
                 new_order = int(new_order)
 
                 new_min = parseRepRange(new_min, new_sets)
@@ -1558,6 +1630,7 @@ def manage():
                         "exercise_name": new_exercise,
                         "num_sets": new_sets,
                         "increment": new_inc,
+                        "base": new_base,
                         "min_reps": ",".join(str(x) for x in new_min),
                         "max_reps": ",".join(str(x) for x in new_max),
                         "exercise_order": new_order,
@@ -1614,6 +1687,7 @@ def manage():
             upd_name = request.form.get("upd_name", exercise_name)
             upd_sets = request.form.get("upd_sets").replace(" ", "")
             upd_inc = request.form.get("upd_inc").replace(" ", "")
+            upd_base = request.form.get("upd_base").replace(" ", "")
             upd_min = request.form.get("upd_min").replace(" ", "")
             upd_max = request.form.get("upd_max").replace(" ", "")
             upd_notes = request.form.get("upd_notes", "")
@@ -1632,11 +1706,12 @@ def manage():
                 error_message = "Missing value for order."
             elif not check_ranges1(upd_min, upd_max):
                 error_message = "Invalid rep range format."
-            elif not is_valid_text(upd_name) or not is_valid_text(upd_notes) or not is_valid_text(upd_link):
+            elif not check_text(upd_name) or not check_text(upd_notes) or not check_text(upd_link):
                 error_message = "Invalid character(s) in input."
             else:
                 upd_sets = int(upd_sets)
                 upd_inc = float(upd_inc)
+                upd_base = float(upd_base)
                 upd_order = int(upd_order)
 
                 upd_min = parseRepRange(upd_min, upd_sets)
@@ -1661,6 +1736,7 @@ def manage():
                             "exercise_name": upd_name,
                             "num_sets": upd_sets,
                             "increment": upd_inc,
+                            "base": upd_base,
                             "min_reps": ",".join(str(x) for x in upd_min),
                             "max_reps": ",".join(str(x) for x in upd_max),
                             "exercise_order": upd_order,
@@ -1703,7 +1779,7 @@ def manage():
                            next_order=open_order,
                            max_order=max_order,
                            show_link=show_link,
-                           code=selected_prog["code"],
+                           code=code,
                            active=active,
                            max_exercises=max_exercises,
                            log_cap_warning=log_cap_warning,
@@ -1741,6 +1817,7 @@ def templates():
                     "exercise_name": row["exercise_name"],
                     "num_sets": row["num_sets"],
                     "increment": row["increment"],
+                    "base": row["base"],
                     "min_reps": row["min_reps"],
                     "max_reps": row["max_reps"],
                     "exercise_order": row["exercise_order"],
@@ -1752,9 +1829,6 @@ def templates():
             my_programs.append(prog_name)
             id = findOpenId(program_data)
             code = generateCode(id)
-            print("gwoiweof")
-            print(id)
-            print(code)
             appendProgram({
                 "id": id,
                 "user_id": int(session["user_id"]),
@@ -1800,7 +1874,7 @@ def findProg():
         clear = False
         prog = None
 
-        if not is_valid_text(prog_code):
+        if not check_text(prog_code):
             error_message = "Invalid character(s) in input."
         else:
             clear = True
@@ -1842,6 +1916,7 @@ def findProg():
                             "exercise_name": row["exercise_name"],
                             "num_sets": row["num_sets"],
                             "increment": row["increment"],
+                            "base": row["base"],
                             "min_reps": row["min_reps"],
                             "max_reps": row["max_reps"],
                             "exercise_order": row["exercise_order"],
@@ -1963,7 +2038,7 @@ def logs():
                 error_message = "Missing value from weight."
             elif not upd_reps:
                 error_message = "Missing value from reps."
-            if not is_valid_text(upd_notes):
+            if not check_text(upd_notes):
                 error_message = "Invalid character(s) in input."
             elif matching:
                 upd_date = display_to_iso(upd_date, date_format)

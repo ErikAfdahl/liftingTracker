@@ -106,6 +106,45 @@
         <div class="card mb-3">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
+                    <span class="fw-bold">Show Last Breakdown</span>
+                    <p class="text-secondary small mb-0">How last weight was loaded.</p>
+                </div>
+                <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="show_last" id="show_last_breakdown" value="1"
+                           {% if settings.show_last_breakdown %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-bold">Show Recommendation</span>
+                    <p class="text-secondary small mb-0">Display the recommendation (when available).</p>
+                </div>
+                <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="show_rec" id="show_rec" value="1"
+                           {% if settings.show_rec %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-bold">Show Recommendation Breakdown</span>
+                    <p class="text-secondary small mb-0">How recommended weight should be loaded.</p>
+                </div>
+                <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="show_rec" id="show_rec_breakdown" value="1"
+                           {% if settings.show_rec_breakdown %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
                     <span class="fw-bold">Show 1RM Streak</span>
                     <p class="text-secondary small mb-0">Display the current 1RM streak.</p>
                 </div>
@@ -126,19 +165,6 @@
                     <input class="form-check-input" type="checkbox" role="switch"
                            name="show_streak_weight" id="show_streak_weight" value="1"
                            {% if settings.show_streak_weight %}checked{% endif %}>
-                </div>
-            </div>
-        </div>
-        <div class="card mb-3">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="fw-bold">Show Recommendation</span>
-                    <p class="text-secondary small mb-0">Display the recommendation (when available).</p>
-                </div>
-                <div class="form-check form-switch ms-3">
-                    <input class="form-check-input" type="checkbox" role="switch"
-                           name="show_rec" id="show_rec" value="1"
-                           {% if settings.show_rec %}checked{% endif %}>
                 </div>
             </div>
         </div>
