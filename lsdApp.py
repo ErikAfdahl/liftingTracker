@@ -500,7 +500,7 @@ def generate_weight_breakdown(weight, base):
         for i in range(len(plates)):
             count = weight // plates[i]
             if count > 0:
-                acc.append(f"{int(weight // plates[i])} {plates[i]} lb {"plates" if count > 1 else "plate"}")
+                acc.append(f'{int(weight // plates[i])} {plates[i]} lb {"plates" if count > 1 else "plate"}')
                 if (count * plates[i]) == weight:
                     break
                 else:
