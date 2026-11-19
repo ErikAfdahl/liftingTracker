@@ -103,7 +103,8 @@ def check_ranges2(min, max):
 def check_text(text, max_length=100):
     """Return True if text is non-empty, short enough, and uses only allowed characters."""
     print(f"Text fewoife '{text}'")
-    if text is None:
+    print(f"Text fewoife '{text == None}'")
+    if text == None:
         print("Text is None")
         return True
     if not isinstance(text, str):
@@ -1713,7 +1714,7 @@ def manage():
             upd_notes = request.form.get("upd_notes", "")
             upd_order = request.form.get("upd_order").replace(" ", "")
             upd_unit = request.form.get("upd_unit")
-            upd_link = request.form.get("upd_link")
+            upd_link = request.form.get("upd_link", "")
             edit_exercises = [row for row in user_ex if row["program_name"] == selected_edit]
 
             if not check_text(upd_name):
@@ -1721,6 +1722,8 @@ def manage():
             elif not check_text(upd_notes):
                 error_message = "Invalid character(s) in notes input."
             elif not check_text(upd_link):
+                print("feiownfoeiwnfoeiwnfoweinf")
+                print(upd_link)
                 error_message = "Invalid character(s) in link input."
             elif not upd_name:
                 error_message = "Please enter an exercise name."
