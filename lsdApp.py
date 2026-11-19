@@ -103,11 +103,17 @@ def check_ranges2(min, max):
 def check_text(text, max_length=100):
     """Return True if text is non-empty, short enough, and uses only allowed characters."""
     print(f"Text fewoife '{text}'")
+    if text is None:
+        print("Text is None")
+        return True
     if not isinstance(text, str):
+        print("idk")
         return False
     text = text.strip()
     if len(text) > max_length:
+        print("text too long")
         return False
+
     return ALLOWED_TEXT.fullmatch(text) is not None
 
 def check_password(password: str, hashed: str) -> bool:
