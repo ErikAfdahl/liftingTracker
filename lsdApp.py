@@ -1501,7 +1501,7 @@ def manage():
                 error_message = "A program with that name already exists."
             elif not check_text(new_program_name):
                 # print(f"The program name '{new_program_name}' is not valid.")
-                error_message = "Invalid character(s) in input."
+                error_message = "Invalid character(s) in program name input."
             else:
                 id = get_open_id(program_data)
                 code = generate_code(id)
@@ -1557,8 +1557,6 @@ def manage():
                 error_message = "Please enter a program name."
             elif new_name in my_programs:
                 error_message = "A program with that name already exists."
-            elif not check_text(new_name) or not check_text(notes):
-                error_message = "Invalid character(s) in input."
             else:
                 program_row = next((row for row in user_programs if row["program_name"] == selected_edit), None)
 
@@ -1607,6 +1605,8 @@ def manage():
             elif not check_text(new_notes):
                 error_message = "Invalid character(s) in notes input."
             elif not check_text(new_link):
+                print("feiownfoeiwnfoeiwnfoweinf")
+                print(new_link)
                 error_message = "Invalid character(s) in link input."
             elif not new_exercise:
                 error_message = "Please enter an exercise name."
