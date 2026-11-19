@@ -27,7 +27,7 @@ DATE_FORMATS = {
     5: "%Y/%m/%d",
 }
 
-ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'\-/=+&:]*")
+ALLOWED_TEXT = re.compile(r"[A-Za-z0-9 .,!?'-/=+]*")
 
 def iso_to_display(iso_str: str, fmt: int) -> str:
     d = datetime.strptime(iso_str, "%Y-%m-%d")
@@ -1604,10 +1604,10 @@ def manage():
                 error_message = "Invalid character(s) in exercise name input."
             elif not check_text(new_notes):
                 error_message = "Invalid character(s) in notes input."
-            elif not check_text(new_link):
-                print("feiownfoeiwnfoeiwnfoweinf")
-                print(new_link)
-                error_message = "Invalid character(s) in link input."
+            # elif not check_text(new_link):
+            #     print("feiownfoeiwnfoeiwnfoweinf")
+            #     print(new_link)
+            #     error_message = "Invalid character(s) in link input."
             elif not new_exercise:
                 error_message = "Please enter an exercise name."
             elif not new_sets:
@@ -1714,10 +1714,10 @@ def manage():
                 error_message = "Invalid character(s) in exercise name input."
             elif not check_text(upd_notes):
                 error_message = "Invalid character(s) in notes input."
-            elif not check_text(upd_link):
-                print("feiownfoeiwnfoeiwnfoweinf")
-                print(upd_link)
-                error_message = "Invalid character(s) in link input."
+            # elif not check_text(upd_link):
+            #     print("feiownfoeiwnfoeiwnfoweinf")
+            #     print(upd_link)
+            #     error_message = "Invalid character(s) in link input."
             elif not upd_name:
                 error_message = "Please enter an exercise name."
             elif not upd_sets:
